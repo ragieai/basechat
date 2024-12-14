@@ -7,7 +7,11 @@ const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   if (!req.auth) {
-    if (req.nextUrl.pathname !== "/login" && !req.nextUrl.pathname.startsWith("/api/auth/callback")) {
+    if (
+      req.nextUrl.pathname !== "/login" &&
+      !req.nextUrl.pathname.startsWith("/api/auth/callback") &&
+      !req.nextUrl.pathname.startsWith("/healthz")
+    ) {
       const newUrl = new URL("/login", req.nextUrl.origin);
       return Response.redirect(newUrl);
     }
