@@ -44,7 +44,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     ...authConfig.callbacks,
     authorized: ({ auth }) => !!auth,
     async jwt({ token, user, trigger, session: sessionUpdates }) {
-      const test = await db.select().from(schema.connections);
       switch (trigger) {
         case "signIn":
         case "signUp":
