@@ -2,6 +2,7 @@
   "name": "chatbot-example",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -59,7 +60,7 @@
     "typescript": "^5"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "eslint --cache --fix",
+    "*.{js,jsx,ts,tsx}": "eslint --fix",
     "*.{jsx,ts,tsx,css,md}": "prettier --write"
   },
   "prettier": {
