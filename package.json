@@ -41,6 +41,9 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.2.4",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.17.0",
     "@types/node": "^20",
     "@types/pg": "^8.11.10",
     "@types/react": "^19",
@@ -48,7 +51,6 @@
     "drizzle-kit": "^0.28.1",
     "eslint": "^9",
     "eslint-config-next": "15.1.0",
-    "@eslint/eslintrc": "^3",
     "husky": "^9.1.7",
     "postcss": "^8",
     "prettier": "^3.3.3",
