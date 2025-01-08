@@ -8,10 +8,12 @@ import ChatIconOn from "../../public/icons/chat-on.svg";
 import DataIconOff from "../../public/icons/data-off.svg";
 import DataIconOn from "../../public/icons/data-on.svg";
 import SettingsIconOff from "../../public/icons/settings-off.svg";
+import SettingsIconOn from "../../public/icons/settings-on.svg";
 
 export enum AppLocation {
   CHAT,
   DATA,
+  SETTINGS,
 }
 
 export function NavButton({ alt, src, className }: { alt: string; src: any; className?: string }) {
@@ -35,6 +37,9 @@ export default function Footer({ appLocation, className }: Props) {
   const dataIcon = appLocation === AppLocation.DATA ? DataIconOn : DataIconOff;
   const dataClassName = appLocation === AppLocation.DATA ? "mr-5 font-semibold" : "mr-5";
 
+  const settingsIcon = appLocation === AppLocation.SETTINGS ? SettingsIconOn : SettingsIconOff;
+  const settingsClassName = appLocation === AppLocation.SETTINGS ? "mr-5 font-semibold" : "mr-5";
+
   return (
     <div className={className}>
       <div className="flex">
@@ -44,7 +49,9 @@ export default function Footer({ appLocation, className }: Props) {
         <Link href="/data">
           <NavButton alt="My Data" src={dataIcon} className={dataClassName} />
         </Link>
-        <NavButton alt="Settings" src={SettingsIconOff} />
+        <Link href="/settings">
+          <NavButton alt="Settings" src={settingsIcon} className={settingsClassName} />
+        </Link>
       </div>
     </div>
   );
