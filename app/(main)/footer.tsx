@@ -14,6 +14,7 @@ export enum AppLocation {
   CHAT,
   DATA,
   SETTINGS,
+  SETTINGS_USERS,
 }
 
 export function NavButton({ alt, src, className }: { alt: string; src: any; className?: string }) {
