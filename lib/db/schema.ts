@@ -3,7 +3,10 @@ import type { AdapterAccountType } from "next-auth/adapters";
 
 const timestampFields = {
   createdAt: timestamp("created_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date().toISOString()),
 };
 
 const baseFields = {

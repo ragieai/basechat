@@ -36,3 +36,9 @@ export const conversationMessagesResponseSchema = z.array(
     }),
   ]),
 );
+
+export const updateTenantSchema = z.object({
+  question1: z.string(),
+  question2: z.string(),
+  question3: z.string(),
+});

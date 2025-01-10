@@ -1,12 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useFormState } from "react-dom";
 import { useForm, UseFormReturn } from "react-hook-form";
+import { toast, Toaster } from "sonner";
 import { z } from "zod";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import * as schema from "@/lib/db/schema";
+import { updateTenantSchema } from "@/lib/schema";
 
 const formSchema = z.object({
   question1: z.string(),
@@ -46,13 +51,24 @@ type Props = {
 };
 
 export default function GeneralSettings({ tenant }: Props) {
+  const [isLoading, setLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { question1: "", question2: "", question3: "" },
+    defaultValues: formSchema.parse(tenant),
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log({ values });
+    setLoading(true);
+
+    const payload = updateTenantSchema.parse(values);
+    const res = await fetch("/api/tenant", { method: "PATCH", body: JSON.stringify(payload) });
+    setLoading(false);
+
+    if (res.status !== 200) throw new Error("Failed to save");
+
+    toast.success("Changes saved");
+    form.reset(values);
   }
 
   async function handleCancel() {
@@ -82,18 +98,19 @@ export default function GeneralSettings({ tenant }: Props) {
               >
                 Cancel
               </button>
-
               <button
                 type="submit"
-                className="rounded-lg bg-[#D946EF] text-white disabled:opacity-[55%] px-4 py-2.5"
-                disabled={!form.formState.isDirty}
+                className="rounded-lg bg-[#D946EF] text-white disabled:opacity-[55%] px-4 py-2.5 flex items-center"
+                disabled={!form.formState.isDirty || isLoading}
               >
                 Save
+                {isLoading && <Loader2 size={18} className="ml-2 animate-spin" />}
               </button>
             </div>
           </div>
         </form>
       </Form>
+      <Toaster position="bottom-center" />
     </div>
   );
 }
