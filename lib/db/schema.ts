@@ -37,6 +37,9 @@ export const tenants = pgTable("tenants", {
   ownerId: uuid("owner_id")
     .references(() => users.id, { onDelete: "restrict" })
     .notNull(),
+  question1: text("question1"),
+  question2: text("question2"),
+  question3: text("question3"),
 });
 
 export const rolesEnum = pgEnum("roles", ["assistant", "system", "user"]);
