@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 
 import ChatInput from "@/components/chatbot/chat-input";
+import * as schema from "@/lib/db/schema";
 import { getInitials } from "@/lib/utils";
 
 import { useGlobalState } from "./context";
@@ -14,11 +15,11 @@ const inter = Inter({ subsets: ["latin"] });
 const conversationResponseSchema = z.object({ id: z.string() });
 
 interface Props {
-  company: string;
+  tenant: typeof schema.tenants.$inferSelect;
   className?: string;
 }
 
-export default function Welcome({ company, className }: Props) {
+export default function Welcome({ tenant, className }: Props) {
   const router = useRouter();
   const { setInitialMessage } = useGlobalState();
 
@@ -32,7 +33,7 @@ export default function Welcome({ company, className }: Props) {
     router.push(`/conversations/${conversation.id}`);
   };
 
-  const initials = getInitials(company);
+  const initials = getInitials(tenant.name);
 
   return (
     <div className={className}>
@@ -41,19 +42,19 @@ export default function Welcome({ company, className }: Props) {
           {initials}
         </div>
         <h1 className="mb-12 text-[40px] font-bold leading-[50px]">
-          Hello, I&apos;m {company}&apos;s AI.
+          Hello, I&apos;m {tenant.name}&apos;s AI.
           <br />
           What would you like to know?
         </h1>
         <div className="flex items-start justify-evenly space-x-2">
           <div className="rounded-md border p-4 h-full w-1/3">
-            Sample question. Lorem ipsum dolor sit amet consectetur. Sample question.
+            {tenant.question1 || "Sample question. Lorem ipsum dolor sit amet consectetur. Sample question."}
           </div>
           <div className="rounded-md border p-4 h-full w-1/3">
-            Sample question. Lorem ipsum dolor sit amet consectetur. Sample question.
+            {tenant.question2 || "Sample question. Lorem ipsum dolor sit amet consectetur. Sample question."}
           </div>
           <div className="rounded-md border p-4 h-full w-1/3">
-            Sample question. Lorem ipsum dolor sit amet consectetur. Sample question.
+            {tenant.question3 || "Sample question. Lorem ipsum dolor sit amet consectetur. Sample question."}
           </div>
         </div>
       </div>

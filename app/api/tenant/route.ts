@@ -16,9 +16,5 @@ export async function PATCH(request: NextRequest) {
 
   await db.update(schema.tenants).set(update).where(eq(schema.tenants.id, tenant.id));
 
-  await new Promise((resolve) => {
-    setTimeout(resolve, 4000);
-  });
-
   return new Response();
 }

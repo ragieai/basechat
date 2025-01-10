@@ -11,7 +11,7 @@ export default async function Home() {
 
   return (
     <Main name={session.user.name} appLocation={AppLocation.CHAT}>
-      <Welcome company={tenant.name} className="flex-1 flex flex-col w-full bg-white p-4 max-w-[717px]" />
+      <Welcome tenant={tenant} className="flex-1 flex flex-col w-full bg-white p-4 max-w-[717px]" />
     </Main>
   );
 }
