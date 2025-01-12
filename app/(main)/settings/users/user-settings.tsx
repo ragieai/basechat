@@ -120,9 +120,18 @@ export default function UserSettings({ profiles: _profiles }: Props) {
           <TableBody>
             {profiles.map((profile, i) => (
               <TableRow key={i}>
-                <TableCell className="flex pl-0">
-                  <div className="mr-2">{profile.name}</div>
-                  <div className="text-[#74747A]">{profile.email}</div>
+                <TableCell className="flex items-center pl-0">
+                  {profile.id ? (
+                    <>
+                      <div className="mr-2">{profile.name}</div>
+                      <div className="text-[#74747A]">{profile.email}</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="mr-2">{profile.email}</div>
+                      <div className="text-[#74747A] rounded border-[#D7D7D7] border py-1 px-2">Pending</div>
+                    </>
+                  )}
                 </TableCell>
                 <TableCell>Owner</TableCell>
                 <TableCell className="text-right">
