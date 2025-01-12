@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Tag, TagInput } from "emblor";
-import { MoreHorizontal, Trash } from "lucide-react";
+import { Loader2, MoreHorizontal, Trash } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -23,10 +23,11 @@ interface Props {
 }
 
 const formSchema = z.object({
-  emails: z.array(z.string().email(), { message: "Invalid email address" }),
+  emails: z.array(z.string().email(), { message: "Invalid email address" }).min(1),
 });
 
 export default function UserSettings({ profiles }: Props) {
+  const [isLoading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
@@ -36,14 +37,19 @@ export default function UserSettings({ profiles }: Props) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true);
+
     const res = await fetch("/api/invites", { method: "POST", body: JSON.stringify(values) });
     if (res.status !== 200) {
       toast.error("Invite failed.  Try again later.");
       return;
     }
-  }
 
-  const { setValue } = form;
+    setLoading(false);
+    toast.success("Invites sent");
+    setTags([]);
+    form.reset();
+  }
 
   return (
     <div className="w-full p-4 flex-grow flex flex-col">
@@ -68,8 +74,10 @@ export default function UserSettings({ profiles }: Props) {
                         }}
                         tags={tags}
                         setTags={(tags) => {
+                          form.clearErrors();
+
                           setTags(tags);
-                          setValue(
+                          form.setValue(
                             "emails",
                             (tags as Tag[]).map((t) => t.text),
                           );
@@ -83,8 +91,12 @@ export default function UserSettings({ profiles }: Props) {
                 )}
               />
               <div className="flex flex-col justify-end">
-                <button type="submit" className="font-semibold text-white rounded-lg bg-[#D946EF] px-4 py-2.5 ml-3">
+                <button
+                  type="submit"
+                  className="flex items-center font-semibold text-white rounded-lg bg-[#D946EF] px-4 py-2.5 ml-3"
+                >
                   Invite
+                  {isLoading && <Loader2 size={18} className="ml-2 animate-spin" />}
                 </button>
               </div>
             </div>
