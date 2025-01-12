@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -112,7 +112,6 @@ export default function GeneralSettings({ tenant }: Props) {
           </div>
         </form>
       </Form>
-      <Toaster position="bottom-center" />
     </div>
   );
 }

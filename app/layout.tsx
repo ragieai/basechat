@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
 
 import { GlobalStateProvider } from "./(main)/context";
 
@@ -21,7 +22,10 @@ export default function RootLayout({
     <SessionProvider>
       <GlobalStateProvider>
         <html lang="en" className="h-full w-full">
-          <body className={`${inter.className} antialiased h-full w-full bg-white`}>{children}</body>
+          <body className={`${inter.className} antialiased h-full w-full bg-white`}>
+            {children}
+            <Toaster position="bottom-center" />
+          </body>
         </html>
       </GlobalStateProvider>
     </SessionProvider>

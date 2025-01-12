@@ -5,6 +5,7 @@ import { Tag, TagInput } from "emblor";
 import { MoreHorizontal, Trash } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import {
@@ -35,7 +36,11 @@ export default function UserSettings({ profiles }: Props) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("submit", values);
+    const res = await fetch("/api/invites", { method: "POST", body: JSON.stringify(values) });
+    if (res.status !== 200) {
+      toast.error("Invite failed.  Try again later.");
+      return;
+    }
   }
 
   const { setValue } = form;
