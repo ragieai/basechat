@@ -14,8 +14,6 @@ export default async function DataIndexPage() {
   const tenant = await getTenantByUserId(session.user.id);
   const profiles = await getProfilesByTenantId(tenant.id);
 
-  console.log({ profiles });
-
   return (
     <Main name={session.user.name} appLocation={AppLocation.SETTINGS}>
       <div className="max-w-[1140px] w-full p-4 flex-grow flex">
