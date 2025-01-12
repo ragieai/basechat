@@ -15,6 +15,13 @@
       "when": 1736434094871,
       "tag": "0001_overrated_nick_fury",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1736653274057,
+      "tag": "0002_brainy_thing",
+      "breakpoints": true
     }
   ]
 }

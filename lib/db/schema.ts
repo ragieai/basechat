@@ -45,6 +45,13 @@ export const tenants = pgTable("tenants", {
   question3: text("question3"),
 });
 
+export const profiles = pgTable("profiles", {
+  ...baseTenantFields,
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(),
+});
+
 export const rolesEnum = pgEnum("roles", ["assistant", "system", "user"]);
 
 export const messages = pgTable("messages", {

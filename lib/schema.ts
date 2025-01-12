@@ -42,3 +42,9 @@ export const updateTenantSchema = z.object({
   question2: z.string(),
   question3: z.string(),
 });
+
+export interface Profile {
+  id: string;
+  email: string | null;
+  name: string | null;
+}

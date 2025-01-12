@@ -11,8 +11,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Profile } from "@/lib/schema";
 
-export default function UserSettings() {
+interface Props {
+  profiles: Profile[];
+}
+
+export default function UserSettings({ profiles }: Props) {
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
   return (
@@ -42,33 +47,33 @@ export default function UserSettings() {
             <TableRow>
               <TableHead className="font-semibold text-[13px] text-[#74747A] pl-0">Name</TableHead>
               <TableHead className="font-semibold text-[13px] text-[#74747A] w-[92px]">Role</TableHead>
-              <TableHead className="font-semibold text-[13px] text-[#74747A] w-[200px]">Last Active</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow key={1}>
-              <TableCell className="flex pl-0">
-                <div className="mr-2">John Smith</div>
-                <div className="text-[#74747A]">john@example.com</div>
-              </TableCell>
-              <TableCell>Owner</TableCell>
-              <TableCell>Few seconds ago</TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button>
-                      <MoreHorizontal />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onSelect={() => null}>
-                      <Trash />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
+            {profiles.map((profile) => (
+              <TableRow key={1}>
+                <TableCell className="flex pl-0">
+                  <div className="mr-2">{profile.name}</div>
+                  <div className="text-[#74747A]">{profile.email}</div>
+                </TableCell>
+                <TableCell>Owner</TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button>
+                        <MoreHorizontal />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onSelect={() => null}>
+                        <Trash />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </div>

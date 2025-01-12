@@ -5,6 +5,22 @@ import { and, eq } from "drizzle-orm";
 import db from "./db";
 import * as schema from "./db/schema";
 import { getRagieClient, getRagieConnection } from "./ragie";
+import { Profile } from "./schema";
+
+export async function createTenant(userId: string, name: string) {
+  const tenants = await db
+    .insert(schema.tenants)
+    .values({ name, ownerId: userId })
+    .returning({ id: schema.tenants.id });
+  assert(tenants.length === 1);
+  const tenantId = tenants[0].id;
+
+  const profiles = await db.insert(schema.profiles).values({ tenantId, userId }).returning({ id: schema.profiles.id });
+  assert(profiles.length === 1);
+  const profileId = profiles[0].id;
+
+  return { tenantId, profileId };
+}
 
 export async function deleteConnection(tenantId: string, id: string) {
   await db.transaction(async (tx) => {
@@ -58,6 +74,18 @@ export async function saveConnection(tenantId: string, ragieConnectionId: string
         and(eq(schema.connections.tenantId, tenantId), eq(schema.connections.ragieConnectionId, ragieConnectionId)),
       );
   }
+}
+
+export async function getProfilesByTenantId(tenantId: string): Promise<Profile[]> {
+  return await db
+    .select({
+      id: schema.profiles.id,
+      email: schema.users.email,
+      name: schema.users.name,
+    })
+    .from(schema.profiles)
+    .innerJoin(schema.users, eq(schema.profiles.userId, schema.users.id))
+    .where(eq(schema.profiles.tenantId, tenantId));
 }
 
 export async function getTenantByUserId(id: string) {
