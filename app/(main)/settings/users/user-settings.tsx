@@ -26,7 +26,8 @@ const formSchema = z.object({
   emails: z.array(z.string().email(), { message: "Invalid email address" }).min(1),
 });
 
-export default function UserSettings({ profiles }: Props) {
+export default function UserSettings({ profiles: _profiles }: Props) {
+  const [profiles, setProfiles] = useState(_profiles);
   const [isLoading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -49,7 +50,18 @@ export default function UserSettings({ profiles }: Props) {
     toast.success("Invites sent");
     setTags([]);
     form.reset();
+
+    const newProfiles = values.emails.map((email) => ({ id: "", name: null, email }));
+    setProfiles([...profiles, ...newProfiles]);
   }
+
+  const handleSetTags = (tags: Tag[]) => {
+    form.clearErrors();
+    setTags(tags);
+
+    const emails = (tags as Tag[]).map((t) => t.text);
+    form.setValue("emails", emails);
+  };
 
   return (
     <div className="w-full p-4 flex-grow flex flex-col">
@@ -73,15 +85,7 @@ export default function UserSettings({ profiles }: Props) {
                           tag: { body: "pl-3 hover:bg-[#ffffff] bg-[#ffffff]" },
                         }}
                         tags={tags}
-                        setTags={(tags) => {
-                          form.clearErrors();
-
-                          setTags(tags);
-                          form.setValue(
-                            "emails",
-                            (tags as Tag[]).map((t) => t.text),
-                          );
-                        }}
+                        setTags={(tags) => handleSetTags(tags as Tag[])}
                         addTagsOnBlur
                         activeTagIndex={activeTagIndex}
                         setActiveTagIndex={setActiveTagIndex}
@@ -114,8 +118,8 @@ export default function UserSettings({ profiles }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {profiles.map((profile) => (
-              <TableRow key={1}>
+            {profiles.map((profile, i) => (
+              <TableRow key={i}>
                 <TableCell className="flex pl-0">
                   <div className="mr-2">{profile.name}</div>
                   <div className="text-[#74747A]">{profile.email}</div>
