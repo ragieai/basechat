@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useFormState } from "react-dom";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { toast, Toaster } from "sonner";
 import { z } from "zod";
@@ -13,10 +12,13 @@ import { Input } from "@/components/ui/input";
 import * as schema from "@/lib/db/schema";
 import { updateTenantSchema } from "@/lib/schema";
 
+// Transform null to empty string for form field handling
+const nullToEmptyString = (v: string | null) => v ?? "";
+
 const formSchema = z.object({
-  question1: z.string(),
-  question2: z.string(),
-  question3: z.string(),
+  question1: z.string().nullable().transform(nullToEmptyString),
+  question2: z.string().nullable().transform(nullToEmptyString),
+  question3: z.string().nullable().transform(nullToEmptyString),
 });
 
 type QuestionFieldProps = {
