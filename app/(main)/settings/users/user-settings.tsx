@@ -26,8 +26,8 @@ const formSchema = z.object({
   emails: z.array(z.string().email(), { message: "Invalid email address" }).min(1),
 });
 
-export default function UserSettings({ profiles: _profiles }: Props) {
-  const [profiles, setProfiles] = useState(_profiles);
+export default function UserSettings({ profiles: initialProfiles }: Props) {
+  const [profiles, setProfiles] = useState(initialProfiles);
   const [isLoading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
