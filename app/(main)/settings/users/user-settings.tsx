@@ -82,6 +82,7 @@ export default function UserSettings({ profiles }: Props) {
                             (tags as Tag[]).map((t) => t.text),
                           );
                         }}
+                        addTagsOnBlur
                         activeTagIndex={activeTagIndex}
                         setActiveTagIndex={setActiveTagIndex}
                         {...field}
