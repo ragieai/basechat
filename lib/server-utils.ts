@@ -2,10 +2,25 @@ import assert from "assert";
 
 import { auth } from "@/auth";
 
+import { getMembersByTenantId, getTenantByUserId } from "./service";
+
 export async function requireSession() {
   const session = await auth();
   assert(session, "not logged in");
   return session;
+}
+
+export async function requireAuthContext() {
+  const session = await requireSession();
+  const tenant = await getTenantByUserId(session.user.id);
+
+  const profiles = await getMembersByTenantId(tenant.id);
+
+  // FIXME: Picking the first tenant will not work if users are in multiple tenant. Active tenant ID should be set on the session.
+  assert(profiles.length > 0, "expected at least one profile record");
+  const profile = profiles[0];
+
+  return { profile, tenant, session };
 }
 
 /**

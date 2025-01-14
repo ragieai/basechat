@@ -16,18 +16,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Profile } from "@/lib/schema";
+import { Member, MemberType } from "@/lib/schema";
 
 interface Props {
-  profiles: Profile[];
+  members: Member[];
 }
 
 const formSchema = z.object({
   emails: z.array(z.string().email(), { message: "Invalid email address" }).min(1),
 });
 
-export default function UserSettings({ profiles: initialProfiles }: Props) {
-  const [profiles, setProfiles] = useState(initialProfiles);
+export default function UserSettings({ members: initialMembers }: Props) {
+  const [members, setMembers] = useState(initialMembers);
   const [isLoading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -51,8 +51,8 @@ export default function UserSettings({ profiles: initialProfiles }: Props) {
     setTags([]);
     form.reset();
 
-    const newProfiles = values.emails.map((email) => ({ id: "", name: null, email }));
-    setProfiles([...profiles, ...newProfiles]);
+    const newMembers = values.emails.map((email) => ({ id: "", name: null, email, type: "invite" as MemberType }));
+    setMembers([...members, ...newMembers]);
   }
 
   const handleSetTags = (tags: Tag[]) => {
@@ -118,17 +118,17 @@ export default function UserSettings({ profiles: initialProfiles }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {profiles.map((profile, i) => (
+            {members.map((member, i) => (
               <TableRow key={i}>
                 <TableCell className="flex items-center pl-0">
-                  {profile.id ? (
+                  {member.type === "profile" ? (
                     <>
-                      <div className="mr-2">{profile.name}</div>
-                      <div className="text-[#74747A]">{profile.email}</div>
+                      <div className="mr-2">{member.name}</div>
+                      <div className="text-[#74747A]">{member.email}</div>
                     </>
                   ) : (
                     <>
-                      <div className="mr-2">{profile.email}</div>
+                      <div className="mr-2">{member.email}</div>
                       <div className="text-[#74747A] rounded border-[#D7D7D7] border py-1 px-2">Pending</div>
                     </>
                   )}

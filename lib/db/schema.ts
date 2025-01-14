@@ -1,4 +1,15 @@
-import { boolean, integer, json, pgEnum, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  integer,
+  json,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
 const timestampFields = {
@@ -45,12 +56,32 @@ export const tenants = pgTable("tenants", {
   question3: text("question3"),
 });
 
-export const profiles = pgTable("profiles", {
-  ...baseTenantFields,
-  userId: uuid("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull(),
-});
+export const invites = pgTable(
+  "invites",
+  {
+    ...baseTenantFields,
+    invitedBy: uuid("invited_by_id")
+      .references(() => profiles.id, { onDelete: "cascade" })
+      .notNull(),
+    email: text("email"),
+  },
+  (t) => ({
+    unique_tenant_id_email: unique().on(t.tenantId, t.email),
+  }),
+);
+
+export const profiles = pgTable(
+  "profiles",
+  {
+    ...baseTenantFields,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (t) => ({
+    unique_tenant_id_user_id: unique().on(t.tenantId, t.userId),
+  }),
+);
 
 export const rolesEnum = pgEnum("roles", ["assistant", "system", "user"]);
 

@@ -22,6 +22,27 @@
       "when": 1736653274057,
       "tag": "0002_brainy_thing",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1736862389458,
+      "tag": "0003_plain_taskmaster",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1736863030287,
+      "tag": "0004_even_the_leader",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1736863062259,
+      "tag": "0005_wooden_black_bird",
+      "breakpoints": true
     }
   ]
 }

@@ -1,11 +1,12 @@
 import assert from "assert";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
+import { union } from "drizzle-orm/pg-core";
 
 import db from "./db";
 import * as schema from "./db/schema";
 import { getRagieClient, getRagieConnection } from "./ragie";
-import { Profile } from "./schema";
+import { Member, MemberType } from "./schema";
 
 export async function createTenant(userId: string, name: string) {
   const tenants = await db
@@ -76,16 +77,28 @@ export async function saveConnection(tenantId: string, ragieConnectionId: string
   }
 }
 
-export async function getProfilesByTenantId(tenantId: string): Promise<Profile[]> {
-  return await db
-    .select({
-      id: schema.profiles.id,
-      email: schema.users.email,
-      name: schema.users.name,
-    })
-    .from(schema.profiles)
-    .innerJoin(schema.users, eq(schema.profiles.userId, schema.users.id))
-    .where(eq(schema.profiles.tenantId, tenantId));
+export async function getMembersByTenantId(tenantId: string): Promise<Member[]> {
+  return await union(
+    db
+      .select({
+        id: schema.profiles.id,
+        email: schema.users.email,
+        name: schema.users.name,
+        type: sql<MemberType>`'profile'`.as("type"),
+      })
+      .from(schema.profiles)
+      .innerJoin(schema.users, eq(schema.profiles.userId, schema.users.id))
+      .where(eq(schema.profiles.tenantId, tenantId)),
+    db
+      .select({
+        id: schema.invites.id,
+        email: schema.invites.email,
+        name: schema.invites.email,
+        type: sql<MemberType>`'invite'`.as("type"),
+      })
+      .from(schema.invites)
+      .where(eq(schema.invites.tenantId, tenantId)),
+  ).orderBy(sql`type desc`, sql`name`);
 }
 
 export async function getTenantByUserId(id: string) {
@@ -98,4 +111,26 @@ export async function isSetupComplete(userId: string) {
   const rs = await db.select().from(schema.tenants).where(eq(schema.tenants.ownerId, userId));
   assert(rs.length === 0 || rs.length === 1, "unexpected result");
   return rs.length === 1;
+}
+
+export async function createInvites(tenantId: string, invitedBy: string, emails: string[]) {
+  return await db.transaction(
+    async (tx) =>
+      await Promise.all(
+        emails.map(async (email) => {
+          const rs = await tx
+            .insert(schema.invites)
+            .values({ tenantId, invitedBy, email })
+            .onConflictDoUpdate({
+              target: [schema.invites.tenantId, schema.invites.email],
+              set: { invitedBy, updatedAt: new Date().toISOString() },
+            })
+            .returning();
+
+          assert(rs.length === 1);
+
+          return rs[0];
+        }),
+      ),
+  );
 }
