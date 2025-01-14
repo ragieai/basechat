@@ -63,7 +63,7 @@ export const invites = pgTable(
     invitedBy: uuid("invited_by_id")
       .references(() => profiles.id, { onDelete: "cascade" })
       .notNull(),
-    email: text("email"),
+    email: text("email").notNull(),
   },
   (t) => ({
     unique_tenant_id_email: unique().on(t.tenantId, t.email),

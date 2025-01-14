@@ -2,6 +2,9 @@ import assert from "assert";
 
 import { and, eq, sql } from "drizzle-orm";
 import { union } from "drizzle-orm/pg-core";
+import nodemailer from "nodemailer";
+
+import * as settings from "@/lib/settings";
 
 import db from "./db";
 import * as schema from "./db/schema";
@@ -122,7 +125,7 @@ export async function isSetupComplete(userId: string) {
 }
 
 export async function createInvites(tenantId: string, invitedBy: string, emails: string[]) {
-  return await db.transaction(
+  const invites = await db.transaction(
     async (tx) =>
       await Promise.all(
         emails.map(async (email) => {
@@ -141,6 +144,27 @@ export async function createInvites(tenantId: string, invitedBy: string, emails:
         }),
       ),
   );
+
+  const transporter = nodemailer.createTransport({
+    host: settings.SMTP_HOST,
+    port: settings.SMTP_PORT,
+    secure: settings.SMTP_SECURE,
+  });
+
+  const promises = invites.map((invite) => {
+    const inviteLink = "https://example.com/invite/";
+
+    return transporter.sendMail({
+      to: invite.email,
+      from: settings.SMTP_FROM,
+      subject: "You have been invited to an AI Chatbot",
+      text: `Click the link below to accept the invite:\n\n${inviteLink}`,
+    });
+  });
+
+  await Promise.all(promises);
+
+  return invites;
 }
 
 export async function getProfileByTenantIdAndUserId(tenantId: string, userId: string) {

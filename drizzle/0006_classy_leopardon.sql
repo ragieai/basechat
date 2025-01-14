@@ -1,0 +1,1 @@
+ALTER TABLE "invites" ALTER COLUMN "email" SET NOT NULL;

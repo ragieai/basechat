@@ -43,6 +43,13 @@
       "when": 1736863062259,
       "tag": "0005_wooden_black_bird",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1736870126759,
+      "tag": "0006_classy_leopardon",
+      "breakpoints": true
     }
   ]
 }
