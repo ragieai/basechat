@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Member, MemberType } from "@/lib/schema";
+import { Member, MemberRole, MemberType } from "@/lib/schema";
 
 interface Props {
   members: Member[];
@@ -43,6 +43,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
     const res = await fetch("/api/invites", { method: "POST", body: JSON.stringify(values) });
     if (res.status !== 200) {
       toast.error("Invite failed.  Try again later.");
+      setLoading(false);
       return;
     }
 
@@ -51,7 +52,14 @@ export default function UserSettings({ members: initialMembers }: Props) {
     setTags([]);
     form.reset();
 
-    const newMembers = values.emails.map((email) => ({ id: "", name: null, email, type: "invite" as MemberType }));
+    const newMembers = values.emails.map((email) => ({
+      id: "",
+      name: null,
+      email,
+      type: "invite" as MemberType,
+      role: "invite" as MemberRole,
+    }));
+
     setMembers([...members, ...newMembers]);
   }
 
@@ -133,7 +141,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
                     </>
                   )}
                 </TableCell>
-                <TableCell>Owner</TableCell>
+                <TableCell className="capitalize">{member.role}</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

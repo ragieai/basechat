@@ -6,7 +6,7 @@ import { union } from "drizzle-orm/pg-core";
 import db from "./db";
 import * as schema from "./db/schema";
 import { getRagieClient, getRagieConnection } from "./ragie";
-import { Member, MemberType } from "./schema";
+import { Member, MemberRole, MemberType } from "./schema";
 
 export async function createTenant(userId: string, name: string) {
   const tenants = await db
@@ -78,16 +78,23 @@ export async function saveConnection(tenantId: string, ragieConnectionId: string
 }
 
 export async function getMembersByTenantId(tenantId: string): Promise<Member[]> {
-  return await union(
+  return union(
     db
       .select({
         id: schema.profiles.id,
         email: schema.users.email,
         name: schema.users.name,
         type: sql<MemberType>`'profile'`.as("type"),
+        role: sql<MemberRole>`
+          case
+            when ${schema.tenants.ownerId} = ${schema.users.id} then 'owner'
+            else 'user'
+          end
+        `.as("role"),
       })
       .from(schema.profiles)
       .innerJoin(schema.users, eq(schema.profiles.userId, schema.users.id))
+      .innerJoin(schema.tenants, eq(schema.tenants.id, tenantId))
       .where(eq(schema.profiles.tenantId, tenantId)),
     db
       .select({
@@ -95,6 +102,7 @@ export async function getMembersByTenantId(tenantId: string): Promise<Member[]> 
         email: schema.invites.email,
         name: schema.invites.email,
         type: sql<MemberType>`'invite'`.as("type"),
+        role: sql<MemberRole>`'invite'`.as("role"),
       })
       .from(schema.invites)
       .where(eq(schema.invites.tenantId, tenantId)),
@@ -133,4 +141,13 @@ export async function createInvites(tenantId: string, invitedBy: string, emails:
         }),
       ),
   );
+}
+
+export async function getProfileByTenantIdAndUserId(tenantId: string, userId: string) {
+  const rs = await db
+    .select()
+    .from(schema.profiles)
+    .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.userId, userId)));
+  assert(rs.length === 1, "expected single record");
+  return rs[0];
 }
