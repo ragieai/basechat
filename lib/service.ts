@@ -113,9 +113,14 @@ export async function getMembersByTenantId(tenantId: string): Promise<Member[]> 
 }
 
 export async function getTenantByUserId(id: string) {
-  const rs = await db.select().from(schema.tenants).where(eq(schema.tenants.ownerId, id));
+  const rs = await db
+    .select()
+    .from(schema.profiles)
+    .innerJoin(schema.tenants, eq(schema.profiles.tenantId, schema.tenants.id))
+    .where(eq(schema.profiles.userId, id));
+
   assert(rs.length === 1, "expected single tenant");
-  return rs[0];
+  return rs[0].tenants;
 }
 
 export async function isSetupComplete(userId: string) {
@@ -152,7 +157,7 @@ export async function createInvites(tenantId: string, invitedBy: string, emails:
   });
 
   const promises = invites.map((invite) => {
-    const inviteLink = "https://example.com/invite/";
+    const inviteLink = settings.BASE_URL + "/login/?invite=" + invite.id;
 
     return transporter.sendMail({
       to: invite.email,
@@ -174,4 +179,19 @@ export async function getProfileByTenantIdAndUserId(tenantId: string, userId: st
     .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.userId, userId)));
   assert(rs.length === 1, "expected single record");
   return rs[0];
+}
+
+async function getInviteById(id: string) {
+  const rs = await db.select().from(schema.invites).where(eq(schema.invites.id, id));
+  assert(rs.length === 1);
+  return rs[0];
+}
+
+export async function acceptInvite(userId: string, inviteId: string) {
+  const invite = await getInviteById(inviteId);
+
+  await db.transaction(async (tx) => {
+    await tx.insert(schema.profiles).values({ tenantId: invite.tenantId, userId });
+    await tx.delete(schema.invites).where(eq(schema.invites.id, inviteId));
+  });
 }

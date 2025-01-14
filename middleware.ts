@@ -15,10 +15,6 @@ export default auth((req) => {
       const newUrl = new URL("/login", req.nextUrl.origin);
       return Response.redirect(newUrl);
     }
-  } else if (!req.auth.user.setup) {
-    if (!req.nextUrl.pathname.startsWith("/setup")) {
-      return Response.redirect(new URL("/setup", req.nextUrl.origin));
-    }
   }
 });
 

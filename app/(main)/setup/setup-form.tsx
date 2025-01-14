@@ -46,12 +46,6 @@ export default function SetupForm() {
       return;
     }
 
-    const updateSessionResponse = await update({ setup: true });
-    if (!updateSessionResponse) {
-      setFailureMessage("An unexpected error occurred. Refresh to try again.");
-      return;
-    }
-
     await router.push("/");
   }
 

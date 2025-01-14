@@ -54,10 +54,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
           break;
         case "update":
-          if ("setup" in sessionUpdates) {
-            // FIXME: Validate setup against the database
-            token.setup = !!sessionUpdates.setup;
-          }
           break;
         case undefined:
           break;
