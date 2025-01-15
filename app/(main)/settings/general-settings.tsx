@@ -64,7 +64,7 @@ export default function GeneralSettings({ tenant }: Props) {
     setLoading(true);
 
     const payload = updateTenantSchema.parse(values);
-    const res = await fetch("/api/tenant", { method: "PATCH", body: JSON.stringify(payload) });
+    const res = await fetch("/api/tenants/current", { method: "PATCH", body: JSON.stringify(payload) });
     setLoading(false);
 
     if (res.status !== 200) throw new Error("Failed to save");
