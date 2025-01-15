@@ -33,6 +33,14 @@ interface Props {
   onSelectedDocumentId: (id: string) => void;
 }
 
+function isExpandable(messages: Message[], i: number) {
+  return (
+    i === messages.length - 1 &&
+    (messages.length < 2 ||
+      (messages.length - 2 > 0 && messages[messages.length - 2].content != "Tell me more about this"))
+  );
+}
+
 export default function Chatbot({ name, conversationId, initMessage, onSelectedDocumentId }: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -130,7 +138,7 @@ export default function Chatbot({ name, conversationId, initMessage, onSelectedD
                   sources={message.sources}
                   onSelectedDocumentId={onSelectedDocumentId}
                 />
-                {i === messages.length - 1 && messages[i].role === "assistant" && !messages[i].expanded && (
+                {isExpandable(messages, i) && (
                   <div className="flex justify-center">
                     <button
                       className="flex justify-center rounded-[20px] border px-4 py-2.5 mt-8"
