@@ -1,4 +1,4 @@
-![Base Chat Banner](image.png)
+![image](https://github.com/user-attachments/assets/b40d47e6-e37e-4361-8dc8-80938742b556)
 
 # Base Chat
 
