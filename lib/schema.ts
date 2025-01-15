@@ -56,3 +56,10 @@ export interface Member {
 export const createTenantResponseSchema = z.object({
   id: z.string(),
 });
+
+export const tenantListResponseSchema = z.array(
+  z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+);

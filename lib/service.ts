@@ -189,3 +189,11 @@ export async function acceptInvite(userId: string, inviteId: string) {
   });
   return invite;
 }
+
+export async function getTenantsByUserId(userId: string) {
+  return db
+    .select({ id: schema.tenants.id, name: schema.tenants.name })
+    .from(schema.tenants)
+    .innerJoin(schema.profiles, eq(schema.tenants.id, schema.profiles.tenantId))
+    .where(eq(schema.profiles.userId, userId));
+}

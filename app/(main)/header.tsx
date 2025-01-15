@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
-import { ReactNode } from "react";
+import { signOut, useSession } from "next-auth/react";
+import { ReactNode, useEffect, useState } from "react";
+import { z } from "zod";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { tenantListResponseSchema } from "@/lib/schema";
+import { cn, getInitials } from "@/lib/utils";
 
+import CheckIcon from "../../public/icons/check.svg";
 import HamburgerIcon from "../../public/icons/hamburger.svg";
 import LogOutIcon from "../../public/icons/log-out.svg";
 import NewChatIcon from "../../public/icons/new-chat.svg";
@@ -39,6 +42,17 @@ const HeaderPopoverContent = ({
 
 export default function Header({ name, onNavClick = () => {} }: Props) {
   const handleLogOutClick = async () => await signOut();
+  const { data } = useSession();
+
+  const [tenants, setTenants] = useState<z.infer<typeof tenantListResponseSchema>>([]);
+
+  useEffect(() => {
+    (async () => {
+      const res = await fetch("/api/tenants");
+      const tenants = tenantListResponseSchema.parse(await res.json());
+      setTenants(tenants);
+    })();
+  }, []);
 
   return (
     <header className="w-full shrink-0 flex justify-between p-4 items-center">
@@ -61,7 +75,20 @@ export default function Header({ name, onNavClick = () => {} }: Props) {
             {name?.trim()[0].toUpperCase()}
           </div>
         </PopoverTrigger>
-        <HeaderPopoverContent align="end" className="p-4">
+        <HeaderPopoverContent align="end" className="p-4 w-[332px]">
+          <ul>
+            {tenants.map((tenant, i) => (
+              <li key={i} className="hover:bg-black hover:bg-opacity-5 px-4 py-3 rounded-lg cursor-pointer">
+                <div className="flex items-center mb-1">
+                  <div className="w-4">{data?.tenantId === tenant.id && <Image src={CheckIcon} alt="selected" />}</div>
+                  <TenantLogo name={tenant.name} className="ml-3" />
+                  <div className="ml-4">{tenant.name}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <hr className="my-4 bg-black border-none h-[1px] opacity-10" />
           <div className="flex cursor-pointer" onClick={handleLogOutClick}>
             <Image src={LogOutIcon} alt="Log out" className="mr-3" />
             Log out
@@ -69,5 +96,20 @@ export default function Header({ name, onNavClick = () => {} }: Props) {
         </HeaderPopoverContent>
       </Popover>
     </header>
+  );
+}
+
+function TenantLogo({ name, className }: { name: string; className?: string }) {
+  const initials = getInitials(name);
+
+  return (
+    <div
+      className={cn(
+        "h-[40px] w-[40px] avatar rounded-[20px] text-white flex items-center justify-center font-bold text-[16px]",
+        className,
+      )}
+    >
+      {initials}
+    </div>
   );
 }
