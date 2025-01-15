@@ -36,7 +36,7 @@ interface Props {
 function isExpandable(messages: Message[], i: number) {
   return (
     i === messages.length - 1 &&
-    (messages.length < 2 ||
+    (messages.length <= 2 ||
       (messages.length - 2 > 0 && messages[messages.length - 2].content != "Tell me more about this"))
   );
 }
