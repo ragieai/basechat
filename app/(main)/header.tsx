@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { ReactNode, useEffect, useState } from "react";
 import { z } from "zod";
 
@@ -65,7 +65,7 @@ export default function Header({ name, currentTenantId, onNavClick = () => {} }:
         }),
       ),
     });
-    window.location.reload();
+    router.push("/");
   };
 
   return (
