@@ -6,14 +6,12 @@ import { z } from "zod";
 
 import db from "@/lib/db";
 import * as schema from "@/lib/db/schema";
-import { requireSession } from "@/lib/server-utils";
-import { getTenantByUserId } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server-utils";
 
 const createConversationRequest = z.object({ title: z.string() });
 
 export async function POST(request: NextRequest) {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
+  const { tenant } = await requireAuthContext();
   const json = await request.json();
   const { title } = createConversationRequest.parse(json);
 
@@ -23,8 +21,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
+  const { tenant } = await requireAuthContext();
 
   const rs = await db
     .select({

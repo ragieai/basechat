@@ -1,8 +1,7 @@
 import { NextRequest } from "next/server";
 import { Ragie } from "ragie";
 
-import { requireSession } from "@/lib/server-utils";
-import { getTenantByUserId } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server-utils";
 import * as settings from "@/lib/settings";
 
 export const dynamic = "force-dynamic"; // no caching
@@ -12,8 +11,7 @@ interface Params {
 }
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<Params> }) {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
+  const { tenant } = await requireAuthContext();
 
   const client = new Ragie({ auth: settings.RAGIE_API_KEY, serverURL: settings.RAGIE_API_BASE_URL });
   const { type } = await params;

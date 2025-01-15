@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { requireAuthContext, requireSession } from "@/lib/server-utils";
-import { createInvites, getTenantByUserId } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server-utils";
+import { createInvites } from "@/lib/service";
 
 const inviteSchema = z.object({
   emails: z.array(z.string().email()).min(1),

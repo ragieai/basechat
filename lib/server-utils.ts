@@ -2,7 +2,7 @@ import assert from "assert";
 
 import { auth } from "@/auth";
 
-import { getProfileByTenantIdAndUserId, getTenantByUserId } from "./service";
+import { getProfileByTenantIdAndUserId } from "./service";
 
 export async function requireSession() {
   const session = await auth();
@@ -12,12 +12,14 @@ export async function requireSession() {
 
 export async function requireAuthContext() {
   const session = await requireSession();
+  assert(session.tenantId, "expected tenantId to be set on session");
 
-  // FIXME: This could return multiple tenants
-  const tenant = await getTenantByUserId(session.user.id);
-  const profile = await getProfileByTenantIdAndUserId(tenant.id, session.user.id);
-
-  return { profile, tenant, session };
+  const record = await getProfileByTenantIdAndUserId(session.tenantId, session.user.id);
+  return {
+    profile: record.profiles,
+    tenant: record.tenants,
+    session,
+  };
 }
 
 /**

@@ -1,7 +1,5 @@
-import Link from "next/link";
-
-import { requireSession } from "@/lib/server-utils";
-import { getMembersByTenantId, getTenantByUserId } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server-utils";
+import { getMembersByTenantId } from "@/lib/service";
 
 import { AppLocation } from "../../footer";
 import Main from "../../main";
@@ -9,9 +7,8 @@ import SettingsNav from "../settings-nav";
 
 import UserSettings from "./user-settings";
 
-export default async function DataIndexPage() {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
+export default async function UsersIndexPage() {
+  const { session, tenant } = await requireAuthContext();
   const members = await getMembersByTenantId(tenant.id);
 
   return (

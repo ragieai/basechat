@@ -1,5 +1,4 @@
-import { requireSession } from "@/lib/server-utils";
-import { getTenantByUserId } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server-utils";
 
 import { AppLocation } from "../footer";
 import Main from "../main";
@@ -8,8 +7,7 @@ import GeneralSettings from "./general-settings";
 import SettingsNav from "./settings-nav";
 
 export default async function DataIndexPage() {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
+  const { tenant, session } = await requireAuthContext();
 
   return (
     <Main name={session.user.name} appLocation={AppLocation.SETTINGS}>

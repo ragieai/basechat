@@ -2,14 +2,12 @@ import { NextRequest } from "next/server";
 
 import { createConversationMessage, getConversationMessages } from "@/lib/data-access/conversation";
 import { conversationMessagesResponseSchema, createConversationMessageRequestSchema } from "@/lib/schema";
-import { requireSession } from "@/lib/server-utils";
-import { getTenantByUserId } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server-utils";
 
 import { generate, retrieveConversationContext } from "./conversation-controller";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ conversationId: string }> }) {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
+  const { tenant } = await requireAuthContext();
   const { conversationId } = await params;
   const messages = await getConversationMessages(tenant.id, conversationId);
 
@@ -17,8 +15,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ conversationId: string }> }) {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
+  const { tenant } = await requireAuthContext();
   const { conversationId } = await params;
   const json = await request.json();
   const { content } = createConversationMessageRequestSchema.parse(json);

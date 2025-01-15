@@ -1,13 +1,11 @@
 import { formatDistanceToNow } from "date-fns";
 import { eq } from "drizzle-orm";
-import { Inter } from "next/font/google";
 import Image from "next/image";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import db from "@/lib/db";
 import * as schema from "@/lib/db/schema";
-import { requireSession } from "@/lib/server-utils";
-import { getTenantByUserId } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server-utils";
 
 import CONNECTOR_MAP from "../../../lib/connector-map";
 import ManageDataPreviewIcons from "../../../public/manage-data-preview-icons.svg";
@@ -17,11 +15,8 @@ import Main from "../main";
 import AddConnectionMenu from "./add-connection-menu";
 import ManageConnectionMenu from "./manage-connection-menu";
 
-const inter = Inter({ subsets: ["latin"] });
-
 export default async function DataIndexPage() {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
+  const { tenant, session } = await requireAuthContext();
   const connections = await db.select().from(schema.connections).where(eq(schema.connections.tenantId, tenant.id));
 
   return (

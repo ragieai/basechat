@@ -4,12 +4,10 @@ import { NextRequest } from "next/server";
 import db from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { updateTenantSchema } from "@/lib/schema";
-import { requireSession } from "@/lib/server-utils";
-import { getTenantByUserId } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server-utils";
 
 export async function PATCH(request: NextRequest) {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
+  const { tenant } = await requireAuthContext();
 
   const json = await request.json();
   const update = updateTenantSchema.parse(json);

@@ -1,15 +1,12 @@
 import { NextRequest } from "next/server";
 
 import { getConversationMessage } from "@/lib/data-access/conversation";
-import { requireSession } from "@/lib/server-utils";
-import { getTenantByUserId } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server-utils";
 
 type Params = { conversationId: string; messageId: string };
 
 export async function GET(request: NextRequest, { params }: { params: Promise<Params> }) {
-  const session = await requireSession();
-  const tenant = await getTenantByUserId(session.user.id);
-
+  const { tenant } = await requireAuthContext();
   const { conversationId, messageId } = await params;
   const message = await getConversationMessage(tenant.id, conversationId, messageId);
 

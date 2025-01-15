@@ -9,6 +9,7 @@ import { z } from "zod";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { createTenantResponseSchema } from "@/lib/schema";
 
 const PhotoPlaceholderIconSVG = () => (
   <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +33,6 @@ export default function SetupForm() {
   });
 
   const { update } = useSession();
-
   const router = useRouter();
 
   const [failureMessage, setFailureMessage] = useState<string | null>(null);
@@ -40,13 +40,16 @@ export default function SetupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setFailureMessage(null);
 
-    const setupResponse = await fetch("/api/setup", { method: "POST", body: JSON.stringify(values) });
-    if (setupResponse.status < 200 || setupResponse.status >= 300) {
+    const res = await fetch("/api/setup", { method: "POST", body: JSON.stringify(values) });
+    if (res.status < 200 || res.status >= 300) {
       setFailureMessage("An unexpected error occurred. Could not finish setup.");
       return;
     }
 
-    await router.push("/");
+    const payload = createTenantResponseSchema.parse(await res.json());
+    await update({ tenantId: payload.id });
+
+    router.push("/");
   }
 
   return (

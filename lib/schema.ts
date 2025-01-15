@@ -52,3 +52,7 @@ export interface Member {
   role: MemberRole;
   type: MemberType;
 }
+
+export const createTenantResponseSchema = z.object({
+  id: z.string(),
+});

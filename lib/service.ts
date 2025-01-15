@@ -112,21 +112,13 @@ export async function getMembersByTenantId(tenantId: string): Promise<Member[]> 
   ).orderBy(sql`type desc`, sql`name`);
 }
 
-export async function getTenantByUserId(id: string) {
+export async function getFirstTenantByUserId(id: string) {
   const rs = await db
     .select()
     .from(schema.profiles)
     .innerJoin(schema.tenants, eq(schema.profiles.tenantId, schema.tenants.id))
     .where(eq(schema.profiles.userId, id));
-
-  assert(rs.length === 1, "expected single tenant");
-  return rs[0].tenants;
-}
-
-export async function isSetupComplete(userId: string) {
-  const rs = await db.select().from(schema.tenants).where(eq(schema.tenants.ownerId, userId));
-  assert(rs.length === 0 || rs.length === 1, "unexpected result");
-  return rs.length === 1;
+  return rs.length > 0 ? rs[0].tenants : null;
 }
 
 export async function createInvites(tenantId: string, invitedBy: string, emails: string[]) {
@@ -176,6 +168,7 @@ export async function getProfileByTenantIdAndUserId(tenantId: string, userId: st
   const rs = await db
     .select()
     .from(schema.profiles)
+    .innerJoin(schema.tenants, eq(schema.profiles.tenantId, schema.tenants.id))
     .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.userId, userId)));
   assert(rs.length === 1, "expected single record");
   return rs[0];
@@ -194,4 +187,5 @@ export async function acceptInvite(userId: string, inviteId: string) {
     await tx.insert(schema.profiles).values({ tenantId: invite.tenantId, userId });
     await tx.delete(schema.invites).where(eq(schema.invites.id, inviteId));
   });
+  return invite;
 }
