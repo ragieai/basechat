@@ -1,9 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { requireSession } from "@/lib/server-utils";
-import { acceptInvite, getFirstTenantByUserId } from "@/lib/service";
-
-import RedirectComponent from "./redirect-component";
+import { acceptInvite, getFirstTenantByUserId, setCurrentProfileId } from "@/lib/service";
 
 interface Props {
   searchParams: Promise<{ invite?: string }>;
@@ -18,8 +16,10 @@ export default async function StartPage({ searchParams }: Props) {
 
   if (params.invite) {
     try {
-      const invite = await acceptInvite(session.user.id, params.invite);
-      tenantId = invite.tenantId;
+      const profile = await acceptInvite(session.user.id, params.invite);
+      await setCurrentProfileId(session.user.id, profile.id);
+
+      tenantId = profile.tenantId;
     } catch (e) {
       acceptError = e;
     }
@@ -37,6 +37,6 @@ export default async function StartPage({ searchParams }: Props) {
       </div>
     );
   } else {
-    return <RedirectComponent tenantId={tenantId} />;
+    redirect("/");
   }
 }

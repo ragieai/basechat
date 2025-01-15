@@ -6,8 +6,5 @@ declare module "next-auth/jwt" {
   interface JWT extends Record<string, unknown>, DefaultJWT {
     /** The user ID that is stored in the database */
     id: string;
-
-    /** The current tenantId */
-    tenantId: string | null;
   }
 }

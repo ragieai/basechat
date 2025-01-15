@@ -10,7 +10,7 @@ export default async function DataIndexPage() {
   const { tenant, session } = await requireAuthContext();
 
   return (
-    <Main name={session.user.name} appLocation={AppLocation.SETTINGS}>
+    <Main currentTenantId={tenant.id} name={session.user.name} appLocation={AppLocation.SETTINGS}>
       <div className="max-w-[1140px] w-full p-4 flex-grow flex">
         <SettingsNav appLocation={AppLocation.SETTINGS} />
         <GeneralSettings tenant={tenant} />

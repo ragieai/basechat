@@ -61,5 +61,10 @@ export const tenantListResponseSchema = z.array(
   z.object({
     id: z.string(),
     name: z.string(),
+    profileId: z.string(),
   }),
 );
+
+export const updateCurrentProfileSchema = z.object({
+  currentProfileId: z.string(),
+});

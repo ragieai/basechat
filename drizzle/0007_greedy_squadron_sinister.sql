@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "current_profile_id" uuid;

@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { ReactNode, useEffect, useState } from "react";
 import { z } from "zod";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { tenantListResponseSchema } from "@/lib/schema";
+import { tenantListResponseSchema, updateCurrentProfileSchema } from "@/lib/schema";
 import { cn, getInitials } from "@/lib/utils";
 
 import CheckIcon from "../../public/icons/check.svg";
@@ -18,6 +19,7 @@ import NewChatIcon from "../../public/icons/new-chat.svg";
 import ConversationHistory from "./conversation-history";
 
 interface Props {
+  currentTenantId: string;
   className?: string;
   name?: string | null;
   onNavClick?: () => void;
@@ -40,9 +42,9 @@ const HeaderPopoverContent = ({
   </PopoverContent>
 );
 
-export default function Header({ name, onNavClick = () => {} }: Props) {
+export default function Header({ name, currentTenantId, onNavClick = () => {} }: Props) {
   const handleLogOutClick = async () => await signOut();
-  const { data } = useSession();
+  const router = useRouter();
 
   const [tenants, setTenants] = useState<z.infer<typeof tenantListResponseSchema>>([]);
 
@@ -53,6 +55,18 @@ export default function Header({ name, onNavClick = () => {} }: Props) {
       setTenants(tenants);
     })();
   }, []);
+
+  const handleTenantClick = async (profileId: string) => {
+    await fetch("/api/profiles", {
+      method: "POST",
+      body: JSON.stringify(
+        updateCurrentProfileSchema.parse({
+          currentProfileId: profileId,
+        }),
+      ),
+    });
+    window.location.reload();
+  };
 
   return (
     <header className="w-full shrink-0 flex justify-between p-4 items-center">
@@ -78,9 +92,13 @@ export default function Header({ name, onNavClick = () => {} }: Props) {
         <HeaderPopoverContent align="end" className="p-4 w-[332px]">
           <ul>
             {tenants.map((tenant, i) => (
-              <li key={i} className="hover:bg-black hover:bg-opacity-5 px-4 py-3 rounded-lg cursor-pointer">
+              <li
+                key={i}
+                className="hover:bg-black hover:bg-opacity-5 px-4 py-3 rounded-lg cursor-pointer"
+                onClick={() => handleTenantClick(tenant.profileId)}
+              >
                 <div className="flex items-center mb-1">
-                  <div className="w-4">{data?.tenantId === tenant.id && <Image src={CheckIcon} alt="selected" />}</div>
+                  <div className="w-4">{currentTenantId === tenant.id && <Image src={CheckIcon} alt="selected" />}</div>
                   <TenantLogo name={tenant.name} className="ml-3" />
                   <div className="ml-4">{tenant.name}</div>
                 </div>

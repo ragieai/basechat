@@ -2,14 +2,12 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createTenantResponseSchema } from "@/lib/schema";
 
 const PhotoPlaceholderIconSVG = () => (
   <svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +30,6 @@ export default function SetupForm() {
     defaultValues: { name: "" },
   });
 
-  const { update } = useSession();
   const router = useRouter();
 
   const [failureMessage, setFailureMessage] = useState<string | null>(null);
@@ -45,9 +42,6 @@ export default function SetupForm() {
       setFailureMessage("An unexpected error occurred. Could not finish setup.");
       return;
     }
-
-    const payload = createTenantResponseSchema.parse(await res.json());
-    await update({ tenantId: payload.id });
 
     router.push("/");
   }

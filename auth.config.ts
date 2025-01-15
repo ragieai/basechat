@@ -6,7 +6,6 @@ export default {
   callbacks: {
     session({ session, token }) {
       session.user.id = token.id;
-      session.tenantId = token.tenantId;
       return session;
     },
   },

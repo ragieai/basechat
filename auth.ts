@@ -14,9 +14,6 @@ declare module "next-auth" {
    * Returned by `auth`, `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
    */
   interface Session {
-    /** The current tenantId */
-    tenantId: string | null;
-
     user: {
       /** User ID should always exist on the session */
       id: string;
@@ -55,9 +52,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
           break;
         case "update":
-          if ("tenantId" in session) {
-            token.tenantId = session.tenantId;
-          }
           break;
         case undefined:
           break;

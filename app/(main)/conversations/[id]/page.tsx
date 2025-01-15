@@ -9,7 +9,7 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   const { id } = await params;
 
   return (
-    <Main name={session.user.name} appLocation={AppLocation.CHAT}>
+    <Main currentTenantId={tenant.id} name={session.user.name} appLocation={AppLocation.CHAT}>
       <Conversation tenantName={tenant.name} id={id} />
     </Main>
   );

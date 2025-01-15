@@ -103,6 +103,8 @@ export const users = pgTable("users", {
   email: text("email").unique(),
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
+  currentProfileId: uuid("current_profile_id"),
+  //   .references(() => profiles.id, { onDelete: "set null" })
 });
 
 export const accounts = pgTable(

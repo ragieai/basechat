@@ -174,6 +174,20 @@ export async function getProfileByTenantIdAndUserId(tenantId: string, userId: st
   return rs[0];
 }
 
+export async function getAuthContextByUserId(userId: string) {
+  const rs = await db
+    .select()
+    .from(schema.users)
+    .innerJoin(schema.profiles, eq(schema.users.currentProfileId, schema.profiles.id))
+    .innerJoin(schema.tenants, eq(schema.profiles.tenantId, schema.tenants.id))
+    .where(eq(schema.users.id, userId));
+
+  assert(rs.length === 1, "expected single record");
+  const row = rs[0];
+
+  return { profile: row.profiles, tenant: row.tenants };
+}
+
 async function getInviteById(id: string) {
   const rs = await db.select().from(schema.invites).where(eq(schema.invites.id, id));
   assert(rs.length === 1);
@@ -183,17 +197,33 @@ async function getInviteById(id: string) {
 export async function acceptInvite(userId: string, inviteId: string) {
   const invite = await getInviteById(inviteId);
 
-  await db.transaction(async (tx) => {
-    await tx.insert(schema.profiles).values({ tenantId: invite.tenantId, userId });
+  const profile = await db.transaction(async (tx) => {
+    const rs = await tx.insert(schema.profiles).values({ tenantId: invite.tenantId, userId }).returning();
     await tx.delete(schema.invites).where(eq(schema.invites.id, inviteId));
+    assert(rs.length === 1, "expected new profile");
+    return rs[0];
   });
-  return invite;
+  return profile;
 }
 
 export async function getTenantsByUserId(userId: string) {
   return db
-    .select({ id: schema.tenants.id, name: schema.tenants.name })
+    .select({ id: schema.tenants.id, name: schema.tenants.name, profileId: schema.profiles.id })
     .from(schema.tenants)
     .innerJoin(schema.profiles, eq(schema.tenants.id, schema.profiles.tenantId))
     .where(eq(schema.profiles.userId, userId));
+}
+
+export async function setCurrentProfileId(userId: string, profileId: string) {
+  await db.transaction(async (tx) => {
+    // Validate profile exists and is scoped to the userId
+    const rs = await db
+      .select({ id: schema.profiles.id })
+      .from(schema.profiles)
+      .where(and(eq(schema.profiles.userId, userId), eq(schema.profiles.id, profileId)));
+    assert(rs.length === 1, "expect single record");
+    const profile = rs[0];
+
+    await db.update(schema.users).set({ currentProfileId: profile.id }).where(eq(schema.users.id, userId));
+  });
 }
