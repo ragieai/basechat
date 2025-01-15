@@ -1,6 +1,8 @@
+![Base Chat Banner](image.png)
+
 # Base Chat
 
-Base Chat is a multi-tenant chat bot that uses [Ragie Connect](https://www.ragie.ai/connectors?utm_source=basechat-readme) to allow users to connect and chat with their organization's knowledgebase. It is a reference application for several of [Ragie](https://www.ragie.ai/?utm_source=basechat-readme)'s features.
+Base Chat is a multi-tenant RAG chatbot that uses [Ragie Connect](https://www.ragie.ai/connectors?utm_source=basechat-readme) to allow users to connect and chat with their organization's knowledgebase. It is a reference application for several of [Ragie](https://www.ragie.ai/?utm_source=basechat-readme)'s features.
 
 NOTE: This project is under active development and may include breaking changes in subsequent releases.
 
