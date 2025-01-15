@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/b40d47e6-e37e-4361-8dc8-80938742b556)
+![base-chat](https://github.com/user-attachments/assets/7c1b8e04-39af-40d1-a673-b43340ba9f4c)
 
 # Base Chat
 
