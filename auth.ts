@@ -19,8 +19,6 @@ declare module "next-auth" {
       /** User ID should always exist on the session */
       id: string;
 
-      /** Flag indiciating whether or not the user has finished setup */
-      setup: boolean;
       /**
        * By default, TypeScript merges new interface properties and overwrites existing ones.
        * In this case, the default session user properties will be overwritten,
@@ -43,14 +41,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     authorized: ({ auth }) => !!auth,
-    async jwt({ token, user, trigger, session: sessionUpdates }) {
+    async jwt({ token, user, trigger }) {
       switch (trigger) {
         case "signIn":
         case "signUp":
           if (user) {
             assert(user.id, "expected AdapterUser");
             token.id = user.id;
-            token.setup = await isSetupComplete(user.id);
           }
           break;
         case "update":
