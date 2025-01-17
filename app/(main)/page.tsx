@@ -1,11 +1,11 @@
-import { requireAuthContext } from "@/lib/server-utils";
+import { authOrRedirect } from "@/lib/server-utils";
 
 import { AppLocation } from "./footer";
 import Main from "./main";
 import Welcome from "./welcome";
 
 export default async function Home() {
-  const context = await requireAuthContext();
+  const context = await authOrRedirect();
 
   return (
     <Main currentTenantId={context.tenant.id} name={context.session.user.name} appLocation={AppLocation.CHAT}>

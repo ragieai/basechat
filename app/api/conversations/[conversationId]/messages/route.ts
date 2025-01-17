@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 
 import { createConversationMessage, getConversation, getConversationMessages } from "@/lib/data-access/conversation";
 import { conversationMessagesResponseSchema, createConversationMessageRequestSchema } from "@/lib/schema";
-import { requireAuthContext } from "@/lib/server-utils";
+import { authOrRedirect } from "@/lib/server-utils";
 
 import {
   EXPAND_MESSAGE_CONTENT,
@@ -15,7 +15,7 @@ import {
 } from "./utils";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ conversationId: string }> }) {
-  const { profile, tenant } = await requireAuthContext();
+  const { profile, tenant } = await authOrRedirect();
   const { conversationId } = await params;
   const messages = await getConversationMessages(tenant.id, profile.id, conversationId);
 
@@ -23,7 +23,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ conversationId: string }> }) {
-  const { profile, tenant } = await requireAuthContext();
+  const { profile, tenant } = await authOrRedirect();
   const { conversationId } = await params;
   const json = await request.json();
 

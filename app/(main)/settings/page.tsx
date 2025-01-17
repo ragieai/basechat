@@ -1,4 +1,4 @@
-import { requireAuthContext } from "@/lib/server-utils";
+import { authOrRedirect } from "@/lib/server-utils";
 
 import { AppLocation } from "../footer";
 import Main from "../main";
@@ -7,7 +7,7 @@ import GeneralSettings from "./general-settings";
 import SettingsNav from "./settings-nav";
 
 export default async function DataIndexPage() {
-  const { tenant, session } = await requireAuthContext();
+  const { tenant, session } = await authOrRedirect();
 
   return (
     <Main currentTenantId={tenant.id} name={session.user.name} appLocation={AppLocation.SETTINGS}>

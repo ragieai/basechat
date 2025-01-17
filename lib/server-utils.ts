@@ -1,8 +1,10 @@
 import assert from "assert";
 
+import { redirect } from "next/navigation";
+
 import { auth } from "@/auth";
 
-import { getAuthContextByUserId, getProfileByTenantIdAndUserId } from "./service";
+import { getAuthContextByUserId } from "./service";
 
 export async function requireSession() {
   const session = await auth();
@@ -14,6 +16,14 @@ export async function requireAuthContext() {
   const session = await requireSession();
   const { profile, tenant } = await getAuthContextByUserId(session.user.id);
   return { profile, tenant, session };
+}
+
+export async function authOrRedirect() {
+  try {
+    return await requireAuthContext();
+  } catch (e) {
+    return redirect("/login");
+  }
 }
 
 /**
