@@ -13,7 +13,9 @@ export default auth((req) => {
       !req.nextUrl.pathname.startsWith("/healthz")
     ) {
       const newUrl = new URL("/login", req.nextUrl.origin);
-      newUrl.searchParams.set("redirectTo", req.nextUrl.toString());
+      if (req.nextUrl.pathname !== "/") {
+        newUrl.searchParams.set("redirectTo", req.nextUrl.toString());
+      }
       return Response.redirect(newUrl);
     }
   }
