@@ -29,13 +29,13 @@ const RagieLogoSVG = () => (
   </svg>
 );
 
-export default async function SignInPage({ searchParams }: { searchParams: Promise<{ invite?: string }> }) {
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ redirectTo?: string }> }) {
   const params = await searchParams;
   return (
     <div className="min-h-screen flex flex-col items-center bg-white">
       <div className="flex-grow h-full flex flex-col items-center justify-center">
         <h1 className={cn(inter_tight.className, "text-[107px] font-bold")}>{settings.APP_NAME}</h1>
-        <SignIn invite={params.invite} />
+        <SignIn redirectTo={params.redirectTo} />
       </div>
       <div className="h-20 w-full bg-[#27272A] flex items-center justify-center">
         <div className={`mr-2.5 text-md text-[#FEFEFE] ${inter.className}`}>Powered by</div>

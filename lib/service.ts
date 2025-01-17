@@ -149,7 +149,7 @@ export async function createInvites(tenantId: string, invitedBy: string, emails:
   });
 
   const promises = invites.map((invite) => {
-    const inviteLink = settings.BASE_URL + "/login/?invite=" + invite.id;
+    const inviteLink = settings.BASE_URL + "/invites?accept=" + invite.id;
 
     return transporter.sendMail({
       to: invite.email,

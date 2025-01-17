@@ -38,13 +38,13 @@ const GoogleMarkSVG = () => (
   </svg>
 );
 
-export default function SignIn({ invite }: { invite?: string }) {
+export default function SignIn({ redirectTo }: { redirectTo?: string }) {
   return (
     <form
       action={async () => {
         "use server";
-        const redirectTo = invite ? `/start?invite=${invite}` : "/start";
-        await signIn("google", { redirectTo });
+        const next = redirectTo ? redirectTo : "/start";
+        await signIn("google", { redirectTo: next });
       }}
     >
       <button type="submit" className="flex bg-[#F2F2F2] py-2.5 px-3 rounded-[48px]">
