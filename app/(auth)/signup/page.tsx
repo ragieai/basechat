@@ -1,31 +1,27 @@
-"use client";
-
-import { Roboto } from "next/font/google";
 import Link from "next/link";
-import { useActionState } from "react";
 
-import { cn } from "@/lib/utils";
+import * as settings from "@/lib/settings";
 
 import GoogleLoginForm from "../google-login-form";
 
-import { formLogin } from "./actions";
-
-const roboto = Roboto({ subsets: ["latin"], weight: "400" });
-
-export default function SignIn({ className, redirectTo }: { redirectTo?: string; className?: string }) {
-  const [{ error }, loginFormAction, pending] = useActionState(formLogin, {});
-
+export default function SignUpPage() {
   return (
-    <div className={cn("flex flex-col items-center", className)}>
-      <GoogleLoginForm redirectTo={redirectTo} />
+    <>
+      <div className="self-start mb-12 text-[30px] font-bold">
+        Welcome to {settings.APP_NAME}.<br />
+        Sign up to build your chatbot.
+      </div>
+
+      <div className="flex flex-col items-center w-full">
+        <GoogleLoginForm redirectTo={""} />
+      </div>
 
       <div className=" flex flex-col items-center mb-12 w-full relative">
         <hr className="w-full" />
         <div className="absolute top-[-24px] bg-white p-3 text-center text-[#74747A]">or</div>
       </div>
 
-      <form className="flex flex-col w-full" action={loginFormAction}>
-        {error && <div className="text-red-500 text-center mb-4">Login failed: {error}</div>}
+      <form className="flex flex-col w-full">
         <input
           name="email"
           type="email"
@@ -39,16 +35,15 @@ export default function SignIn({ className, redirectTo }: { redirectTo?: string;
           className="w-full border rounded-[6px] text-[16px] placeholder-[#74747A] px-4 py-2 mb-8"
         />
         <button className="text-md text-white text-[16px] font-semibold bg-[#D946EF] rounded-[54px] py-2 w-full">
-          Sign in
+          Sign up
         </button>
       </form>
-
       <div className="mt-6 text-[16px]">
-        <span className="text-[#74747A]">Need to create a new organization?&nbsp;</span>
-        <Link href="/signup" className="text-[#1D1D1F] hover:underline">
-          Sign up
+        <span className="text-[#74747A]">Already using {settings.APP_NAME}?&nbsp;</span>
+        <Link href="/login" className="text-[#1D1D1F] hover:underline">
+          Sign in
         </Link>
       </div>
-    </div>
+    </>
   );
 }
