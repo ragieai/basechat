@@ -34,8 +34,16 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   return (
     <div className="min-h-screen flex flex-col items-center bg-white">
       <div className="flex-grow h-full flex flex-col items-center justify-center">
-        <h1 className={cn(inter_tight.className, "text-[107px] font-bold")}>{settings.APP_NAME}</h1>
-        <SignIn redirectTo={params.redirectTo} />
+        <div className="flex w-[442px] items-center mb-16">
+          <div className="max-h-[44px] max-w-[44px] avatar mr-3" />
+          <h1 className={cn(inter_tight.className, "text-[40px] font-bold")}>{settings.APP_NAME}</h1>
+        </div>
+        <div className="self-start mb-12 text-[30px] font-bold">
+          Welcome back.
+          <br />
+          Log in to your account below.
+        </div>
+        <SignIn className="w-full" redirectTo={params.redirectTo} />
       </div>
       <div className="h-20 w-full bg-[#27272A] flex items-center justify-center">
         <div className={`mr-2.5 text-md text-[#FEFEFE] ${inter.className}`}>Powered by</div>
