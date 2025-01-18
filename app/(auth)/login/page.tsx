@@ -1,8 +1,9 @@
 import { Inter, Inter_Tight } from "next/font/google";
 
-import SignIn from "@/components/sign-in";
 import * as settings from "@/lib/settings";
 import { cn } from "@/lib/utils";
+
+import SignIn from "./sign-in";
 
 const inter_tight = Inter_Tight({
   subsets: ["latin"],
