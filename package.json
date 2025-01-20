@@ -10,7 +10,7 @@
     "lint": "next lint",
     "db:generate": "npx drizzle-kit generate",
     "db:migrate": "npx drizzle-kit migrate",
-    "prepare": "npx husky init"
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.6",
