@@ -9,7 +9,8 @@ import Google from "next-auth/providers/google";
 import authConfig from "./auth.config";
 import db from "./lib/db";
 import * as schema from "./lib/db/schema";
-import { getFirstTenantByUserId } from "./lib/service";
+import { verifyPassword } from "./lib/server-utils";
+import { findUserByEmail, getFirstTenantByUserId } from "./lib/service";
 
 declare module "next-auth" {
   /**
@@ -39,8 +40,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: {},
         password: {},
       },
-      authorize: async (credentials: any) => {
-        throw new Error("not implemented");
+      authorize: async (credentials: Partial<{ email: unknown; password: unknown }>) => {
+        const user = await findUserByEmail(credentials.email as string);
+        if (!user) {
+          throw new Error("Invalid credentials.");
+        }
+        if (!user.password || !verifyPassword(user.password, credentials.password as string)) {
+          throw new Error("Invalid credentials.");
+        }
+        return user;
       },
     }),
   ],

@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils";
 
 import GoogleLoginForm from "../google-login-form";
 
-import { formLogin } from "./actions";
+import { handleLogin } from "./actions";
 
 const roboto = Roboto({ subsets: ["latin"], weight: "400" });
 
 export default function SignIn({ className, redirectTo }: { redirectTo?: string; className?: string }) {
-  const [{ error }, loginFormAction, pending] = useActionState(formLogin, {});
+  const [{ error }, loginFormAction, pending] = useActionState(handleLogin, {});
 
   return (
     <div className={cn("flex flex-col items-center", className)}>

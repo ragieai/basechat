@@ -1,5 +1,7 @@
 import assert from "assert";
+import { randomBytes } from "crypto";
 
+import argon2 from "argon2";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -56,4 +58,17 @@ export async function validateSignature(
 
   // Use a constant-time comparison to prevent timing attacks
   return Buffer.from(expectedSignature, "utf-8").equals(Buffer.from(receivedSignature, "utf-8"));
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  return await argon2.hash(password);
+}
+
+export async function verifyPassword(hashedPassword: string, plainPassword: string): Promise<boolean> {
+  try {
+    return await argon2.verify(hashedPassword, plainPassword);
+  } catch (error) {
+    // Handle errors (e.g., invalid hash format)
+    return false;
+  }
 }

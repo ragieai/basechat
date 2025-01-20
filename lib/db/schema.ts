@@ -105,6 +105,7 @@ export const users = pgTable("users", {
   ...baseFields,
   name: text("name"),
   email: text("email").unique(),
+  password: text("password"),
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
   currentProfileId: uuid("current_profile_id").references((): AnyPgColumn => profiles.id, { onDelete: "set null" }),

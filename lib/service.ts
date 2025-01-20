@@ -231,3 +231,9 @@ export async function setCurrentProfileId(userId: string, profileId: string) {
 export async function deleteInviteById(tenantId: string, id: string) {
   await db.delete(schema.invites).where(and(eq(schema.invites.tenantId, tenantId), eq(schema.invites.id, id)));
 }
+
+export async function findUserByEmail(email: string) {
+  const rs = await db.select().from(schema.users).where(eq(schema.users.email, email));
+  assert(rs.length === 1 || rs.length === 0, "unexpected result");
+  return rs.length ? rs[0] : null;
+}
