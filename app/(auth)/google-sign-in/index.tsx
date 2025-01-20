@@ -3,7 +3,7 @@ import Image from "next/image";
 
 import GoogleMarkSVG from "../../../public/google-mark.svg";
 
-import { googleLogin } from "./actions";
+import { handleGoogleSignIn } from "./actions";
 
 interface Props {
   redirectTo?: string;
@@ -11,9 +11,9 @@ interface Props {
 
 const roboto = Roboto({ subsets: ["latin"], weight: "400" });
 
-export default function GoogleLoginForm({ redirectTo }: Props) {
+export default function GoogleSignIn({ redirectTo }: Props) {
   return (
-    <form className="mb-8 w-full" action={googleLogin}>
+    <form className="mb-8 w-full" action={handleGoogleSignIn}>
       <input type="hidden" name="redirectTo" value={redirectTo} />
       <button type="submit" className="flex bg-[#F2F2F2] py-2.5 px-3 rounded-[48px] w-full justify-center items-center">
         <Image src={GoogleMarkSVG} alt="Continue with Google" />

@@ -24,7 +24,7 @@ export async function authOrRedirect() {
   try {
     return await requireAuthContext();
   } catch (e) {
-    return redirect("/login");
+    return redirect("/signin");
   }
 }
 

@@ -4,11 +4,11 @@ import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 import { signIn } from "@/auth";
 
-interface LoginFormState {
+interface SignInFormState {
   error?: string;
 }
 
-export async function handleLogin(prevState: LoginFormState, formData: FormData): Promise<LoginFormState> {
+export async function handleSignIn(prevState: SignInFormState, formData: FormData): Promise<SignInFormState> {
   const redirectTo = formData.get("redirectTo");
   const next = redirectTo ? redirectTo.toString() : "/start";
   try {

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import * as settings from "@/lib/settings";
 
-import GoogleLoginForm from "../google-login-form";
+import GoogleSignIn from "../google-sign-in";
 
 import { handleSignUp } from "./actions";
 
@@ -15,7 +15,7 @@ export default function SignUpPage() {
       </div>
 
       <div className="flex flex-col items-center w-full">
-        <GoogleLoginForm redirectTo={""} />
+        <GoogleSignIn redirectTo={""} />
       </div>
 
       <div className=" flex flex-col items-center mb-12 w-full relative">
@@ -62,7 +62,7 @@ export default function SignUpPage() {
       </form>
       <div className="mt-6 text-[16px]">
         <span className="text-[#74747A]">Already using {settings.APP_NAME}?&nbsp;</span>
-        <Link href="/login" className="text-[#1D1D1F] hover:underline">
+        <Link href="/signin" className="text-[#1D1D1F] hover:underline">
           Sign in
         </Link>
       </div>

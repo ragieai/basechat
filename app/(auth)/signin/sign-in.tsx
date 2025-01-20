@@ -6,25 +6,25 @@ import { useActionState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import GoogleLoginForm from "../google-login-form";
+import GoogleSignIn from "../google-sign-in";
 
-import { handleLogin } from "./actions";
+import { handleSignIn } from "./actions";
 
 const roboto = Roboto({ subsets: ["latin"], weight: "400" });
 
 export default function SignIn({ className, redirectTo }: { redirectTo?: string; className?: string }) {
-  const [{ error }, loginFormAction, pending] = useActionState(handleLogin, {});
+  const [{ error }, signInAction, pending] = useActionState(handleSignIn, {});
 
   return (
     <div className={cn("flex flex-col items-center", className)}>
-      <GoogleLoginForm redirectTo={redirectTo} />
+      <GoogleSignIn redirectTo={redirectTo} />
 
       <div className=" flex flex-col items-center mb-12 w-full relative">
         <hr className="w-full" />
         <div className="absolute top-[-24px] bg-white p-3 text-center text-[#74747A]">or</div>
       </div>
 
-      <form className="flex flex-col w-full" action={loginFormAction}>
+      <form className="flex flex-col w-full" action={signInAction}>
         {error && <div className="text-red-500 text-center mb-4">Login failed: {error}</div>}
         <input
           name="email"
