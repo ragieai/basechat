@@ -13,7 +13,7 @@ const registerSchema = z
     firstName: z.string().trim().min(1, { message: "First name is required" }),
     lastName: z.string().trim().min(1, { message: "Last name is required" }),
     email: z.string().email().trim().min(1, { message: "Email is required" }),
-    password: z.string().min(1, { message: "Password is required" }),
+    password: z.string().min(6, { message: "Password is required and must be at least 6 characters" }),
     confirm: z.string(),
     redirectTo: z.string().optional(),
   })
