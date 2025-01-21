@@ -6,6 +6,7 @@ import { z, ZodError } from "zod";
 import db from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { hashPassword } from "@/lib/server-utils";
+import * as settings from "@/lib/settings";
 
 const registerSchema = z
   .object({
@@ -14,6 +15,7 @@ const registerSchema = z
     email: z.string().email().trim().min(1, { message: "Email is required" }),
     password: z.string().min(1, { message: "Password is required" }),
     confirm: z.string(),
+    redirectTo: z.string().optional(),
   })
   .refine((data) => data.password === data.confirm, {
     message: "Passwords don't match",
@@ -31,6 +33,7 @@ export async function handleSignUp(prevState: SignUpFormState, formData: FormDat
       email: formData.get("email"),
       password: formData.get("password"),
       confirm: formData.get("confirm"),
+      redirectTo: formData.get("redirectTo"),
     });
   } catch (e) {
     return { error: (e as ZodError).errors.map((error) => error.message) };
@@ -51,5 +54,11 @@ export async function handleSignUp(prevState: SignUpFormState, formData: FormDat
     };
   }
 
-  redirect("/");
+  const signInUrl = new URL("/signin", settings.BASE_URL);
+  signInUrl.searchParams.set("registered", "1");
+  if (values.redirectTo) {
+    signInUrl.searchParams.set("redirectTo", values.redirectTo);
+  }
+
+  redirect(signInUrl.toString());
 }
