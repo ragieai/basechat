@@ -8,6 +8,8 @@ import { GlobalStateProvider } from "./(main)/context";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Base Chat",
   description: "Base Chat powered by Ragie",

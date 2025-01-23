@@ -7,10 +7,8 @@ import SettingsNav from "../settings-nav";
 
 import UserSettings from "./user-settings";
 
-export const dynamic = "force-dynamic";
-
 export default async function UsersIndexPage() {
-  const { session, tenant } = await authOrRedirect(undefined);
+  const { session, tenant } = await authOrRedirect();
   const members = await getMembersByTenantId(tenant.id);
 
   return (

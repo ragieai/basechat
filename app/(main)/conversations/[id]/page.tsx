@@ -5,7 +5,7 @@ import { authOrRedirect } from "@/lib/server-utils";
 import Conversation from "./conversation";
 
 export default async function ConversationPage({ params }: { params: Promise<{ id: string }> }) {
-  const { session, tenant } = await authOrRedirect(undefined);
+  const { session, tenant } = await authOrRedirect();
   const { id } = await params;
 
   return (

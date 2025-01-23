@@ -4,10 +4,8 @@ import { AppLocation } from "./footer";
 import Main from "./main";
 import Welcome from "./welcome";
 
-export const dynamic = "force-dynamic";
-
 export default async function Home() {
-  const context = await authOrRedirect(undefined);
+  const context = await authOrRedirect();
 
   return (
     <Main currentTenantId={context.tenant.id} name={context.session.user.name} appLocation={AppLocation.CHAT}>

@@ -20,15 +20,7 @@ export async function requireAuthContext() {
   return { profile, tenant, session };
 }
 
-// _setDynamicAsForceDynamicReminder parameter is a bit of a hack but making sure the
-// page that is using authOrRedirect is using "force-dynamic" is required to make sure
-// auth enforcement works correctly.
-//
-// Make sure the containing page includes the exported symbol:
-//
-//  export const dynamic = "force-dynamic";
-//
-export async function authOrRedirect(_setDynamicAsForceDynamicReminder: undefined) {
+export async function authOrRedirect() {
   try {
     return await requireAuthContext();
   } catch (e) {
