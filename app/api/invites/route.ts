@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { authOrRedirect } from "@/lib/server-utils";
+import { requireAuthContext } from "@/lib/server-utils";
 import { createInvites } from "@/lib/service";
 
 const inviteSchema = z.object({
@@ -9,7 +9,7 @@ const inviteSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const context = await authOrRedirect();
+  const context = await requireAuthContext();
 
   const json = await request.json();
   const payload = inviteSchema.parse(json);

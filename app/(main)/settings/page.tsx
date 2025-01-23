@@ -6,8 +6,10 @@ import Main from "../main";
 import GeneralSettings from "./general-settings";
 import SettingsNav from "./settings-nav";
 
-export default async function DataIndexPage() {
-  const { tenant, session } = await authOrRedirect();
+export const dynamic = "force-dynamic";
+
+export default async function SettingsIndexPage() {
+  const { tenant, session } = await authOrRedirect(undefined);
 
   return (
     <Main currentTenantId={tenant.id} name={session.user.name} appLocation={AppLocation.SETTINGS}>

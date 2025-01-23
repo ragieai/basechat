@@ -15,8 +15,10 @@ import Main from "../main";
 import AddConnectionMenu from "./add-connection-menu";
 import ManageConnectionMenu from "./manage-connection-menu";
 
+export const dynamic = "force-dynamic";
+
 export default async function DataIndexPage() {
-  const { tenant, session } = await authOrRedirect();
+  const { tenant, session } = await authOrRedirect(undefined);
   const connections = await db.select().from(schema.connections).where(eq(schema.connections.tenantId, tenant.id));
 
   return (
