@@ -1,6 +1,8 @@
 import Link from "next/link";
 
-import { Button, Title } from "../common";
+import { Title } from "../common";
+
+import Reset from "./reset";
 
 export default function ResetPage() {
   return (
@@ -12,15 +14,7 @@ export default function ResetPage() {
         email.
       </div>
 
-      <form className="flex flex-col w-full">
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          className="w-full border rounded-[6px] text-[16px] placeholder-[#74747A] px-4 py-2 mb-6"
-        />
-        <Button>Send reset link</Button>
-      </form>
+      <Reset />
 
       <Link href="/signin" className="mt-6 text-[16px] text-[#74747A] hover:underline">
         Back to sign in

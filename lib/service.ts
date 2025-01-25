@@ -2,6 +2,7 @@ import assert from "assert";
 
 import { and, eq, sql } from "drizzle-orm";
 import { union } from "drizzle-orm/pg-core";
+import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import SMTPConnection from "nodemailer/lib/smtp-connection";
 
@@ -151,12 +152,11 @@ export async function createInvites(tenantId: string, invitedBy: string, emails:
   if (settings.SMTP_USER && settings.SMTP_PASSWORD) {
     options.auth = { type: "login", user: settings.SMTP_USER, pass: settings.SMTP_PASSWORD };
   }
-  const transporter = nodemailer.createTransport(options);
 
   const promises = invites.map((invite) => {
     const inviteLink = settings.BASE_URL + "/invites/accept?invite=" + invite.id;
 
-    return transporter.sendMail({
+    return sendMail({
       to: invite.email,
       from: settings.SMTP_FROM,
       subject: `You have been invited to ${settings.APP_NAME}`,
@@ -245,4 +245,49 @@ export async function findUserByEmail(email: string) {
   const rs = await db.select().from(schema.users).where(eq(schema.users.email, email));
   assert(rs.length === 1 || rs.length === 0, "unexpected result");
   return rs.length ? rs[0] : null;
+}
+
+export async function sendResetPasswordVerification(email: string) {
+  const user = await findUserByEmail(email);
+  if (!user) return false;
+
+  assert(user.email, "expected not null email address");
+
+  const token = jwt.sign({}, settings.AUTH_SECRET, {
+    subject: user.email,
+    expiresIn: "24h",
+    audience: settings.BASE_URL,
+  });
+
+  const link = settings.BASE_URL + `/reset-verify?token=${token}`;
+
+  await sendMail({
+    to: email,
+    subject: "Reset password verification",
+    text: `Click the link below to reset your password:\n\n${link}`,
+  });
+  return true;
+}
+
+export async function sendMail({
+  to,
+  subject,
+  text,
+  from = settings.SMTP_FROM,
+}: {
+  to: string;
+  subject: string;
+  text: string;
+  from?: string;
+}) {
+  const options: SMTPConnection.Options = {
+    host: settings.SMTP_HOST,
+    port: settings.SMTP_PORT,
+    secure: settings.SMTP_SECURE,
+  };
+  if (settings.SMTP_USER && settings.SMTP_PASSWORD) {
+    options.auth = { type: "login", user: settings.SMTP_USER, pass: settings.SMTP_PASSWORD };
+  }
+  const transporter = nodemailer.createTransport(options);
+  return transporter.sendMail({ to, from, subject, text });
 }
