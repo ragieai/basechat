@@ -15,3 +15,17 @@ export function Button({ children, className }: { children: ReactNode; className
     </button>
   );
 }
+
+export function Error({ error, className }: { error: string[] | undefined; className?: string }) {
+  return (
+    error && (
+      <ul className={cn("mb-4", className)}>
+        {error.map((e, i) => (
+          <li key={i} className="text-red-500 text-center">
+            {e}
+          </li>
+        ))}
+      </ul>
+    )
+  );
+}

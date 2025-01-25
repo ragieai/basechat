@@ -1,11 +1,21 @@
 "use client";
 
-import { Button } from "../common";
+import { useActionState } from "react";
 
-export default function ChangePassword() {
+import { Button, Error } from "../common";
+
+import { handleChangePassword } from "./actions";
+
+interface Props {
+  token: string;
+}
+
+export default function ChangePassword({ token }: Props) {
+  const [{ error }, changePasswordAction, pending] = useActionState(handleChangePassword, {});
   return (
     <>
-      <form className="w-full mt-10">
+      <form className="w-full mt-10" action={changePasswordAction}>
+        <Error error={error} />
         <input
           name="password"
           type="password"
@@ -18,6 +28,7 @@ export default function ChangePassword() {
           placeholder="Re-type password"
           className="w-full border rounded-[6px] text-[16px] placeholder-[#74747A] px-4 py-2 mb-6"
         />
+        <input type="hidden" name="token" value={token} />
         <Button className="mt-6">Submit</Button>
       </form>
     </>

@@ -8,19 +8,14 @@ import * as schema from "@/lib/db/schema";
 import { hashPassword } from "@/lib/server-utils";
 import * as settings from "@/lib/settings";
 
-const registerSchema = z
-  .object({
-    firstName: z.string().trim().min(1, { message: "First name is required" }),
-    lastName: z.string().trim().min(1, { message: "Last name is required" }),
-    email: z.string().email().trim().min(1, { message: "Email is required" }),
-    password: z.string().min(6, { message: "Password is required and must be at least 6 characters" }),
-    confirm: z.string(),
-    redirectTo: z.string().optional(),
-  })
-  .refine((data) => data.password === data.confirm, {
-    message: "Passwords don't match",
-    path: ["confirm"],
-  });
+import { extendPasswordSchema } from "../utils";
+
+const registerSchema = extendPasswordSchema({
+  firstName: z.string().trim().min(1, { message: "First name is required" }),
+  lastName: z.string().trim().min(1, { message: "Last name is required" }),
+  email: z.string().email().trim().min(1, { message: "Email is required" }),
+  redirectTo: z.string().optional(),
+});
 
 type SignUpFormState = { error: string[] } | null;
 

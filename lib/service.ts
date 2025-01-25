@@ -12,6 +12,7 @@ import db from "./db";
 import * as schema from "./db/schema";
 import { getRagieClient, getRagieConnection } from "./ragie";
 import { Member, MemberRole, MemberType } from "./schema";
+import { hashPassword } from "./server-utils";
 
 export async function createTenant(userId: string, name: string) {
   const tenants = await db
@@ -255,7 +256,7 @@ export async function sendResetPasswordVerification(email: string) {
 
   const token = jwt.sign({}, settings.AUTH_SECRET, {
     subject: user.email,
-    expiresIn: "24h",
+    expiresIn: "10m",
     audience: settings.BASE_URL,
   });
 
@@ -267,6 +268,13 @@ export async function sendResetPasswordVerification(email: string) {
     text: `Click the link below to reset your password:\n\n${link}`,
   });
   return true;
+}
+
+export async function changePassword(email: string, newPassword: string) {
+  await db
+    .update(schema.users)
+    .set({ password: await hashPassword(newPassword) })
+    .where(eq(schema.users.email, email));
 }
 
 export async function sendMail({

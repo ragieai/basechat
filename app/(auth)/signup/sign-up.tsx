@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { Button } from "../common";
+import { Button, Error } from "../common";
 
 import { handleSignUp } from "./actions";
 
@@ -11,15 +11,8 @@ export default function SignUp({ redirectTo }: { redirectTo?: string }) {
 
   return (
     <form className="flex flex-col w-full" action={signUpAction}>
-      {state?.error && (
-        <ul className="mb-4">
-          {state.error.map((e, i) => (
-            <li key={i} className="text-red-500 text-center">
-              {e}
-            </li>
-          ))}
-        </ul>
-      )}
+      <Error error={state?.error} />
+
       <div className="flex justify-between gap-4">
         <input
           name="firstName"
