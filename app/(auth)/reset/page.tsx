@@ -9,7 +9,7 @@ export default function ResetPage() {
     <>
       <Title>Reset your password</Title>
 
-      <div className="mt-6 text-[16px] mb-6">
+      <div className="mt-6 text-[16px] mb-7">
         Enter the email address associated with your account. If you have an account, we’ll send a reset link to your
         email.
       </div>
