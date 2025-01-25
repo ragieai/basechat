@@ -259,7 +259,7 @@ export async function sendResetPasswordVerification(email: string) {
     audience: settings.BASE_URL,
   });
 
-  const link = settings.BASE_URL + `/reset-verify?token=${token}`;
+  const link = settings.BASE_URL + `/change-password?token=${token}`;
 
   await sendMail({
     to: email,
