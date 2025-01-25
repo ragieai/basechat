@@ -1,15 +1,22 @@
 "use server";
 
-import { z } from "zod";
+import { z, ZodError } from "zod";
 
 import { sendResetPasswordVerification } from "@/lib/service";
 
 interface ResetFormState {
-  error?: string;
+  error?: string[];
+  email?: string;
 }
 
 export async function handleResetPassword(prevState: ResetFormState, formData: FormData): Promise<ResetFormState> {
-  const email = z.string().email().parse(formData.get("email"));
+  let email;
+  try {
+    email = z.string().email().parse(formData.get("email"));
+  } catch (e) {
+    if (!(e instanceof ZodError)) throw e;
+    return { error: e.errors.map((e) => e.message) };
+  }
   await sendResetPasswordVerification(email);
-  return {};
+  return { email };
 }

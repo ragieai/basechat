@@ -1,23 +1,24 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
-import { Button } from "../common";
+import { Button, Error } from "../common";
 
 import { handleResetPassword } from "./actions";
 
 export default function Reset() {
-  const [{ error }, resetPasswordAction, pending] = useActionState(handleResetPassword, {});
+  const [state, resetPasswordAction, pending] = useActionState(handleResetPassword, {});
+
+  useEffect(() => {
+    if (state.email) {
+      toast.info(`Email sent to ${state.email}`);
+    }
+  }, [state.email]);
 
   return (
-    <form
-      className="flex flex-col w-full"
-      action={(formData) => {
-        resetPasswordAction(formData);
-        toast.info(`Email sent to ${formData.get("email")}`);
-      }}
-    >
+    <form className="flex flex-col w-full" action={resetPasswordAction}>
+      <Error error={state.error} />
       <input
         name="email"
         type="email"
