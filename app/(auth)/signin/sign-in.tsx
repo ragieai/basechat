@@ -3,6 +3,8 @@
 import { Roboto } from "next/font/google";
 import { useActionState } from "react";
 
+import { Button } from "../common";
+
 import { handleSignIn } from "./actions";
 
 const roboto = Roboto({ subsets: ["latin"], weight: "400" });
@@ -26,9 +28,7 @@ export default function SignIn({ redirectTo }: { redirectTo?: string }) {
         className="w-full border rounded-[6px] text-[16px] placeholder-[#74747A] px-4 py-2 mb-8"
       />
       <input type="hidden" name="redirectTo" value={redirectTo} />
-      <button className="text-md text-white text-[16px] font-semibold bg-[#D946EF] rounded-[54px] py-2 w-full">
-        Sign in
-      </button>
+      <Button>Sign in</Button>
     </form>
   );
 }

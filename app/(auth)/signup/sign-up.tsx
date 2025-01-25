@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 
+import { Button } from "../common";
+
 import { handleSignUp } from "./actions";
 
 export default function SignUp({ redirectTo }: { redirectTo?: string }) {
@@ -51,9 +53,7 @@ export default function SignUp({ redirectTo }: { redirectTo?: string }) {
         className="w-full border rounded-[6px] text-[16px] placeholder-[#74747A] px-4 py-2 mb-8"
       />
       <input type="hidden" name="redirectTo" value={redirectTo} />
-      <button className="text-md text-white text-[16px] font-semibold bg-[#D946EF] rounded-[54px] py-2 w-full">
-        Sign up
-      </button>
+      <Button>Sign up</Button>
     </form>
   );
 }

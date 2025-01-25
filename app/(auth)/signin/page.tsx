@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import * as settings from "@/lib/settings";
 
+import { Title } from "../common";
 import GoogleSignIn from "../google-sign-in";
 
 import SignIn from "./sign-in";
@@ -19,11 +20,11 @@ export default async function SignInPage({
 
   return (
     <>
-      <div className="self-start mb-12 text-[30px] font-bold">
+      <Title className="mb-12">
         Welcome back.
         <br />
         Log in to your account below.
-      </div>
+      </Title>
 
       <div className="flex flex-col items-center w-full">
         <GoogleSignIn redirectTo={redirectTo} />
@@ -38,9 +39,13 @@ export default async function SignInPage({
 
       <SignIn redirectTo={redirectTo} />
 
+      <Link href="/reset" className="text-[#D946EF] text-[16px] mt-6 hover:underline">
+        Forgot password?
+      </Link>
+
       <div className="mt-6 text-[16px]">
         <span className="text-[#74747A]">Need to create a new organization?&nbsp;</span>
-        <Link href={signUpUrl.toString()} className="text-[#1D1D1F] hover:underline">
+        <Link href={signUpUrl.toString()} className="text-[#D946EF] hover:underline">
           Sign up
         </Link>
       </div>

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { useActionState } from "react";
 
 import * as settings from "@/lib/settings";
 
+import { Title } from "../common";
 import GoogleSignIn from "../google-sign-in";
 
 import SignUp from "./sign-up";
@@ -16,10 +16,10 @@ export default async function SignUpPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      <div className="self-start mb-12 text-[30px] font-bold">
+      <Title className="mb-12">
         Welcome to {settings.APP_NAME}.<br />
         Sign up to build your chatbot.
-      </div>
+      </Title>
 
       <div className="flex flex-col items-center w-full">
         <GoogleSignIn redirectTo={redirectTo} />

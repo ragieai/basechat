@@ -10,6 +10,7 @@ export default auth((req) => {
     if (
       req.nextUrl.pathname !== "/signin" &&
       req.nextUrl.pathname !== "/signup" &&
+      req.nextUrl.pathname !== "/reset" &&
       !req.nextUrl.pathname.startsWith("/api/auth/callback") &&
       !req.nextUrl.pathname.startsWith("/healthz")
     ) {
