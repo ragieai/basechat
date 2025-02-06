@@ -118,6 +118,18 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
     toast.info("Role was changed");
   };
 
+  const changeInviteRole = async (id: string, role: MemberRole) => {
+    const res = await fetch(`/api/invites/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+    });
+    if (!res.ok) {
+      toast.error("Could not change role");
+      return;
+    }
+    toast.info("Role was changed");
+  };
+
   const handleDelete = (id: string, type: MemberType, role: MemberRole) => {
     switch (type) {
       case "invite":
@@ -144,7 +156,7 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
       case "profile":
         return changeProfileRole(id, newRole);
       case "invite":
-        return;
+        return changeInviteRole(id, newRole);
       default:
         assertNever(type);
     }

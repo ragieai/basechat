@@ -310,3 +310,11 @@ export async function updateProfileRoleById(tenantId: string, profileId: string,
     .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.id, profileId)));
   return;
 }
+
+export async function updateInviteRoleById(tenantId: string, inviteId: string, newRole: Role) {
+  await db
+    .update(schema.invites)
+    .set({ role: newRole })
+    .where(and(eq(schema.invites.tenantId, tenantId), eq(schema.invites.id, inviteId)));
+  return;
+}
