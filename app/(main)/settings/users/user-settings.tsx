@@ -25,6 +25,7 @@ import { Member, MemberRole, MemberType } from "@/lib/schema";
 
 interface Props {
   members: Member[];
+  ownerProfileId: string;
 }
 
 const formSchema = z.object({
@@ -32,7 +33,7 @@ const formSchema = z.object({
   role: z.union([z.literal("admin"), z.literal("user")]),
 });
 
-export default function UserSettings({ members: initialMembers }: Props) {
+export default function UserSettings({ members: initialMembers, ownerProfileId }: Props) {
   const [members, setMembers] = useState(initialMembers);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
@@ -69,7 +70,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
       name: null,
       email,
       type: "invite" as MemberType,
-      role: "invite" as MemberRole,
+      role: values.role as MemberRole,
     }));
 
     setMembers([...members, ...newMembers]);
@@ -110,16 +111,11 @@ export default function UserSettings({ members: initialMembers }: Props) {
       case "invite":
         return deleteInvite(id);
       case "profile": {
-        switch (role) {
-          case "admin": // fallthrough
-          case "user":
-            return deleteUser(id);
-          case "owner":
-            toast.info("Cannot delete owner");
-            return;
-          default:
-            return assertNever(role);
+        if (id == ownerProfileId) {
+          toast.info("Cannot delete owner");
+          return;
         }
+        return deleteUser(id);
       }
       default:
         return assertNever(type);
@@ -247,9 +243,11 @@ export default function UserSettings({ members: initialMembers }: Props) {
                     </>
                   )}
                 </TableCell>
-                <TableCell className="capitalize">{member.role}</TableCell>
+                <TableCell className="capitalize">
+                  {member.type == "profile" && member.id == ownerProfileId ? "Owner" : member.role}
+                </TableCell>
                 <TableCell className="text-right">
-                  {(member.type === "invite" || member.role === "user") && (
+                  {(member.type == "invite" || (member.type == "profile" && member.id != ownerProfileId)) && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button>

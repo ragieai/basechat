@@ -94,12 +94,7 @@ export async function getMembersByTenantId(tenantId: string): Promise<Member[]> 
         email: schema.users.email,
         name: schema.users.name,
         type: sql<MemberType>`'profile'`.as("type"),
-        role: sql<MemberRole>`
-          case
-            when ${schema.tenants.ownerId} = ${schema.users.id} then 'owner'
-            else ${schema.profiles.role}::text
-          end
-        `.as("role"),
+        role: schema.profiles.role,
       })
       .from(schema.profiles)
       .innerJoin(schema.users, eq(schema.profiles.userId, schema.users.id))
@@ -111,7 +106,7 @@ export async function getMembersByTenantId(tenantId: string): Promise<Member[]> 
         email: schema.invites.email,
         name: schema.invites.email,
         type: sql<MemberType>`'invite'`.as("type"),
-        role: sql<MemberRole>`${schema.invites.role}::text`.as("role"),
+        role: schema.invites.role,
       })
       .from(schema.invites)
       .where(eq(schema.invites.tenantId, tenantId)),
