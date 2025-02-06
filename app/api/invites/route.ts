@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { requireAuthContext } from "@/lib/server-utils";
-import { createInvites } from "@/lib/service";
+import { requireAuthContext } from "@/lib/server/server-utils";
+import { createInvites } from "@/lib/server/service";
 
 const inviteSchema = z
   .object({

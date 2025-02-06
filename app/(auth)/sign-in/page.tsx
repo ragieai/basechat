@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import * as settings from "@/lib/settings";
+import * as settings from "@/lib/server/settings";
 
 import { Title } from "../common";
 import GoogleSignIn from "../google-sign-in";

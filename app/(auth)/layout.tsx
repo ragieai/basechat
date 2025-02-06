@@ -1,6 +1,6 @@
 import { Inter, Inter_Tight } from "next/font/google";
 
-import * as settings from "@/lib/settings";
+import * as settings from "@/lib/server/settings";
 import { cn } from "@/lib/utils";
 
 const inter_tight = Inter_Tight({

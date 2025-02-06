@@ -2,7 +2,7 @@
 
 import { z, ZodError } from "zod";
 
-import { sendResetPasswordVerification } from "@/lib/service";
+import { sendResetPasswordVerification } from "@/lib/server/service";
 
 interface ResetFormState {
   error?: string[];

@@ -1,9 +1,9 @@
 import { openai } from "@ai-sdk/openai";
 import { CoreMessage, streamObject } from "ai";
 
-import { createConversationMessage, updateConversationMessageContent } from "@/lib/data-access/conversation";
-import { getRagieClient } from "@/lib/ragie";
 import { createConversationMessageResponseSchema } from "@/lib/schema";
+import { getRagieClient } from "@/lib/server/ragie";
+import { createConversationMessage, updateConversationMessageContent } from "@/lib/server/service";
 
 type GenerateContext = { messages: CoreMessage[]; sources: any[] };
 

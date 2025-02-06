@@ -4,8 +4,8 @@ import jwt from "jsonwebtoken";
 import { z, ZodError } from "zod";
 
 import { signIn } from "@/auth";
-import { changePassword } from "@/lib/service";
-import * as settings from "@/lib/settings";
+import { changePassword } from "@/lib/server/service";
+import * as settings from "@/lib/server/settings";
 
 import { extendPasswordSchema } from "../utils";
 

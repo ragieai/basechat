@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 
 import ChatInput from "@/components/chatbot/chat-input";
-import * as schema from "@/lib/db/schema";
+import * as schema from "@/lib/server/db/schema";
 import { getInitials } from "@/lib/utils";
 
 import { useGlobalState } from "./context";

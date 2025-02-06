@@ -1,5 +1,5 @@
-import { authOrRedirect } from "@/lib/server-utils";
-import { getMembersByTenantId, getProfileByTenantIdAndUserId } from "@/lib/service";
+import { authOrRedirect } from "@/lib/server/server-utils";
+import { getMembersByTenantId, getProfileByTenantIdAndUserId } from "@/lib/server/service";
 
 import { AppLocation } from "../../footer";
 import Main from "../../main";

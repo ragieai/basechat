@@ -3,11 +3,11 @@ import assert from "assert";
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
-import db from "@/lib/db";
-import * as schema from "@/lib/db/schema";
-import { requireSession } from "@/lib/server-utils";
-import { saveConnection } from "@/lib/service";
-import * as settings from "@/lib/settings";
+import db from "@/lib/server/db";
+import * as schema from "@/lib/server/db/schema";
+import { requireSession } from "@/lib/server/server-utils";
+import { saveConnection } from "@/lib/server/service";
+import * as settings from "@/lib/server/settings";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession();

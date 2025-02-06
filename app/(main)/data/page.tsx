@@ -3,9 +3,9 @@ import { eq } from "drizzle-orm";
 import Image from "next/image";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import db from "@/lib/db";
-import * as schema from "@/lib/db/schema";
-import { authOrRedirect } from "@/lib/server-utils";
+import db from "@/lib/server/db";
+import * as schema from "@/lib/server/db/schema";
+import { authOrRedirect } from "@/lib/server/server-utils";
 
 import CONNECTOR_MAP from "../../../lib/connector-map";
 import ManageDataPreviewIcons from "../../../public/manage-data-preview-icons.svg";

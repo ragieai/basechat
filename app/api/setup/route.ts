@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { requireSession } from "@/lib/server-utils";
-import { createTenant, setCurrentProfileId } from "@/lib/service";
+import { requireSession } from "@/lib/server/server-utils";
+import { createTenant, setCurrentProfileId } from "@/lib/server/service";
 
 const setupSchema = z.object({
   name: z.string().trim().min(1),

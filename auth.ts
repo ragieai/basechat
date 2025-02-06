@@ -7,10 +7,10 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
 import authConfig from "./auth.config";
-import db from "./lib/db";
-import * as schema from "./lib/db/schema";
-import { verifyPassword } from "./lib/server-utils";
-import { findUserByEmail, getFirstTenantByUserId } from "./lib/service";
+import db from "./lib/server/db";
+import * as schema from "./lib/server/db/schema";
+import { verifyPassword } from "./lib/server/server-utils";
+import { findUserByEmail, getFirstTenantByUserId } from "./lib/server/service";
 
 declare module "next-auth" {
   /**

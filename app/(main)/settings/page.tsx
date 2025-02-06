@@ -1,4 +1,4 @@
-import { authOrRedirect } from "@/lib/server-utils";
+import { authOrRedirect } from "@/lib/server/server-utils";
 
 import { AppLocation } from "../footer";
 import Main from "../main";

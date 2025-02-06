@@ -9,8 +9,8 @@ import { z } from "zod";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import * as schema from "@/lib/db/schema";
 import { updateTenantSchema } from "@/lib/schema";
+import * as schema from "@/lib/server/db/schema";
 
 // Transform null to empty string for form field handling
 const nullToEmptyString = (v: string | null) => v ?? "";
