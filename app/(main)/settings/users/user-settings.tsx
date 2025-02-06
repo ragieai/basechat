@@ -95,7 +95,7 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
     setMembers(members.filter((m) => m.type !== "invite" || m.id !== id));
   };
 
-  const deleteUser = async (id: string) => {
+  const deleteProfile = async (id: string) => {
     const res = await fetch(`/api/profiles/${id}`, { method: "DELETE" });
     if (!res.ok) {
       toast.error("Could not delete user");
@@ -104,6 +104,18 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
 
     toast.info("User was deleted");
     setMembers(members.filter((m) => m.role !== "user" || m.id !== id));
+  };
+
+  const changeProfileRole = async (id: string, role: MemberRole) => {
+    const res = await fetch(`/api/profiles/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+    });
+    if (!res.ok) {
+      toast.error("Could not change role");
+      return;
+    }
+    toast.info("Role was changed");
   };
 
   const handleDelete = (id: string, type: MemberType, role: MemberRole) => {
@@ -115,7 +127,7 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
           toast.info("Cannot delete owner");
           return;
         }
-        return deleteUser(id);
+        return deleteProfile(id);
       }
       default:
         return assertNever(type);
@@ -125,6 +137,17 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
   const handleDialogOpenChange = (open: boolean) => {
     setDialogOpen(open);
     resetForm();
+  };
+
+  const handleRoleChange = (id: string, type: MemberType, newRole: MemberRole) => {
+    switch (type) {
+      case "profile":
+        return changeProfileRole(id, newRole);
+      case "invite":
+        return;
+      default:
+        assertNever(type);
+    }
   };
 
   const userCount = useMemo(() => members.filter((m) => m.type !== "invite").length, [members]);
@@ -244,7 +267,18 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
                   )}
                 </TableCell>
                 <TableCell className="capitalize">
-                  {member.type == "profile" && member.id == ownerProfileId ? "Owner" : member.role}
+                  <Select
+                    onValueChange={(newRole) => handleRoleChange(member.id, member.type, newRole as MemberRole)}
+                    defaultValue={member.role}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={"admin"}>Admin</SelectItem>
+                      <SelectItem value={"user"}>User</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell className="text-right">
                   {(member.type == "invite" || (member.type == "profile" && member.id != ownerProfileId)) && (

@@ -11,8 +11,10 @@ import * as settings from "@/lib/settings";
 import db from "./db";
 import * as schema from "./db/schema";
 import { getRagieClient } from "./ragie";
-import { Member, MemberRole, MemberType } from "./schema";
+import { Member, MemberType } from "./schema";
 import { hashPassword } from "./server-utils";
+
+type Role = (typeof schema.rolesEnum.enumValues)[number];
 
 export async function createTenant(userId: string, name: string) {
   const tenants = await db
@@ -122,12 +124,7 @@ export async function getFirstTenantByUserId(id: string) {
   return rs.length > 0 ? rs[0].tenants : null;
 }
 
-export async function createInvites(
-  tenantId: string,
-  invitedBy: string,
-  emails: string[],
-  role: (typeof schema.rolesEnum.enumValues)[number],
-) {
+export async function createInvites(tenantId: string, invitedBy: string, emails: string[], role: Role) {
   const invites = await db.transaction(
     async (tx) =>
       await Promise.all(
@@ -304,4 +301,12 @@ export async function sendMail({
   }
   const transporter = nodemailer.createTransport(options);
   return transporter.sendMail({ to, from, subject, text });
+}
+
+export async function updateProfileRoleById(tenantId: string, profileId: string, newRole: Role) {
+  await db
+    .update(schema.profiles)
+    .set({ role: newRole })
+    .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.id, profileId)));
+  return;
 }
