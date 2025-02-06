@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
+import { SelectItemIndicator, SelectItemText } from "@radix-ui/react-select";
 import assertNever from "assert-never";
 import { Tag, TagInput } from "emblor";
 import { Loader2, MoreHorizontal, Trash } from "lucide-react";
@@ -278,17 +279,25 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
                     </>
                   )}
                 </TableCell>
-                <TableCell className="capitalize">
+                <TableCell className="capitalize w-[100px]">
                   <Select
                     onValueChange={(newRole) => handleRoleChange(member.id, member.type, newRole as MemberRole)}
                     defaultValue={member.role}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-none">
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={"admin"}>Admin</SelectItem>
-                      <SelectItem value={"user"}>User</SelectItem>
+                      <SelectItem value={"admin"}>
+                        <div>Admin</div>
+                      </SelectItem>
+                      <div className="px-2 pt-1 pb-2 text-xs cursor-default">
+                        Manage account, users and chatbot data
+                      </div>
+                      <SelectItem value={"user"}>
+                        <div>User</div>
+                      </SelectItem>
+                      <div className="px-2 pt-1 pb-2 text-xs cursor-default">Can chat with data added by Admins</div>
                     </SelectContent>
                   </Select>
                 </TableCell>
