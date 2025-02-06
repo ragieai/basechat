@@ -34,6 +34,7 @@ const formSchema = z.object({
 
 export default function UserSettings({ members: initialMembers }: Props) {
   const [members, setMembers] = useState(initialMembers);
+  const [isDialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -53,6 +54,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
       return;
     }
 
+    setDialogOpen(false);
     setLoading(false);
     toast.success("Invites sent");
     setTags([]);
@@ -123,7 +125,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
         <h1 className="font-bold text-[32px]">Users</h1>
         <div className="flex">
           <div className="flex flex-col justify-end">
-            <Dialog>
+            <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <PrimaryButton>Invite</PrimaryButton>
               </DialogTrigger>
