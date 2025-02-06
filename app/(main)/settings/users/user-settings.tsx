@@ -98,6 +98,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
     switch (role) {
       case "invite":
         return deleteInvite(id);
+      case "admin":
       case "user":
         return deleteUser(id);
       case "owner":

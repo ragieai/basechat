@@ -22,7 +22,10 @@ export async function createTenant(userId: string, name: string) {
   assert(tenants.length === 1);
   const tenantId = tenants[0].id;
 
-  const profiles = await db.insert(schema.profiles).values({ tenantId, userId }).returning({ id: schema.profiles.id });
+  const profiles = await db
+    .insert(schema.profiles)
+    .values({ tenantId, userId, role: "admin" })
+    .returning({ id: schema.profiles.id });
   assert(profiles.length === 1);
   const profileId = profiles[0].id;
 
@@ -94,7 +97,7 @@ export async function getMembersByTenantId(tenantId: string): Promise<Member[]> 
         role: sql<MemberRole>`
           case
             when ${schema.tenants.ownerId} = ${schema.users.id} then 'owner'
-            else 'user'
+            else ${schema.profiles.role}::text
           end
         `.as("role"),
       })
@@ -204,7 +207,7 @@ export async function acceptInvite(userId: string, inviteId: string) {
   const invite = await getInviteById(inviteId);
 
   const profile = await db.transaction(async (tx) => {
-    const rs = await tx.insert(schema.profiles).values({ tenantId: invite.tenantId, userId }).returning();
+    const rs = await tx.insert(schema.profiles).values({ tenantId: invite.tenantId, userId, role: "user" }).returning();
     await tx.delete(schema.invites).where(eq(schema.invites.id, inviteId));
     assert(rs.length === 1, "expected new profile");
     return rs[0];

@@ -1,0 +1,1 @@
+ALTER TYPE "public"."roles" RENAME TO "message_roles";
