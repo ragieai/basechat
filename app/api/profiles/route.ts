@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 
-import { updateCurrentProfileSchema } from "@/lib/schema";
-import { requireSession } from "@/lib/server/server-utils";
+import { updateCurrentProfileSchema } from "@/lib/api";
 import { setCurrentProfileId } from "@/lib/server/service";
+import { requireSession } from "@/lib/server/utils";
 
 export async function POST(request: NextRequest) {
   const session = await requireSession();

@@ -9,7 +9,7 @@ import { z } from "zod";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { updateTenantSchema } from "@/lib/schema";
+import { updateTenantSchema } from "@/lib/api";
 import * as schema from "@/lib/server/db/schema";
 
 // Transform null to empty string for form field handling

@@ -5,7 +5,7 @@ import { z, ZodError } from "zod";
 import { signIn } from "@/auth";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
-import { hashPassword } from "@/lib/server/server-utils";
+import { hashPassword } from "@/lib/server/utils";
 
 import { extendPasswordSchema } from "../utils";
 

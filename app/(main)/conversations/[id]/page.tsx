@@ -1,6 +1,6 @@
 import { AppLocation } from "@/app/(main)/footer";
 import Main from "@/app/(main)/main";
-import { authOrRedirect } from "@/lib/server/server-utils";
+import { authOrRedirect } from "@/lib/server/utils";
 
 import Conversation from "./conversation";
 

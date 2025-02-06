@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { conversationListResponseSchema, conversationSchema } from "@/lib/schema";
+import { conversationListResponseSchema, conversationSchema } from "@/lib/api";
 
 import NewChatIcon from "../../public/icons/new-chat.svg";
 

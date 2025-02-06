@@ -2,8 +2,8 @@ import { NextRequest } from "next/server";
 import { ConnectorSource } from "ragie/models/components";
 
 import { getRagieClient } from "@/lib/server/ragie";
-import { requireAuthContext } from "@/lib/server/server-utils";
 import * as settings from "@/lib/server/settings";
+import { requireAuthContext } from "@/lib/server/utils";
 
 export const dynamic = "force-dynamic"; // no caching
 

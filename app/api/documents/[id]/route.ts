@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 
 import { getRagieClient } from "@/lib/server/ragie";
-import { requireAuthContext } from "@/lib/server/server-utils";
+import { requireAuthContext } from "@/lib/server/utils";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { tenant } = await requireAuthContext();

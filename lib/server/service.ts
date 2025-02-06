@@ -6,13 +6,13 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import SMTPConnection from "nodemailer/lib/smtp-connection";
 
-import { Member, MemberType } from "@/lib/schema";
+import { Member, MemberType } from "@/lib/api";
 import * as settings from "@/lib/server/settings";
 
 import db from "./db";
 import * as schema from "./db/schema";
 import { getRagieClient } from "./ragie";
-import { hashPassword } from "./server-utils";
+import { hashPassword } from "./utils";
 
 type Role = (typeof schema.rolesEnum.enumValues)[number];
 

@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
-import { requireAuthContext } from "@/lib/server/server-utils";
+import { requireAuthContext } from "@/lib/server/utils";
 
 const createConversationRequest = z.object({ title: z.string() });
 

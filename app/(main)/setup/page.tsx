@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
 
-import { requireSession } from "@/lib/server/server-utils";
+import { requireSession } from "@/lib/server/utils";
 
 import SetupForm from "./setup-form";
 

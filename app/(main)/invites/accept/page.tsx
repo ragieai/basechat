@@ -2,8 +2,8 @@ import assert from "assert";
 
 import { redirect } from "next/navigation";
 
-import { requireSession } from "@/lib/server/server-utils";
 import { acceptInvite, setCurrentProfileId } from "@/lib/server/service";
+import { requireSession } from "@/lib/server/utils";
 
 interface Props {
   searchParams: Promise<{ invite?: string }>;

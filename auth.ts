@@ -9,8 +9,8 @@ import Google from "next-auth/providers/google";
 import authConfig from "./auth.config";
 import db from "./lib/server/db";
 import * as schema from "./lib/server/db/schema";
-import { verifyPassword } from "./lib/server/server-utils";
 import { findUserByEmail, getFirstTenantByUserId } from "./lib/server/service";
+import { verifyPassword } from "./lib/server/utils";
 
 declare module "next-auth" {
   /**

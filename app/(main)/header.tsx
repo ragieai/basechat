@@ -8,7 +8,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { z } from "zod";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { tenantListResponseSchema, updateCurrentProfileSchema } from "@/lib/schema";
+import { tenantListResponseSchema, updateCurrentProfileSchema } from "@/lib/api";
 import { cn, getInitials } from "@/lib/utils";
 
 import CheckIcon from "../../public/icons/check.svg";

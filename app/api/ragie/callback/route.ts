@@ -5,9 +5,9 @@ import { NextRequest } from "next/server";
 
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
-import { requireSession } from "@/lib/server/server-utils";
 import { saveConnection } from "@/lib/server/service";
 import * as settings from "@/lib/server/settings";
+import { requireSession } from "@/lib/server/utils";
 
 export async function GET(request: NextRequest) {
   const session = await requireSession();

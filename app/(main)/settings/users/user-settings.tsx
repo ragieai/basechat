@@ -22,7 +22,7 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Member, MemberRole, MemberType } from "@/lib/schema";
+import { Member, MemberRole, MemberType } from "@/lib/api";
 
 interface Props {
   members: Member[];

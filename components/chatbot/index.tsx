@@ -10,7 +10,7 @@ import {
   conversationMessagesResponseSchema,
   CreateConversationMessageRequest,
   createConversationMessageResponseSchema,
-} from "@/lib/schema";
+} from "@/lib/api";
 
 import AssistantMessage from "./assistant-message";
 import ChatInput from "./chat-input";

@@ -1,7 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { CoreMessage, streamObject } from "ai";
 
-import { createConversationMessageResponseSchema } from "@/lib/schema";
+import { createConversationMessageResponseSchema } from "@/lib/api";
 import { getRagieClient } from "@/lib/server/ragie";
 import { createConversationMessage, updateConversationMessageContent } from "@/lib/server/service";
 

@@ -2,9 +2,9 @@ import { CoreMessage } from "ai";
 import assertNever from "assert-never";
 import { NextRequest } from "next/server";
 
-import { conversationMessagesResponseSchema, createConversationMessageRequestSchema } from "@/lib/schema";
-import { requireAuthContext } from "@/lib/server/server-utils";
+import { conversationMessagesResponseSchema, createConversationMessageRequestSchema } from "@/lib/api";
 import { createConversationMessage, getConversation, getConversationMessages } from "@/lib/server/service";
+import { requireAuthContext } from "@/lib/server/utils";
 
 import {
   EXPAND_MESSAGE_CONTENT,
