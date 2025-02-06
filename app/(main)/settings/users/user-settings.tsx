@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
-import { SelectItemIndicator, SelectItemText } from "@radix-ui/react-select";
+import { SelectItemIndicator, SelectItemText, Value } from "@radix-ui/react-select";
 import assertNever from "assert-never";
 import { Tag, TagInput } from "emblor";
 import { Loader2, MoreHorizontal, Trash } from "lucide-react";
@@ -33,6 +33,20 @@ const formSchema = z.object({
   emails: z.array(z.string().email(), { message: "Invalid email address" }).min(1),
   role: z.union([z.literal("admin"), z.literal("user")]),
 });
+
+const roleItems = [
+  { name: "Admin", value: "admin" as const, description: "Manage account, users and chatbot data" },
+  { name: "User", value: "user" as const, description: "Can chat with data added by Admins" },
+];
+
+const RoleSelectItem = ({ item }: { item: { name: string; value: MemberRole; description: string } }) => (
+  <>
+    <SelectItem className="hover:bg-[#F5F5F7]" value={item.value}>
+      <div>{item.name}</div>
+    </SelectItem>
+    <div className="px-2 pt-1 pb-2 text-xs cursor-default">{item.description}</div>
+  </>
+);
 
 export default function UserSettings({ members: initialMembers, ownerProfileId }: Props) {
   const [members, setMembers] = useState(initialMembers);
@@ -221,8 +235,9 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="user">User</SelectItem>
+                              {roleItems.map((option, i) => (
+                                <RoleSelectItem key={i} item={option} />
+                              ))}
                             </SelectContent>
                           </Select>
                         </FormItem>
@@ -288,16 +303,9 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={"admin"}>
-                        <div>Admin</div>
-                      </SelectItem>
-                      <div className="px-2 pt-1 pb-2 text-xs cursor-default">
-                        Manage account, users and chatbot data
-                      </div>
-                      <SelectItem value={"user"}>
-                        <div>User</div>
-                      </SelectItem>
-                      <div className="px-2 pt-1 pb-2 text-xs cursor-default">Can chat with data added by Admins</div>
+                      {roleItems.map((option, i) => (
+                        <RoleSelectItem key={i} item={option} />
+                      ))}
                     </SelectContent>
                   </Select>
                 </TableCell>
