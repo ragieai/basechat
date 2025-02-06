@@ -207,7 +207,10 @@ export async function acceptInvite(userId: string, inviteId: string) {
   const invite = await getInviteById(inviteId);
 
   const profile = await db.transaction(async (tx) => {
-    const rs = await tx.insert(schema.profiles).values({ tenantId: invite.tenantId, userId, role: "user" }).returning();
+    const rs = await tx
+      .insert(schema.profiles)
+      .values({ tenantId: invite.tenantId, userId, role: invite.role })
+      .returning();
     await tx.delete(schema.invites).where(eq(schema.invites.id, inviteId));
     assert(rs.length === 1, "expected new profile");
     return rs[0];
