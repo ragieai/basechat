@@ -44,6 +44,11 @@ export default function UserSettings({ members: initialMembers }: Props) {
     defaultValues: { emails: [], role: "admin" },
   });
 
+  const resetForm = () => {
+    setTags([]);
+    form.reset();
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
 
@@ -57,8 +62,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
     setDialogOpen(false);
     setLoading(false);
     toast.success("Invites sent");
-    setTags([]);
-    form.reset();
+    resetForm();
 
     const newMembers = values.emails.map((email) => ({
       id: "",
@@ -116,6 +120,11 @@ export default function UserSettings({ members: initialMembers }: Props) {
     }
   };
 
+  const handleDialogOpenChange = (open: boolean) => {
+    setDialogOpen(open);
+    resetForm();
+  };
+
   const userCount = useMemo(() => members.filter((m) => m.role !== "invite").length, [members]);
   const inviteCount = useMemo(() => members.filter((m) => m.role === "invite").length, [members]);
 
@@ -125,7 +134,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
         <h1 className="font-bold text-[32px]">Users</h1>
         <div className="flex">
           <div className="flex flex-col justify-end">
-            <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
               <DialogTrigger asChild>
                 <PrimaryButton>Invite</PrimaryButton>
               </DialogTrigger>
