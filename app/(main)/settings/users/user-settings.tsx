@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DialogTrigger } from "@radix-ui/react-dialog";
 import assertNever from "assert-never";
 import { Tag, TagInput } from "emblor";
 import { Loader2, MoreHorizontal, Trash } from "lucide-react";
@@ -9,13 +10,16 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import PrimaryButton from "@/components/primary-button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Member, MemberRole, MemberType } from "@/lib/schema";
 
@@ -25,6 +29,7 @@ interface Props {
 
 const formSchema = z.object({
   emails: z.array(z.string().email(), { message: "Invalid email address" }).min(1),
+  role: z.union([z.literal("admin"), z.literal("user")]),
 });
 
 export default function UserSettings({ members: initialMembers }: Props) {
@@ -35,7 +40,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { emails: [] },
+    defaultValues: { emails: [], role: "admin" },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -114,49 +119,79 @@ export default function UserSettings({ members: initialMembers }: Props) {
 
   return (
     <div className="w-full p-4 flex-grow flex flex-col">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="flex w-full justify-between items-center pt-2">
-            <h1 className="font-bold text-[32px]">Users</h1>
-            <div className="flex">
-              <FormField
-                control={form.control}
-                name="emails"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormMessage>Must use valid email addresses</FormMessage>
-                    <FormControl>
-                      <TagInput
-                        placeholder="Email address, comma separated"
-                        styleClasses={{
-                          input: "shadow-none",
-                          inlineTagsContainer: "rounded-lg border border-[#9A57F6] bg-[#F5F5F7] w-[360px] px-1 py-1.5",
-                          tag: { body: "pl-3 hover:bg-[#ffffff] bg-[#ffffff]" },
-                        }}
-                        tags={tags}
-                        setTags={(tags) => handleSetTags(tags as Tag[])}
-                        addTagsOnBlur
-                        activeTagIndex={activeTagIndex}
-                        setActiveTagIndex={setActiveTagIndex}
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <div className="flex flex-col justify-end">
-                <button
-                  type="submit"
-                  className="flex items-center font-semibold text-white rounded-lg bg-[#D946EF] px-4 py-2.5 ml-3"
-                >
-                  Invite
-                  {isLoading && <Loader2 size={18} className="ml-2 animate-spin" />}
-                </button>
-              </div>
-            </div>
+      <div className="flex w-full justify-between items-center pt-2">
+        <h1 className="font-bold text-[32px]">Users</h1>
+        <div className="flex">
+          <div className="flex flex-col justify-end">
+            <Dialog>
+              <DialogTrigger asChild>
+                <PrimaryButton>Invite</PrimaryButton>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Invite users</DialogTitle>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)}>
+                    <FormField
+                      control={form.control}
+                      name="emails"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormMessage>Must use valid email addresses</FormMessage>
+                          <FormControl>
+                            <TagInput
+                              placeholder="Email address, comma separated"
+                              styleClasses={{
+                                input: "shadow-none",
+                                inlineTagsContainer: "rounded-lg border border-[#D946EF] bg-[#F5F5F7] px-1 py-1.5",
+                                tag: { body: "pl-3 hover:bg-[#ffffff] bg-[#ffffff]" },
+                              }}
+                              tags={tags}
+                              setTags={(tags) => handleSetTags(tags as Tag[])}
+                              addTagsOnBlur
+                              activeTagIndex={activeTagIndex}
+                              setActiveTagIndex={setActiveTagIndex}
+                              {...field}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem className="mt-4">
+                          <FormLabel>Role</FormLabel>
+                          <FormMessage>Must select a role</FormMessage>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl className="focus:ring-[#D946EF]">
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a role" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="user">User</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                    <DialogFooter className="mt-8">
+                      <PrimaryButton type="submit">
+                        Send invite
+                        {isLoading && <Loader2 size={18} className="ml-2 animate-spin" />}
+                      </PrimaryButton>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
-        </form>
-      </Form>
+        </div>
+      </div>
       <div className="mt-16">
         <div className="text-[#74747A] mb-1.5 flex">
           <div>
