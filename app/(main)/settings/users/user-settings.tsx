@@ -191,7 +191,11 @@ export default function UserSettings({ members: initialMembers }: Props) {
                       )}
                     />
                     <DialogFooter className="mt-8">
-                      <PrimaryButton type="submit">
+                      {/*
+                        disabled is set based on `tags` instead of formState because
+                        TagInput tracks input state outside of formState... not ideal
+                       */}
+                      <PrimaryButton type="submit" disabled={!tags.length}>
                         Send invite
                         {isLoading && <Loader2 size={18} className="ml-2 animate-spin" />}
                       </PrimaryButton>
