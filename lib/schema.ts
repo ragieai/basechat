@@ -49,7 +49,7 @@ export const updateTenantSchema = z.object({
 });
 
 export type MemberType = "profile" | "invite";
-export type MemberRole = "owner" | "admin" | "user" | "invite";
+export type MemberRole = "owner" | "admin" | "user";
 
 export interface Member {
   id: string;

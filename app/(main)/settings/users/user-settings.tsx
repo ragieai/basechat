@@ -91,7 +91,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
     }
 
     toast.info("Invite was deleted");
-    setMembers(members.filter((m) => m.role !== "invite" || m.id !== id));
+    setMembers(members.filter((m) => m.type !== "invite" || m.id !== id));
   };
 
   const deleteUser = async (id: string) => {
@@ -105,18 +105,24 @@ export default function UserSettings({ members: initialMembers }: Props) {
     setMembers(members.filter((m) => m.role !== "user" || m.id !== id));
   };
 
-  const handleDelete = (id: string, role: MemberRole) => {
-    switch (role) {
+  const handleDelete = (id: string, type: MemberType, role: MemberRole) => {
+    switch (type) {
       case "invite":
         return deleteInvite(id);
-      case "admin":
-      case "user":
-        return deleteUser(id);
-      case "owner":
-        toast.info("Cannot delete owner");
-        return;
+      case "profile": {
+        switch (role) {
+          case "admin": // fallthrough
+          case "user":
+            return deleteUser(id);
+          case "owner":
+            toast.info("Cannot delete owner");
+            return;
+          default:
+            return assertNever(role);
+        }
+      }
       default:
-        return assertNever(role);
+        return assertNever(type);
     }
   };
 
@@ -125,8 +131,8 @@ export default function UserSettings({ members: initialMembers }: Props) {
     resetForm();
   };
 
-  const userCount = useMemo(() => members.filter((m) => m.role !== "invite").length, [members]);
-  const inviteCount = useMemo(() => members.filter((m) => m.role === "invite").length, [members]);
+  const userCount = useMemo(() => members.filter((m) => m.type !== "invite").length, [members]);
+  const inviteCount = useMemo(() => members.filter((m) => m.type === "invite").length, [members]);
 
   return (
     <div className="w-full p-4 flex-grow flex flex-col">
@@ -243,7 +249,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
                 </TableCell>
                 <TableCell className="capitalize">{member.role}</TableCell>
                 <TableCell className="text-right">
-                  {(member.role === "invite" || member.role === "user") && (
+                  {(member.type === "invite" || member.role === "user") && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button>
@@ -251,7 +257,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => handleDelete(member.id, member.role)}>
+                        <DropdownMenuItem onSelect={() => handleDelete(member.id, member.type, member.role)}>
                           <Trash />
                           Delete
                         </DropdownMenuItem>

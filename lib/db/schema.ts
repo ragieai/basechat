@@ -60,6 +60,8 @@ export const tenants = pgTable("tenants", {
   question3: text("question3"),
 });
 
+export const rolesEnum = pgEnum("roles", ["admin", "user"]);
+
 export const invites = pgTable(
   "invites",
   {
@@ -68,13 +70,12 @@ export const invites = pgTable(
       .references(() => profiles.id, { onDelete: "cascade" })
       .notNull(),
     email: text("email").notNull(),
+    role: rolesEnum("role").notNull(),
   },
   (t) => ({
     unique_tenant_id_email: unique().on(t.tenantId, t.email),
   }),
 );
-
-export const rolesEnum = pgEnum("roles", ["admin", "user"]);
 
 export const profiles = pgTable(
   "profiles",

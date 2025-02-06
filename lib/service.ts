@@ -111,7 +111,7 @@ export async function getMembersByTenantId(tenantId: string): Promise<Member[]> 
         email: schema.invites.email,
         name: schema.invites.email,
         type: sql<MemberType>`'invite'`.as("type"),
-        role: sql<MemberRole>`'invite'`.as("role"),
+        role: sql<MemberRole>`${schema.invites.role}::text`.as("role"),
       })
       .from(schema.invites)
       .where(eq(schema.invites.tenantId, tenantId)),
@@ -127,14 +127,19 @@ export async function getFirstTenantByUserId(id: string) {
   return rs.length > 0 ? rs[0].tenants : null;
 }
 
-export async function createInvites(tenantId: string, invitedBy: string, emails: string[]) {
+export async function createInvites(
+  tenantId: string,
+  invitedBy: string,
+  emails: string[],
+  role: (typeof schema.rolesEnum.enumValues)[number],
+) {
   const invites = await db.transaction(
     async (tx) =>
       await Promise.all(
         emails.map(async (email) => {
           const rs = await tx
             .insert(schema.invites)
-            .values({ tenantId, invitedBy, email })
+            .values({ tenantId, invitedBy, email, role })
             .onConflictDoUpdate({
               target: [schema.invites.tenantId, schema.invites.email],
               set: { invitedBy, updatedAt: new Date().toISOString() },
