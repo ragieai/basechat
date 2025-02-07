@@ -34,6 +34,14 @@ export async function authOrRedirect() {
   }
 }
 
+export async function adminOrRedirect() {
+  try {
+    return await requireAdminContext();
+  } catch (e) {
+    return redirect("/");
+  }
+}
+
 /**
  * Validate the HMAC SHA-256 signature of the payload using WebCrypto APIs.
  *

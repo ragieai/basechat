@@ -1,5 +1,5 @@
 import { getMembersByTenantId, getProfileByTenantIdAndUserId } from "@/lib/server/service";
-import { authOrRedirect } from "@/lib/server/utils";
+import { adminOrRedirect } from "@/lib/server/utils";
 
 import { AppLocation } from "../../footer";
 import Main from "../../main";
@@ -8,7 +8,7 @@ import SettingsNav from "../settings-nav";
 import UserSettings from "./user-settings";
 
 export default async function UsersIndexPage() {
-  const { session, tenant } = await authOrRedirect();
+  const { session, tenant } = await adminOrRedirect();
   const members = await getMembersByTenantId(tenant.id);
   const { profiles } = await getProfileByTenantIdAndUserId(tenant.id, tenant.ownerId);
 

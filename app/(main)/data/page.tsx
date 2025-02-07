@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
-import { authOrRedirect } from "@/lib/server/utils";
+import { adminOrRedirect } from "@/lib/server/utils";
 
 import CONNECTOR_MAP from "../../../lib/connector-map";
 import ManageDataPreviewIcons from "../../../public/manage-data-preview-icons.svg";
@@ -16,7 +16,7 @@ import AddConnectionMenu from "./add-connection-menu";
 import ManageConnectionMenu from "./manage-connection-menu";
 
 export default async function DataIndexPage() {
-  const { tenant, session } = await authOrRedirect();
+  const { tenant, session } = await adminOrRedirect();
   const connections = await db.select().from(schema.connections).where(eq(schema.connections.tenantId, tenant.id));
 
   return (
