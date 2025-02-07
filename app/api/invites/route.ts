@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { createInvites } from "@/lib/server/service";
-import { requireAuthContext } from "@/lib/server/utils";
+import { requireAdminContext } from "@/lib/server/utils";
 
 const inviteSchema = z
   .object({
@@ -12,12 +12,12 @@ const inviteSchema = z
   .strict();
 
 export async function POST(request: NextRequest) {
-  const context = await requireAuthContext();
+  const { profile, tenant } = await requireAdminContext();
 
   const json = await request.json();
   const payload = inviteSchema.parse(json);
 
-  const invites = await createInvites(context.tenant.id, context.profile.id, payload.emails, payload.role);
+  const invites = await createInvites(tenant.id, profile.id, payload.emails, payload.role);
 
   return Response.json(invites);
 }

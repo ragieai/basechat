@@ -7,10 +7,10 @@ import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 import { saveConnection } from "@/lib/server/service";
 import * as settings from "@/lib/server/settings";
-import { requireSession } from "@/lib/server/utils";
+import { requireAdminContext } from "@/lib/server/utils";
 
 export async function GET(request: NextRequest) {
-  const session = await requireSession();
+  const { session } = await requireAdminContext();
 
   const connectionId = request.nextUrl.searchParams.get("connection_id");
   assert(connectionId, "expected connection_id");

@@ -3,7 +3,7 @@ import { ConnectorSource } from "ragie/models/components";
 
 import { getRagieClient } from "@/lib/server/ragie";
 import * as settings from "@/lib/server/settings";
-import { requireAuthContext } from "@/lib/server/utils";
+import { requireAdminContext } from "@/lib/server/utils";
 
 export const dynamic = "force-dynamic"; // no caching
 
@@ -12,7 +12,7 @@ interface Params {
 }
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<Params> }) {
-  const { tenant } = await requireAuthContext();
+  const { tenant } = await requireAdminContext();
 
   const client = getRagieClient();
   const { type } = await params;

@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { deleteInviteById, updateInviteRoleById } from "@/lib/server/service";
-import { requireAuthContext } from "@/lib/server/utils";
+import { requireAdminContext } from "@/lib/server/utils";
 
 type Params = Promise<{ id: string }>;
 
 export async function DELETE(_request: NextRequest, { params }: { params: Params }) {
-  const { tenant } = await requireAuthContext();
+  const { tenant } = await requireAdminContext();
   const { id } = await params;
   await deleteInviteById(tenant.id, id);
   return new Response(null, { status: 200 });
@@ -20,7 +20,7 @@ const updateInviteRoleByIdSchema = z
   .strict();
 
 export async function PATCH(request: NextRequest, { params }: { params: Params }) {
-  const { tenant } = await requireAuthContext();
+  const { tenant } = await requireAdminContext();
   const { id } = await params;
 
   const json = await request.json();
