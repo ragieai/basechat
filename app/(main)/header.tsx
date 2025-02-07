@@ -15,6 +15,7 @@ import CheckIcon from "../../public/icons/check.svg";
 import HamburgerIcon from "../../public/icons/hamburger.svg";
 import LogOutIcon from "../../public/icons/log-out.svg";
 import NewChatIcon from "../../public/icons/new-chat.svg";
+import PlusIcon from "../../public/icons/plus.svg";
 
 import ConversationHistory from "./conversation-history";
 
@@ -43,7 +44,6 @@ const HeaderPopoverContent = ({
 );
 
 export default function Header({ name, currentTenantId, onNavClick = () => {} }: Props) {
-  const handleLogOutClick = async () => await signOut();
   const router = useRouter();
 
   const [tenants, setTenants] = useState<z.infer<typeof tenantListResponseSchema>>([]);
@@ -55,6 +55,8 @@ export default function Header({ name, currentTenantId, onNavClick = () => {} }:
       setTenants(tenants);
     })();
   }, []);
+
+  const handleLogOutClick = async () => await signOut();
 
   const handleTenantClick = async (profileId: string) => {
     await fetch("/api/profiles", {
@@ -107,6 +109,14 @@ export default function Header({ name, currentTenantId, onNavClick = () => {} }:
           </ul>
 
           <hr className="my-4 bg-black border-none h-[1px] opacity-10" />
+
+          <Link className="flex cursor-pointer" href="/setup">
+            <Image src={PlusIcon} alt="Log out" className="mr-3" />
+            New Chatbot
+          </Link>
+
+          <hr className="my-4 bg-black border-none h-[1px] opacity-10" />
+
           <div className="flex cursor-pointer" onClick={handleLogOutClick}>
             <Image src={LogOutIcon} alt="Log out" className="mr-3" />
             Log out
