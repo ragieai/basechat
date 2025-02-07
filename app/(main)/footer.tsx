@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
@@ -27,11 +30,19 @@ export function NavButton({ alt, src, className }: { alt: string; src: any; clas
 }
 
 interface Props {
-  appLocation: AppLocation;
   className?: string;
 }
 
-export default function Footer({ appLocation, className }: Props) {
+export default function Footer({ className }: Props) {
+  const pathname = usePathname();
+
+  let appLocation = AppLocation.CHAT;
+  if (pathname.startsWith("/data")) {
+    appLocation = AppLocation.DATA;
+  } else if (pathname.startsWith("/settings")) {
+    appLocation = AppLocation.SETTINGS;
+  }
+
   const chatIcon = appLocation === AppLocation.CHAT ? ChatIconOn : ChatIconOff;
   const chatClassName = appLocation === AppLocation.CHAT ? "mr-5 font-semibold" : "mr-5";
 
