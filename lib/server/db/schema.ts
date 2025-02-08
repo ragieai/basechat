@@ -52,9 +52,6 @@ export const conversations = pgTable("conversations", {
 export const tenants = pgTable("tenants", {
   ...baseFields,
   name: text("name").notNull(),
-  ownerId: uuid("owner_id")
-    .references(() => users.id, { onDelete: "restrict" })
-    .notNull(),
   question1: text("question1"),
   question2: text("question2"),
   question3: text("question3"),

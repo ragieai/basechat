@@ -20,10 +20,7 @@ import { hashPassword } from "./utils";
 type Role = (typeof schema.rolesEnum.enumValues)[number];
 
 export async function createTenant(userId: string, name: string) {
-  const tenants = await db
-    .insert(schema.tenants)
-    .values({ name, ownerId: userId })
-    .returning({ id: schema.tenants.id });
+  const tenants = await db.insert(schema.tenants).values({ name }).returning({ id: schema.tenants.id });
   assert(tenants.length === 1);
   const tenantId = tenants[0].id;
 
@@ -172,16 +169,6 @@ export async function createInvites(tenantId: string, invitedBy: string, emails:
   await Promise.all(promises);
 
   return invites;
-}
-
-export async function getProfileByTenantIdAndUserId(tenantId: string, userId: string) {
-  const rs = await db
-    .select()
-    .from(schema.profiles)
-    .innerJoin(schema.tenants, eq(schema.profiles.tenantId, schema.tenants.id))
-    .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.userId, userId)));
-  assert(rs.length === 1, "expected single record");
-  return rs[0];
 }
 
 export async function getAuthContextByUserId(userId: string) {
