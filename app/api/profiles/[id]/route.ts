@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { changeRole, deleteProfileById } from "@/lib/server/service";
+import { changeRole, deleteProfile } from "@/lib/server/service";
 import { requireAdminContext } from "@/lib/server/utils";
 
 type Params = Promise<{ id: string }>;
