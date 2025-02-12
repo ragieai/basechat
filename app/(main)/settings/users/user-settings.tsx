@@ -32,6 +32,10 @@ const formSchema = z.object({
   role: z.union([z.literal("admin"), z.literal("user")]),
 });
 
+const errorSchema = z.object({
+  error: z.string(),
+});
+
 const roleItems = [
   { name: "Admin", value: "admin" as const, description: "Manage account, users and chatbot data" },
   { name: "User", value: "user" as const, description: "Can chat with data added by Admins" },
@@ -111,7 +115,8 @@ export default function UserSettings({ members: initialMembers }: Props) {
   const deleteProfile = async (id: string) => {
     const res = await fetch(`/api/profiles/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Could not delete user");
+      const payload = errorSchema.parse(await res.json());
+      toast.error(`Error: ${payload.error}`);
       return;
     }
 
@@ -125,7 +130,8 @@ export default function UserSettings({ members: initialMembers }: Props) {
       body: JSON.stringify({ role }),
     });
     if (!res.ok) {
-      toast.error("Could not change role");
+      const payload = errorSchema.parse(await res.json());
+      toast.error(`Error: ${payload.error}`);
       return;
     }
     toast.info("Role was changed");

@@ -34,7 +34,7 @@ describe("changeRole", () => {
 
       expect(async () => {
         await changeRole(tenant.id, admin.id, "user");
-      }).rejects.toThrow("cannot change role of the last admin");
+      }).rejects.toThrow("Cannot change role of the last admin");
     });
   });
 
@@ -71,7 +71,7 @@ describe("deleteProfile", () => {
 
       expect(async () => {
         await deleteProfile(tenant.id, admin.id);
-      }).rejects.toThrow("cannot delete the last admin");
+      }).rejects.toThrow("Cannot delete the last admin");
     });
   });
 

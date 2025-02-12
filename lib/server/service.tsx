@@ -304,11 +304,13 @@ export function getAdminProfiles(tenantId: string) {
     .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.role, "admin")));
 }
 
+export class ServiceError extends Error {}
+
 export async function changeRole(tenantId: string, profileId: string, newRole: Role) {
   if (newRole === "user") {
     const lastAdmin = await isLastAdmin(tenantId, profileId);
     if (lastAdmin) {
-      throw new Error("cannot change role of the last admin");
+      throw new ServiceError("Cannot change role of the last admin");
     }
   }
   return await updateProfileRoleById(tenantId, profileId, newRole);
@@ -317,7 +319,7 @@ export async function changeRole(tenantId: string, profileId: string, newRole: R
 export async function deleteProfile(tenantId: string, profileId: string) {
   const lastAdmin = await isLastAdmin(tenantId, profileId);
   if (lastAdmin) {
-    throw new Error("cannot delete the last admin");
+    throw new ServiceError("Cannot delete the last admin");
   }
   return await deleteProfileById(tenantId, profileId);
 }
