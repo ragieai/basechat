@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
-import { SelectItemIndicator, SelectItemText, Value } from "@radix-ui/react-select";
 import assertNever from "assert-never";
 import { Tag, TagInput } from "emblor";
 import { Loader2, MoreHorizontal, Trash } from "lucide-react";
@@ -26,7 +25,6 @@ import { Member, MemberRole, MemberType } from "@/lib/api";
 
 interface Props {
   members: Member[];
-  ownerProfileId: string;
 }
 
 const formSchema = z.object({
@@ -48,7 +46,7 @@ const RoleSelectItem = ({ item }: { item: { name: string; value: MemberRole; des
   </>
 );
 
-export default function UserSettings({ members: initialMembers, ownerProfileId }: Props) {
+export default function UserSettings({ members: initialMembers }: Props) {
   const [members, setMembers] = useState(initialMembers);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
@@ -150,10 +148,6 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
       case "invite":
         return deleteInvite(id);
       case "profile": {
-        if (id == ownerProfileId) {
-          toast.info("Cannot delete owner");
-          return;
-        }
         return deleteProfile(id);
       }
       default:
@@ -310,21 +304,19 @@ export default function UserSettings({ members: initialMembers, ownerProfileId }
                   </Select>
                 </TableCell>
                 <TableCell className="text-right">
-                  {(member.type == "invite" || (member.type == "profile" && member.id != ownerProfileId)) && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button>
-                          <MoreHorizontal />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => handleDelete(member.id, member.type, member.role)}>
-                          <Trash />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button>
+                        <MoreHorizontal />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onSelect={() => handleDelete(member.id, member.type, member.role)}>
+                        <Trash />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
