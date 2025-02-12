@@ -306,14 +306,26 @@ export function getAdminProfiles(tenantId: string) {
 
 export async function changeRole(tenantId: string, profileId: string, newRole: Role) {
   if (newRole === "user") {
-    const admins = await getAdminProfiles(tenantId);
-    assert(admins.length > 0, "there must be at least one admin per tenant");
-
-    if (admins.length === 1 && admins[0].id === profileId) {
-      throw new Error("cannot remove the last admin");
+    const lastAdmin = await isLastAdmin(tenantId, profileId);
+    if (lastAdmin) {
+      throw new Error("cannot change role of the last admin");
     }
   }
   return await updateProfileRoleById(tenantId, profileId, newRole);
+}
+
+export async function deleteProfile(tenantId: string, profileId: string) {
+  const lastAdmin = await isLastAdmin(tenantId, profileId);
+  if (lastAdmin) {
+    throw new Error("cannot delete the last admin");
+  }
+  return await deleteProfileById(tenantId, profileId);
+}
+
+async function isLastAdmin(tenantId: string, profileId: string) {
+  const admins = await getAdminProfiles(tenantId);
+  assert(admins.length > 0, "there must be at least one admin per tenant");
+  return admins.length === 1 && admins[0].id === profileId;
 }
 
 export async function updateProfileRoleById(tenantId: string, profileId: string, newRole: Role) {

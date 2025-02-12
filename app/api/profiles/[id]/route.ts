@@ -9,7 +9,7 @@ type Params = Promise<{ id: string }>;
 export async function DELETE(_request: NextRequest, { params }: { params: Params }) {
   const { tenant } = await requireAdminContext();
   const { id } = await params;
-  await deleteProfileById(tenant.id, id);
+  await deleteProfile(tenant.id, id);
   return new Response(null, { status: 200 });
 }
 
