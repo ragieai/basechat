@@ -10,7 +10,8 @@
     "lint": "next lint",
     "db:generate": "npx drizzle-kit generate",
     "db:migrate": "npx drizzle-kit migrate",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.6",
@@ -54,6 +55,10 @@
     "@eslint/compat": "^1.2.4",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.17.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.17",
@@ -64,9 +69,12 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.0",
     "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8",
     "prettier": "^3.3.3",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5"
   },

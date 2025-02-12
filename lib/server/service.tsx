@@ -297,6 +297,25 @@ export async function sendMail({
   return transporter.sendMail({ to, from, subject, html, text });
 }
 
+export function getAdminProfiles(tenantId: string) {
+  return db
+    .select()
+    .from(schema.profiles)
+    .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.role, "admin")));
+}
+
+export async function changeRole(tenantId: string, profileId: string, newRole: Role) {
+  if (newRole === "user") {
+    const admins = await getAdminProfiles(tenantId);
+    assert(admins.length > 0, "there must be at least one admin per tenant");
+
+    if (admins.length === 1 && admins[0].id === profileId) {
+      throw new Error("cannot remove the last admin");
+    }
+  }
+  return await updateProfileRoleById(tenantId, profileId, newRole);
+}
+
 export async function updateProfileRoleById(tenantId: string, profileId: string, newRole: Role) {
   await db
     .update(schema.profiles)
