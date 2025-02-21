@@ -194,17 +194,15 @@ export const authenticators = pgTable(
 export const shareAccessTypesEnum = pgEnum("share_access_type", ["public", "organization", "email"]);
 
 export const sharedConversations = pgTable("shared_conversations", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  ...baseTenantFields,
 
-  // Reference to original conversation
+  // original conversation
   conversationId: uuid("conversation_id")
     .references(() => conversations.id, { onDelete: "cascade" })
     .notNull(),
 
   // Share specific fields
-  shareId: text("share_id").notNull().unique(), // URL-friendly unique identifier
+  shareId: text("share_id").notNull().unique(),
   createdBy: uuid("created_by")
     .references(() => profiles.id, { onDelete: "cascade" })
     .notNull(),
@@ -212,10 +210,5 @@ export const sharedConversations = pgTable("shared_conversations", {
   // Access control
   accessType: shareAccessTypesEnum("access_type").notNull().default("public"),
   recipientEmails: json("recipient_emails").$type<string[]>().default([]),
-  expiresAt: timestamp("expires_at"),
-
-  // Tracking
-  tenantId: uuid("tenant_id")
-    .references(() => tenants.id, { onDelete: "cascade" })
-    .notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true, mode: "string" }),
 });
