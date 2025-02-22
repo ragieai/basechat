@@ -1,5 +1,4 @@
-import { eq } from "drizzle-orm";
-import { and } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 import db from "@/lib/server/db";
@@ -18,7 +17,7 @@ export async function DELETE(
   await getConversation(tenant.id, profile.id, conversationId);
 
   // Delete share
-  await db
+  const [deletedShare] = await db
     .delete(sharedConversations)
     .where(
       and(
@@ -26,7 +25,12 @@ export async function DELETE(
         eq(sharedConversations.shareId, shareId),
         eq(sharedConversations.tenantId, tenant.id),
       ),
-    );
+    )
+    .returning();
+
+  if (!deletedShare) {
+    return new Response("Share not found", { status: 404 });
+  }
 
   return new Response(null, { status: 204 });
 }

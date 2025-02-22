@@ -200,9 +200,7 @@ export const sharedConversations = pgTable("shared_conversations", {
   conversationId: uuid("conversation_id")
     .references(() => conversations.id, { onDelete: "cascade" })
     .notNull(),
-
-  // Share specific fields
-  shareId: text("share_id").notNull().unique(),
+  shareId: uuid("share_id").notNull().unique().defaultRandom(),
   createdBy: uuid("created_by")
     .references(() => profiles.id, { onDelete: "cascade" })
     .notNull(),
