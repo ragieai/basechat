@@ -6,6 +6,7 @@ import { experimental_useObject as useObject } from "ai/react";
 import { Inter } from "next/font/google";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
+import { ShareButton } from "@/components/share-button";
 import {
   conversationMessagesResponseSchema,
   CreateConversationMessageRequest,
@@ -173,7 +174,12 @@ export default function Chatbot({ name, conversationId, initMessage, onSelectedD
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
         <div className="flex flex-col w-full p-2 pl-4 rounded-[24px] border border-[#D7D7D7]">
-          <ChatInput handleSubmit={handleSubmit} />
+          <div className="flex gap-2 items-center">
+            <ShareButton conversationId={conversationId} />
+            <div className="flex-1">
+              <ChatInput handleSubmit={handleSubmit} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
