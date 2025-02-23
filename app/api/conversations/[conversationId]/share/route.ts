@@ -3,21 +3,11 @@ import { randomUUID } from "crypto";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
+import { createShareRequestSchema } from "@/lib/api";
 import db from "@/lib/server/db";
 import { sharedConversations } from "@/lib/server/db/schema";
 import { getConversation } from "@/lib/server/service";
 import { requireAuthContext } from "@/lib/server/utils";
-
-// Validate request body
-const createShareRequestSchema = z
-  .object({
-    accessType: z.enum(["public", "organization", "email"]).default("public"),
-    recipientEmails: z.array(z.string().email()).optional(),
-    expiresAt: z.string().datetime().optional(),
-  })
-  .refine((data) => data.accessType !== "email" || (data.recipientEmails && data.recipientEmails.length > 0), {
-    message: "recipientEmails required when accessType is 'email'",
-  });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ conversationId: string }> }) {
   try {

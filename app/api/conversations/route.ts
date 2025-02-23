@@ -4,21 +4,10 @@ import { and, desc, eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
+import { createConversationRequest } from "@/lib/api";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 import { requireAuthContext } from "@/lib/server/utils";
-
-const createConversationRequest = z.object({
-  title: z.string(),
-  messages: z
-    .array(
-      z.object({
-        content: z.string(),
-        role: z.enum(["assistant", "system", "user"]),
-      }),
-    )
-    .optional(),
-});
 
 export async function POST(request: NextRequest) {
   const { profile, tenant } = await requireAuthContext();

@@ -18,37 +18,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ShareButtonProps, ShareSettings, ACCESS_TYPES, EXPIRES_AT_OPTIONS, AccessType } from "@/lib/api";
 import PlusIcon from "@/public/icons/plus.svg";
-
-interface ShareButtonProps {
-  conversationId: string;
-  className?: string;
-}
-
-interface ShareSettings {
-  accessType: AccessType;
-  email?: string;
-  expiresAt?: number;
-  shareId?: string;
-}
-
-const EXPIRES_AT_OPTIONS = [
-  { label: "Never", value: 0 },
-  { label: "1 hour", value: 1 },
-  { label: "6 hours", value: 6 },
-  { label: "12 hours", value: 12 },
-  { label: "24 hours", value: 24 },
-  { label: "3 days", value: 72 },
-  { label: "7 days", value: 168 },
-];
-
-const ACCESS_TYPES = [
-  { label: "Public - Anyone with the link", value: "public" },
-  { label: "Organization - Only members", value: "organization" },
-  { label: "Email - Specific person", value: "email" },
-] as const;
-
-type AccessType = (typeof ACCESS_TYPES)[number]["value"];
 
 export function ShareButton({ conversationId, className }: ShareButtonProps) {
   const [isShared, setIsShared] = useState(false);

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { useGlobalState } from "@/app/(main)/context";
 import Chatbot from "@/components/chatbot";
+import { SharedConversationResponse } from "@/lib/api";
 
 import Summary from "./summary";
 
@@ -14,15 +15,6 @@ interface Props {
   id: string;
   tenantName: string;
   isShared?: boolean;
-}
-
-interface SharedConversationResponse {
-  conversation: {
-    id: string;
-    title: string;
-  };
-  messages: any[];
-  isOwner: boolean;
 }
 
 export default function Conversation({ id, tenantName, isShared = false }: Props) {
@@ -86,7 +78,7 @@ export default function Conversation({ id, tenantName, isShared = false }: Props
   return (
     <div className="flex h-full w-full">
       <Chatbot
-        name={isShared ? "Shared Conversation" : tenantName!}
+        name={tenantName}
         conversationId={isShared ? sharedData!.conversation.id : id}
         initMessage={initialMessage}
         onSelectedDocumentId={handleSelectedDocumentId}
