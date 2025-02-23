@@ -1,3 +1,4 @@
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -17,7 +18,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PlusIcon from "@/public/icons/plus.svg";
-
 interface ShareButtonProps {
   conversationId: string;
   className?: string;
@@ -51,9 +51,11 @@ type AccessType = (typeof ACCESS_TYPES)[number]["value"];
 export function ShareButton({ conversationId, className }: ShareButtonProps) {
   const [isShared, setIsShared] = useState(false);
   const [shareSettings, setShareSettings] = useState<ShareSettings | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleShare = async (settings: ShareSettings) => {
     try {
+      setIsLoading(true);
       const response = await fetch(`/api/conversations/${conversationId}/share`, {
         method: "POST",
         headers: {
@@ -77,6 +79,8 @@ export function ShareButton({ conversationId, className }: ShareButtonProps) {
       toast.error("Failed to share conversation", {
         description: error instanceof Error ? error.message : "An unknown error occurred",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -90,13 +94,13 @@ export function ShareButton({ conversationId, className }: ShareButtonProps) {
       {isShared ? (
         <SharedDialog conversationId={conversationId} settings={shareSettings!} onClose={() => setIsShared(false)} />
       ) : (
-        <ShareDialog onShare={handleShare} />
+        <ShareDialog onShare={handleShare} isLoading={isLoading} />
       )}
     </Dialog>
   );
 }
 
-function ShareDialog({ onShare }: { onShare: (data: ShareSettings) => void }) {
+function ShareDialog({ onShare, isLoading }: { onShare: (data: ShareSettings) => void; isLoading: boolean }) {
   const [accessType, setAccessType] = useState<AccessType>("public");
   const [email, setEmail] = useState("");
   const [expiresAt, setExpiresAt] = useState("0");
@@ -166,7 +170,9 @@ function ShareDialog({ onShare }: { onShare: (data: ShareSettings) => void }) {
         </div>
 
         <DialogFooter>
-          <Button type="submit">Create Share Link</Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? <Loader2 className="animate-spin" /> : "Create Share Link"}
+          </Button>
         </DialogFooter>
       </form>
     </DialogContent>
@@ -183,7 +189,6 @@ function SharedDialog({
   onClose: () => void;
 }) {
   const shareUrl = settings.shareId ? new URL(`/share/${settings.shareId}`, window.location.origin).toString() : "";
-  // TODO: use the share id to create the read only url
 
   const getShareDescription = () => {
     switch (settings.accessType) {

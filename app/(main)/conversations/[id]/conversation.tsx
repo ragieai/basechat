@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useGlobalState } from "@/app/(main)/context";
@@ -65,7 +66,7 @@ export default function Conversation({ id, tenantName, isShared = false }: Props
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Loading...</h2>
+          <Loader2 size={18} className="ml-2 animate-spin" />
         </div>
       </div>
     );
