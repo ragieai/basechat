@@ -3,6 +3,7 @@
 import assert from "assert";
 
 import { experimental_useObject as useObject } from "ai/react";
+import { Loader2 } from "lucide-react";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
@@ -60,6 +61,7 @@ export default function Chatbot({
   const [messages, setMessages] = useState<Message[]>(initialMessages || []);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});
   const [pendingMessage, setPendingMessage] = useState<null | { id: string; expanded: boolean }>(null);
+  const [isContinueLoading, setIsContinueLoading] = useState(false);
 
   const { isLoading, object, submit } = useObject({
     api: `/api/conversations/${conversationId}/messages`,
@@ -145,6 +147,7 @@ export default function Chatbot({
   );
 
   const handleContinueConversation = async () => {
+    setIsContinueLoading(true);
     try {
       // Create a new conversation with the same messages
       const response = await fetch("/api/conversations", {
@@ -166,6 +169,8 @@ export default function Chatbot({
       router.push(`/conversations/${id}`);
     } catch (error) {
       console.error("Failed to continue conversation:", error);
+    } finally {
+      setIsContinueLoading(false);
     }
   };
 
@@ -209,7 +214,9 @@ export default function Chatbot({
           )}
           {readOnly && (
             <div className="flex justify-center mt-8">
-              <PrimaryButton onClick={handleContinueConversation}>Continue Conversation</PrimaryButton>
+              <PrimaryButton onClick={handleContinueConversation} disabled={isContinueLoading}>
+                {isContinueLoading ? <Loader2 className="animate-spin" /> : "Continue Conversation"}
+              </PrimaryButton>
             </div>
           )}
         </div>
