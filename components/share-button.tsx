@@ -18,11 +18,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PlusIcon from "@/public/icons/plus.svg";
 
-import { CopyIcon } from "@/public/icons/copy.svg";
-
 interface ShareButtonProps {
   conversationId: string;
   className?: string;
+}
+
+interface ShareSettings {
+  accessType: AccessType;
+  email?: string;
+  expiresAt?: number;
+  shareId?: string;
 }
 
 const EXPIRES_AT_OPTIONS = [
@@ -42,6 +47,54 @@ const ACCESS_TYPES = [
 ] as const;
 
 type AccessType = (typeof ACCESS_TYPES)[number]["value"];
+
+export function ShareButton({ conversationId, className }: ShareButtonProps) {
+  const [isShared, setIsShared] = useState(false);
+  const [shareSettings, setShareSettings] = useState<ShareSettings | null>(null);
+
+  const handleShare = async (settings: ShareSettings) => {
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/share`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          accessType: settings.accessType,
+          recipientEmails: settings.accessType === "email" ? [settings.email!] : undefined,
+          expiresAt: settings.expiresAt ? new Date(settings.expiresAt).toISOString() : undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create share link");
+      }
+
+      const { shareId } = await response.json();
+      setShareSettings({ ...settings, shareId });
+      setIsShared(true);
+    } catch (error) {
+      toast.error("Failed to share conversation", {
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+      });
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className={className}>
+          <Image src={PlusIcon} alt="Share conversation" width={20} height={20} />
+        </Button>
+      </DialogTrigger>
+      {isShared ? (
+        <SharedDialog conversationId={conversationId} settings={shareSettings!} onClose={() => setIsShared(false)} />
+      ) : (
+        <ShareDialog onShare={handleShare} />
+      )}
+    </Dialog>
+  );
+}
 
 function ShareDialog({ onShare }: { onShare: (data: ShareSettings) => void }) {
   const [accessType, setAccessType] = useState<AccessType>("public");
@@ -120,55 +173,17 @@ function ShareDialog({ onShare }: { onShare: (data: ShareSettings) => void }) {
   );
 }
 
-interface ShareSettings {
-  accessType: AccessType;
-  email?: string;
-  expiresAt?: number;
-}
-
-export function ShareButton({ conversationId, className }: ShareButtonProps) {
-  const [isShared, setIsShared] = useState(false);
-  const [shareSettings, setShareSettings] = useState<ShareSettings | null>(null);
-
-  const handleShare = async (settings: ShareSettings) => {
-    try {
-      // TODO: Implement actual sharing logic here with the settings
-      console.log("Share settings:", settings);
-      setShareSettings(settings);
-      setIsShared(true);
-    } catch (error) {
-      toast.error("Failed to share conversation", {
-        description: error instanceof Error ? error.message : "An unknown error occurred",
-      });
-    }
-  };
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className={className}>
-          <Image src={PlusIcon} alt="Share conversation" width={20} height={20} />
-        </Button>
-      </DialogTrigger>
-      {isShared ? (
-        <SharedDialog conversationId={conversationId} settings={shareSettings!} onClose={() => setIsShared(false)} />
-      ) : (
-        <ShareDialog onShare={handleShare} />
-      )}
-    </Dialog>
-  );
-}
-
 function SharedDialog({
   conversationId,
   settings,
   onClose,
 }: {
   conversationId: string;
-  settings: ShareSettings;
+  settings: ShareSettings & { shareId?: string };
   onClose: () => void;
 }) {
-  const shareUrl = new URL(`/share/${conversationId}`, window.location.href).toString();
+  const shareUrl = settings.shareId ? new URL(`/share/${settings.shareId}`, window.location.origin).toString() : "";
+  // TODO: use the share id to create the read only url
 
   const getShareDescription = () => {
     switch (settings.accessType) {

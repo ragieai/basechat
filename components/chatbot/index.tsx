@@ -4,8 +4,10 @@ import assert from "assert";
 
 import { experimental_useObject as useObject } from "ai/react";
 import { Inter } from "next/font/google";
+import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
+import PrimaryButton from "@/components/primary-button";
 import { ShareButton } from "@/components/share-button";
 import {
   conversationMessagesResponseSchema,
@@ -33,6 +35,8 @@ interface Props {
   name: string;
   initMessage?: string;
   onSelectedDocumentId: (id: string) => void;
+  readOnly?: boolean;
+  messages?: any[];
 }
 
 function isExpandable(messages: Message[], i: number) {
@@ -43,9 +47,17 @@ function isExpandable(messages: Message[], i: number) {
   );
 }
 
-export default function Chatbot({ name, conversationId, initMessage, onSelectedDocumentId }: Props) {
+export default function Chatbot({
+  name,
+  conversationId,
+  initMessage,
+  onSelectedDocumentId,
+  readOnly = false,
+  messages: initialMessages,
+}: Props) {
+  const router = useRouter();
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages || []);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});
   const [pendingMessage, setPendingMessage] = useState<null | { id: string; expanded: boolean }>(null);
 
@@ -104,7 +116,7 @@ export default function Chatbot({ name, conversationId, initMessage, onSelectedD
     if (localInitMessage) {
       handleSubmit(localInitMessage);
       setLocalInitMessage(undefined);
-    } else {
+    } else if (!readOnly || !initialMessages) {
       (async () => {
         const res = await fetch(`/api/conversations/${conversationId}/messages`);
         if (!res.ok) throw new Error("Could not load conversation");
@@ -113,7 +125,7 @@ export default function Chatbot({ name, conversationId, initMessage, onSelectedD
         setMessages(messages);
       })();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- initentionally run once
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once
   }, []);
 
   const container = useRef<HTMLDivElement>(null);
@@ -132,6 +144,31 @@ export default function Chatbot({ name, conversationId, initMessage, onSelectedD
     [messages, sourceCache],
   );
 
+  const handleContinueConversation = async () => {
+    try {
+      // Create a new conversation with the same messages
+      const response = await fetch("/api/conversations", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: `Continued from ${name}`,
+          messages: messages.map(({ content, role }) => ({ content, role })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create conversation");
+      }
+
+      const { id } = await response.json();
+      router.push(`/conversations/${id}`);
+    } catch (error) {
+      console.error("Failed to continue conversation:", error);
+    }
+  };
+
   return (
     <div className="flex h-full w-full items-center flex-col">
       <div ref={container} className="flex flex-col h-full w-full items-center overflow-y-auto">
@@ -148,7 +185,7 @@ export default function Chatbot({ name, conversationId, initMessage, onSelectedD
                   sources={message.sources}
                   onSelectedDocumentId={onSelectedDocumentId}
                 />
-                {isExpandable(messagesWithSources, i) && (
+                {isExpandable(messagesWithSources, i) && !readOnly && (
                   <div className="flex justify-center">
                     <button
                       className="flex justify-center rounded-[20px] border px-4 py-2.5 mt-8"
@@ -170,16 +207,23 @@ export default function Chatbot({ name, conversationId, initMessage, onSelectedD
               onSelectedDocumentId={onSelectedDocumentId}
             />
           )}
+          {readOnly && (
+            <div className="flex justify-center mt-8">
+              <PrimaryButton onClick={handleContinueConversation}>Continue Conversation</PrimaryButton>
+            </div>
+          )}
         </div>
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
         <div className="flex flex-col w-full p-2 pl-4 rounded-[24px] border border-[#D7D7D7]">
-          <div className="flex gap-2 items-center">
-            <ShareButton conversationId={conversationId} />
-            <div className="flex-1">
-              <ChatInput handleSubmit={handleSubmit} />
+          {!readOnly && (
+            <div className="flex gap-2 items-center">
+              <ShareButton conversationId={conversationId} />
+              <div className="flex-1">
+                <ChatInput handleSubmit={handleSubmit} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
