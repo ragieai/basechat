@@ -215,16 +215,16 @@ export default function Chatbot({
         </div>
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
-        <div className="flex flex-col w-full p-2 pl-4 rounded-[24px] border border-[#D7D7D7]">
-          {!readOnly && (
+        {!readOnly && (
+          <div className="flex flex-col w-full p-2 pl-4 rounded-[24px] border border-[#D7D7D7]">
             <div className="flex gap-2 items-center">
               <ShareButton conversationId={conversationId} />
               <div className="flex-1">
                 <ChatInput handleSubmit={handleSubmit} />
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
