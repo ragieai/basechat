@@ -153,7 +153,7 @@ export default function Chatbot({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: `Continued from ${name}`,
+          title: `Shared from "${messages[1]?.content || "conversation"}"`,
           messages: messages.map(({ content, role }) => ({ content, role })),
         }),
       });

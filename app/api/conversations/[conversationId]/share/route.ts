@@ -1,5 +1,3 @@
-import { randomUUID } from "crypto";
-
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -28,7 +26,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         conversationId: conversation.id,
         tenantId: tenant.id,
         createdBy: profile.id,
-        shareId: randomUUID(),
         accessType: body.accessType,
         recipientEmails: body.recipientEmails || [],
         expiresAt: body.expiresAt,
