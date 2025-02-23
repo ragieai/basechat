@@ -1,7 +1,9 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { useGlobalState } from "@/app/(main)/context";
 import Chatbot from "@/components/chatbot";
@@ -24,6 +26,7 @@ interface SharedConversationResponse {
 }
 
 export default function Conversation({ id, tenantName, isShared = false }: Props) {
+  const router = useRouter();
   const [documentId, setDocumentId] = useState<string | null>(null);
   const { initialMessage, setInitialMessage } = useGlobalState();
   const [sharedData, setSharedData] = useState<SharedConversationResponse | null>(null);
@@ -48,15 +51,23 @@ export default function Conversation({ id, tenantName, isShared = false }: Props
           throw new Error("Failed to load shared conversation");
         }
         const data = await response.json();
+
+        if (data.isOwner) {
+          toast.info("Redirecting to your conversation");
+          router.push(`/conversations/${data.conversation.id}`);
+          return;
+        }
+
         setSharedData(data);
       } catch (error) {
         const message = error instanceof Error ? error.message : "An error occurred";
-        throw new Error(message);
+        toast.error(message);
+        router.push("/");
       }
     };
 
     fetchSharedConversation();
-  }, [id, isShared]);
+  }, [id, isShared, router]);
 
   const handleSelectedDocumentId = async (id: string) => {
     setDocumentId(id);
