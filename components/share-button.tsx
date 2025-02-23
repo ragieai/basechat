@@ -133,7 +133,7 @@ function ShareDialog({
       const data = await response.json();
       setExistingShares(data);
     } catch (error) {
-      toast.error("Failed to load existing shares");
+      toast.error("Failed to load existing share links");
     } finally {
       setIsLoadingShares(false);
     }
@@ -217,13 +217,13 @@ function ShareDialog({
         </form>
 
         <div className="border-t pt-4">
-          <h3 className="font-medium mb-4">Existing Shares</h3>
+          <h3 className="font-medium mb-4">Existing Share Links</h3>
           {isLoadingShares ? (
             <div className="flex justify-center py-4">
               <Loader2 className="animate-spin" />
             </div>
           ) : existingShares.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No existing shares</p>
+            <p className="text-sm text-muted-foreground text-center py-4">No existing share links</p>
           ) : (
             <div className="space-y-3">
               {existingShares.map((share) => (
