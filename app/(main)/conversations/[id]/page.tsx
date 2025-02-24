@@ -6,5 +6,5 @@ export default async function ConversationPage({ params }: { params: Promise<{ i
   const { tenant } = await authOrRedirect();
   const { id } = await params;
 
-  return <Conversation tenantName={tenant.name} id={id} />;
+  return <Conversation tenantName={tenant.name} id={id} isShared={false} />;
 }
