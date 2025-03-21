@@ -11,7 +11,7 @@ const createConversationRequest = z.object({ title: z.string() });
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
-  const { slug } = params;
+  const { slug } = await params;
   const json = await request.json();
   const { title } = createConversationRequest.parse(json);
 

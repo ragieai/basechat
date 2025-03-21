@@ -16,7 +16,7 @@ import * as schema from "@/lib/server/db/schema";
 import { createConversationMessage, getConversation, getConversationMessages } from "@/lib/server/service";
 
 export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Get tenant by slug
   const tenant = await db
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
 }
 
 export async function POST(request: NextRequest, { params }: { params: { slug: string } }) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Get tenant by slug
   const tenant = await db

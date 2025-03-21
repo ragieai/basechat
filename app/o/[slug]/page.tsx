@@ -6,8 +6,6 @@ import { getPublicCookie } from "@/lib/server/anonymous";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 
-
-
 import PublicChat from "./public-chat";
 
 interface Props {
@@ -17,7 +15,7 @@ interface Props {
 }
 
 export default async function PublicChatPage({ params }: Props) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Get tenant by slug
   const tenant = await db
