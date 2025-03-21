@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getToken } from "next-auth/jwt";
+
+import { auth } from "@/auth";
 
 export async function publicRouteMiddleware(request: NextRequest) {
   // Only handle /o/[slug] routes
@@ -17,9 +18,9 @@ export async function publicRouteMiddleware(request: NextRequest) {
     // Create response
     const nextResponse = NextResponse.next();
 
-    // Check if user is authenticated
-    const token = await getToken({ req: request });
-    if (token) {
+    // Check if user is authenticated using the same method as the rest of the app
+    const session = await auth();
+    if (session) {
       // Clear auth cookies
       nextResponse.cookies.delete("next-auth.session-token");
       nextResponse.cookies.delete("next-auth.callback-url");
