@@ -60,6 +60,8 @@ export const tenants = pgTable("tenants", {
   logoFileName: text("logo_file_name"), // The name of the file that was uploaded
   logoObjectName: text("logo_object_name"), // The name of the object in the bucket
   logoUrl: text("logo_url"), // The publicly accessible URL of the object
+  isPublic: boolean("is_public").default(false).notNull(),
+  slug: text("slug").unique(),
 });
 
 export const rolesEnum = pgEnum("roles", ["admin", "user"]);
