@@ -137,7 +137,7 @@ const PublicChatField = ({
                   </div>
                 </FormControl>
                 <div className="text-sm text-muted-foreground mt-1">
-                  Your chat will be available at: /o/{field.value || "your-chat-name"}
+                  Your chat will be available at: {window.location.origin}/o/{field.value || "your-chat-name"}
                 </div>
                 {slugError && <div className="text-sm text-destructive mt-1">{slugError}</div>}
                 <FormMessage />
@@ -216,7 +216,7 @@ export default function GeneralSettings({ tenant, canUploadLogo }: Props) {
 
     setIsCheckingSlug(true);
     try {
-      const response = await fetch(`/api/tenants/check-slug?slug=${encodeURIComponent(slug)}`);
+      const response = await fetch(`/api/tenants/check-slug?slug=${encodeURIComponent(slug)}&tenantId=${tenant.id}`);
       const data = await response.json();
 
       if (!data.isUnique) {
