@@ -17,14 +17,17 @@ const conversationResponseSchema = z.object({ id: z.string() });
 interface Props {
   tenant: typeof schema.tenants.$inferSelect;
   className?: string;
+  isPublic?: boolean;
+  tenantSlug?: string;
 }
 
-export default function Welcome({ tenant, className }: Props) {
+export default function Welcome({ tenant, className, isPublic, tenantSlug }: Props) {
   const router = useRouter();
   const { setInitialMessage } = useGlobalState();
 
   const handleSubmit = async (content: string) => {
-    const res = await fetch("/api/conversations", { method: "POST", body: JSON.stringify({ title: content }) });
+    const apiEndpoint = isPublic ? `/api/public/${tenantSlug}/conversations` : "/api/conversations";
+    const res = await fetch(apiEndpoint, { method: "POST", body: JSON.stringify({ title: content }) });
     if (!res.ok) throw new Error("Could not create conversation");
 
     const json = await res.json();
