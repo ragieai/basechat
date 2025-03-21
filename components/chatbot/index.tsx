@@ -33,16 +33,28 @@ interface Props {
   logoUrl?: string | null;
   initMessage?: string;
   onSelectedDocumentId: (id: string) => void;
+  isPublic?: boolean;
+  tenantSlug?: string;
 }
 
-export default function Chatbot({ name, logoUrl, conversationId, initMessage, onSelectedDocumentId }: Props) {
+export default function Chatbot({
+  name,
+  logoUrl,
+  conversationId,
+  initMessage,
+  onSelectedDocumentId,
+  isPublic,
+  tenantSlug,
+}: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
   const [messages, setMessages] = useState<Message[]>([]);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});
   const [pendingMessage, setPendingMessage] = useState<null | { id: string }>(null);
 
+  const apiBase = isPublic ? `/api/public/${tenantSlug}/messages` : `/api/conversations/${conversationId}/messages`;
+
   const { isLoading, object, submit } = useObject({
-    api: `/api/conversations/${conversationId}/messages`,
+    api: apiBase,
     schema: createConversationMessageResponseSchema,
     fetch: async function middleware(input: RequestInfo | URL, init?: RequestInit) {
       const res = await fetch(input, init);
@@ -83,13 +95,13 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
     if (!pendingMessage) return;
 
     (async () => {
-      const res = await fetch(`/api/conversations/${conversationId}/messages/${pendingMessage.id}`);
+      const res = await fetch(`${apiBase}/${pendingMessage.id}`);
       if (!res.ok) return;
 
       const json = (await res.json()) as { id: string; sources: SourceMetadata[] };
       setSourceCache((prev) => ({ ...prev, [json.id]: json.sources }));
     })();
-  }, [conversationId, pendingMessage]);
+  }, [conversationId, pendingMessage, apiBase]);
 
   useEffect(() => {
     if (localInitMessage) {
@@ -97,7 +109,7 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
       setLocalInitMessage(undefined);
     } else {
       (async () => {
-        const res = await fetch(`/api/conversations/${conversationId}/messages`);
+        const res = await fetch(apiBase);
         if (!res.ok) throw new Error("Could not load conversation");
         const json = await res.json();
         const messages = conversationMessagesResponseSchema.parse(json);
@@ -105,7 +117,7 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
       })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once
-  }, []);
+  }, [apiBase]);
 
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
