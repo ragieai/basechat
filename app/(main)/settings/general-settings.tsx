@@ -137,7 +137,7 @@ const PublicChatField = ({
                   </div>
                 </FormControl>
                 <div className="text-sm text-muted-foreground mt-1">
-                  Your chat will be available at: {window.location.origin}/o/{field.value || "your-chat-name"}
+                  Your chat will be available at: {location.origin}/o/{field.value || "your-chat-name"}
                 </div>
                 {slugError && <div className="text-sm text-destructive mt-1">{slugError}</div>}
                 <FormMessage />
