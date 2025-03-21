@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { auth } from "@/auth";
-
 export async function publicRouteMiddleware(request: NextRequest) {
   // Only handle /o/[slug] routes
   if (!request.nextUrl.pathname.startsWith("/o/")) {
@@ -17,15 +15,6 @@ export async function publicRouteMiddleware(request: NextRequest) {
   try {
     // Create response
     const nextResponse = NextResponse.next();
-
-    // Check if user is authenticated using the same method as the rest of the app
-    const session = await auth();
-    if (session) {
-      // Clear auth cookies
-      nextResponse.cookies.delete("next-auth.session-token");
-      nextResponse.cookies.delete("next-auth.callback-url");
-      nextResponse.cookies.delete("next-auth.csrf-token");
-    }
 
     // Validate public route and get user info
     const response = await fetch(new URL("/api/public/validate", request.url), {
