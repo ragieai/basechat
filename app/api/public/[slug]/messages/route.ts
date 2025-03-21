@@ -1,6 +1,6 @@
 import { CoreMessage } from "ai";
 import assertNever from "assert-never";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
   const profile = await db
     .select()
     .from(schema.profiles)
-    .where(eq(schema.profiles.userId, publicCookie.userId) && eq(schema.profiles.tenantId, tenant.id))
+    .where(and(eq(schema.profiles.userId, publicCookie.userId), eq(schema.profiles.tenantId, tenant.id)))
     .limit(1)
     .then((rows) => rows[0]);
 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
   const conversation = await db
     .select()
     .from(schema.conversations)
-    .where(eq(schema.conversations.tenantId, tenant.id) && eq(schema.conversations.profileId, profile.id))
+    .where(and(eq(schema.conversations.tenantId, tenant.id), eq(schema.conversations.profileId, profile.id)))
     .limit(1)
     .then((rows) => rows[0]);
 
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
   const profile = await db
     .select()
     .from(schema.profiles)
-    .where(eq(schema.profiles.userId, publicCookie.userId) && eq(schema.profiles.tenantId, tenant.id))
+    .where(and(eq(schema.profiles.userId, publicCookie.userId), eq(schema.profiles.tenantId, tenant.id)))
     .limit(1)
     .then((rows) => rows[0]);
 
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
   const conversation = await db
     .select()
     .from(schema.conversations)
-    .where(eq(schema.conversations.tenantId, tenant.id) && eq(schema.conversations.profileId, profile.id))
+    .where(and(eq(schema.conversations.tenantId, tenant.id), eq(schema.conversations.profileId, profile.id)))
     .limit(1)
     .then((rows) => rows[0]);
 

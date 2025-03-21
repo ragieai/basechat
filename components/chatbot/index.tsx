@@ -60,9 +60,14 @@ export default function Chatbot({
       const res = await fetch(input, init);
       const id = res.headers.get("x-message-id");
 
-      assert(id);
+      if (!isPublic) {
+        assert(id);
+        setPendingMessage({ id });
+      } else {
+        const tempId = `temp-${Date.now()}`;
+        setPendingMessage({ id: tempId });
+      }
 
-      setPendingMessage({ id });
       return res;
     },
     onError: console.error,
@@ -109,15 +114,41 @@ export default function Chatbot({
       setLocalInitMessage(undefined);
     } else {
       (async () => {
-        const res = await fetch(apiBase);
-        if (!res.ok) throw new Error("Could not load conversation");
-        const json = await res.json();
-        const messages = conversationMessagesResponseSchema.parse(json);
-        setMessages(messages);
+        try {
+          const res = await fetch(apiBase);
+          if (!res.ok) {
+            if (isPublic && res.status === 404) {
+              // For public users, create a new conversation if one doesn't exist
+              const createRes = await fetch(`/api/public/${tenantSlug}/conversations`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ title: "New Conversation" }),
+              });
+              if (!createRes.ok) throw new Error("Could not create conversation");
+              // Now try loading messages again
+              const messagesRes = await fetch(apiBase);
+              if (!messagesRes.ok) throw new Error("Could not load conversation");
+              const json = await messagesRes.json();
+              const messages = conversationMessagesResponseSchema.parse(json);
+              setMessages(messages);
+            } else {
+              throw new Error("Could not load conversation");
+            }
+          } else {
+            const json = await res.json();
+            const messages = conversationMessagesResponseSchema.parse(json);
+            setMessages(messages);
+          }
+        } catch (error) {
+          console.error("Error loading conversation:", error);
+          // You might want to show an error message to the user here
+        }
       })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once
-  }, [apiBase]);
+  }, [apiBase, isPublic, tenantSlug]);
 
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {

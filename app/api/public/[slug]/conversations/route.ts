@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
   const profile = await db
     .select()
     .from(schema.profiles)
-    .where(eq(schema.profiles.userId, publicCookie.userId) && eq(schema.profiles.tenantId, tenant.id))
+    .where(and(eq(schema.profiles.userId, publicCookie.userId), eq(schema.profiles.tenantId, tenant.id)))
     .limit(1)
     .then((rows) => rows[0]);
 
@@ -48,7 +48,19 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
     return Response.json({ error: "Profile not found" }, { status: 404 });
   }
 
-  // Create conversation
+  // Check if user already has a conversation for this tenant
+  const existingConversation = await db
+    .select()
+    .from(schema.conversations)
+    .where(and(eq(schema.conversations.tenantId, tenant.id), eq(schema.conversations.profileId, profile.id)))
+    .limit(1)
+    .then((rows) => rows[0]);
+
+  if (existingConversation) {
+    return Response.json({ id: existingConversation.id });
+  }
+
+  // Create new conversation
   const [newConversation] = await db
     .insert(schema.conversations)
     .values({
