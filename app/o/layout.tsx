@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -17,8 +18,12 @@ export default async function PublicLayout({ children }: { children: React.React
       }
     });
 
-    // Redirect to refresh the page and clear the session
-    redirect("/o");
+    // Get the current URL path
+    const headersList = await headers();
+    const pathname = headersList.get("x-pathname") || "/";
+
+    // Redirect back to the original path to refresh the page and clear the session
+    redirect(pathname);
   }
 
   return <>{children}</>;
