@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export async function publicRouteMiddleware(request: NextRequest) {
   // Only handle /o/[slug] routes
@@ -13,6 +14,18 @@ export async function publicRouteMiddleware(request: NextRequest) {
   }
 
   try {
+    // Create response
+    const nextResponse = NextResponse.next();
+
+    // Check if user is authenticated
+    const token = await getToken({ req: request });
+    if (token) {
+      // Clear auth cookies
+      nextResponse.cookies.delete("next-auth.session-token");
+      nextResponse.cookies.delete("next-auth.callback-url");
+      nextResponse.cookies.delete("next-auth.csrf-token");
+    }
+
     // Validate public route and get user info
     const response = await fetch(new URL("/api/public/validate", request.url), {
       method: "POST",
@@ -27,9 +40,6 @@ export async function publicRouteMiddleware(request: NextRequest) {
     }
 
     const { cookie } = await response.json();
-
-    // Create response
-    const nextResponse = NextResponse.next();
 
     // Set cookie with 30 day expiry
     nextResponse.cookies.set("public_user", encodeURIComponent(JSON.stringify(cookie)), {
