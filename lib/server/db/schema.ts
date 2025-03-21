@@ -65,6 +65,7 @@ export const tenants = pgTable("tenants", {
 });
 
 export const rolesEnum = pgEnum("roles", ["admin", "user"]);
+export const userTypeEnum = pgEnum("user_type", ["authenticated", "anonymous"]);
 
 export const invites = pgTable(
   "invites",
@@ -117,6 +118,7 @@ export const users = pgTable("users", {
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
   currentProfileId: uuid("current_profile_id").references((): AnyPgColumn => profiles.id, { onDelete: "set null" }),
+  type: userTypeEnum("type").default("authenticated").notNull(),
 });
 
 export const accounts = pgTable(
