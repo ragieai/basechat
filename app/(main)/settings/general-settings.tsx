@@ -79,18 +79,18 @@ const PublicChatField = ({
 }) => {
   // Generate slug when public chat is enabled
   const handlePublicChange = async (checked: boolean) => {
-    form.setValue("isPublic", checked);
+    form.setValue("isPublic", checked, { shouldDirty: true });
 
     if (checked) {
       try {
         const response = await fetch(`/api/tenants/generate-slug?name=${encodeURIComponent(tenantName)}`);
         const data = await response.json();
-        form.setValue("slug", data.slug);
+        form.setValue("slug", data.slug, { shouldDirty: true });
       } catch (error) {
         console.error("Failed to generate slug:", error);
       }
     } else {
-      form.setValue("slug", "");
+      form.setValue("slug", "", { shouldDirty: true });
     }
   };
 
@@ -123,7 +123,7 @@ const PublicChatField = ({
             name="slug"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base">Public URL Slug</FormLabel>
+                <FormLabel className="text-base">Public URL Name</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
