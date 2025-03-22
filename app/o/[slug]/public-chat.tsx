@@ -20,7 +20,7 @@ export default function PublicChat({ name, logoUrl, conversationId, isPublic, te
   };
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen w-screen flex-col">
       <Chatbot
         name={name}
         logoUrl={logoUrl}

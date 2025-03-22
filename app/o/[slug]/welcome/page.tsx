@@ -1,27 +1,21 @@
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 import PublicWelcome from "@/app/(main)/public-welcome";
 import { getPublicCookie } from "@/lib/server/anonymous";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 
-import PublicChat from "./public-chat";
 
 interface Props {
   params: {
     slug: string;
   };
-  searchParams: {
-    welcome?: string;
-  };
 }
 
-export default async function PublicChatPage({ params, searchParams }: Props) {
+export default async function PublicWelcomePage({ params }: Props) {
   const { slug } = await params;
-  const { welcome } = await searchParams;
-  const showWelcome = welcome === "true";
 
   // Get tenant by slug
   const tenant = await db
@@ -56,33 +50,7 @@ export default async function PublicChatPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  // Get conversation for anonymous user
-  const conversation = await db
-    .select()
-    .from(schema.conversations)
-    .where(eq(schema.conversations.tenantId, tenant.id) && eq(schema.conversations.profileId, profile.id))
-    .limit(1)
-    .then((rows) => rows[0]);
-
-  // If no conversation exists, redirect to welcome page
-  if (!conversation) {
-    redirect(`/o/${slug}/welcome`);
-  }
-
-  // If we have a conversation and welcome=false, show the chat view
-  if (conversation && !showWelcome) {
-    return (
-      <PublicChat
-        name={tenant.name}
-        logoUrl={tenant.logoUrl}
-        conversationId={conversation.id}
-        isPublic={true}
-        tenantSlug={slug}
-      />
-    );
-  }
-
-  // Show welcome screen in all other cases (no conversation or welcome=true)
+  // Show welcome screen
   return (
     <PublicWelcome
       tenantSlug={slug}

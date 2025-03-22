@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import Header from "@/app/(main)/public-header";
 import { auth } from "@/auth";
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -26,5 +27,18 @@ export default async function PublicLayout({ children }: { children: React.React
     redirect(pathname);
   }
 
-  return <>{children}</>;
+  {
+    /*return <>{children}</>;*/
+  }
+  return (
+    <div className="h-full w-full flex flex-col items-center bg-white">
+      <Header />
+      <div className="h-full w-full flex-1 flex justify-center overflow-auto">
+        <div className="h-full w-full flex flex-col items-center justify-center min-w-[500px]">{children}</div>
+      </div>
+      {/*profile.role != "user" && (
+        <Footer className="h-[80px] shrink-0 w-full bg-[#27272A] flex items-center justify-center" />
+      )*/}
+    </div>
+  );
 }
