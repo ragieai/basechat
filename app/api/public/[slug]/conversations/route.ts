@@ -31,6 +31,7 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
   const cookieStore = request.cookies;
   const cookieMap = Object.fromEntries(cookieStore.getAll().map((cookie) => [cookie.name, cookie.value]));
   const publicCookie = getPublicCookie(cookieMap);
+  console.log("publicCookie", publicCookie);
 
   if (!publicCookie) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });

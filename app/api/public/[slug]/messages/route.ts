@@ -26,6 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     .limit(1)
     .then((rows) => rows[0]);
 
+  console.log("before 404", tenant?.id, tenant?.isPublic);
   if (!tenant || !tenant.isPublic) {
     return new Response("Not found", { status: 404 });
   }
@@ -51,6 +52,10 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     return new Response("Profile not found", { status: 404 });
   }
 
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  await sleep(5000);
+  console.log("after sleep");
+
   // Get conversation for anonymous user
   const conversation = await db
     .select()
@@ -58,6 +63,9 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     .where(and(eq(schema.conversations.tenantId, tenant.id), eq(schema.conversations.profileId, profile.id)))
     .limit(1)
     .then((rows) => rows[0]);
+
+  console.log("before 404", conversation?.id);
+  console.log({ tenantId: tenant.id, profileId: profile.id });
 
   if (!conversation) {
     return new Response("Not found", { status: 404 });

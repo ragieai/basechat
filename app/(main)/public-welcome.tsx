@@ -28,6 +28,7 @@ export default function PublicWelcome({ className, tenantSlug, tenant }: Props) 
   const router = useRouter();
 
   const handleSubmit = async (content: string) => {
+    // TODO:maybe set isLoading to true for spinner in place of send button
     try {
       // First create the conversation
       const res = await fetch(`/api/public/${tenantSlug}/conversations`, {

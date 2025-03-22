@@ -13,15 +13,10 @@ interface Props {
   params: {
     slug: string;
   };
-  searchParams: {
-    welcome?: string;
-  };
 }
 
-export default async function PublicChatPage({ params, searchParams }: Props) {
+export default async function PublicChatPage({ params }: Props) {
   const { slug } = await params;
-  const { welcome } = await searchParams;
-  const showWelcome = welcome === "true";
 
   // Get tenant by slug
   const tenant = await db
@@ -69,31 +64,13 @@ export default async function PublicChatPage({ params, searchParams }: Props) {
     redirect(`/o/${slug}/welcome`);
   }
 
-  // If we have a conversation and welcome=false, show the chat view
-  if (conversation && !showWelcome) {
-    return (
-      <PublicChat
-        name={tenant.name}
-        logoUrl={tenant.logoUrl}
-        conversationId={conversation.id}
-        isPublic={true}
-        tenantSlug={slug}
-      />
-    );
-  }
-
-  // Show welcome screen in all other cases (no conversation or welcome=true)
   return (
-    <PublicWelcome
+    <PublicChat
+      name={tenant.name}
+      logoUrl={tenant.logoUrl}
+      conversationId={conversation.id}
+      isPublic={true}
       tenantSlug={slug}
-      tenant={{
-        name: tenant.name,
-        logoUrl: tenant.logoUrl,
-        question1: tenant.question1,
-        question2: tenant.question2,
-        question3: tenant.question3,
-      }}
-      className="flex-1 flex flex-col w-full bg-white p-4 max-w-[717px]"
     />
   );
 }

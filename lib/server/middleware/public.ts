@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+function userIdInCookie(request: NextRequest) {
+  const existingCookie = request.cookies.get("public_user");
+  console.log("existingCookie", existingCookie);
+  if (existingCookie) {
+    const { userId } = JSON.parse(decodeURIComponent(existingCookie.value));
+    return !!userId;
+  }
+  return false;
+}
+
 export async function publicRouteMiddleware(request: NextRequest) {
   // Only handle /o/[slug] routes
   if (!request.nextUrl.pathname.startsWith("/o/")) {
@@ -17,32 +27,35 @@ export async function publicRouteMiddleware(request: NextRequest) {
     // Create response
     const nextResponse = NextResponse.next();
 
-    // Validate public route and get user info
-    const response = await fetch(new URL("/api/public/validate", request.url), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ slug }),
-    });
+    console.log("userIdInCookie", userIdInCookie(request));
+    //check for cookie public_user with userId and not expired, continue
+    if (!userIdInCookie(request)) {
+      // Validate public route and get user info
+      const response = await fetch(new URL("/api/public/validate", request.url), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ slug }),
+      });
 
-    if (!response.ok) {
-      return NextResponse.redirect(new URL("/404", request.url));
+      if (!response.ok) {
+        return NextResponse.redirect(new URL("/404", request.url));
+      }
+
+      const { cookie } = await response.json();
+
+      // Set cookie with 30 day expiry
+      nextResponse.cookies.set("public_user", encodeURIComponent(JSON.stringify(cookie)), {
+        expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        path: "/",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
     }
-
-    const { cookie } = await response.json();
-
-    // Set cookie with 30 day expiry
-    nextResponse.cookies.set("public_user", encodeURIComponent(JSON.stringify(cookie)), {
-      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      path: "/",
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
 
     // Check if this is a first-time visit to the main chat page
     const isMainChatPage = pathParts.length === 3; // /o/[slug]
-    const isWelcomePage = pathParts.length === 4 && pathParts[3] === "welcome"; // /o/[slug]/welcome
 
     // Only check conversation status for main chat page
     if (isMainChatPage) {
