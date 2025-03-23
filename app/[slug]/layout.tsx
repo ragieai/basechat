@@ -1,4 +1,3 @@
-
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 
@@ -17,12 +16,13 @@ export default async function TenantLayout({ children, params }: Props) {
 
   // Verify that the tenant slug matches the URL slug
   if (tenant.slug !== slug) {
-    redirect("/sign-in");
+    // Redirect to the user's tenant welcome page instead of sign-in
+    redirect(`/${tenant.slug}`);
   }
 
   return (
     <div className="h-full w-full flex flex-col items-center bg-white">
-      <Header currentProfileId={profile.id} name={tenant.name} logoUrl={tenant.logoUrl} />
+      <Header currentProfileId={profile.id} name={tenant.name} logoUrl={tenant.logoUrl} tenantSlug={tenant.slug} />
       <div className="h-full w-full flex-1 flex justify-center overflow-auto">
         <div className="h-full w-full flex flex-col items-center justify-center min-w-[500px]">{children}</div>
       </div>

@@ -11,7 +11,7 @@ import NewChatIcon from "../../public/icons/new-chat.svg";
 
 interface Props {
   className?: string;
-  tenantSlug: string;
+  tenantSlug: string | null;
 }
 
 export default function ConversationHistory({ className, tenantSlug }: Props) {
@@ -26,6 +26,10 @@ export default function ConversationHistory({ className, tenantSlug }: Props) {
       setConversations(conversations);
     })();
   }, []);
+
+  if (!tenantSlug) {
+    return null;
+  }
 
   return (
     <div className={className}>

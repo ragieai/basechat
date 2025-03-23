@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { ReactNode, useEffect, useState } from "react";
 import { z } from "zod";
@@ -25,6 +25,7 @@ interface Props {
   className?: string;
   name?: string | null;
   logoUrl?: string | null;
+  tenantSlug: string | null;
   onNavClick?: () => void;
 }
 
@@ -45,9 +46,9 @@ const HeaderPopoverContent = ({
   </PopoverContent>
 );
 
-export default function Header({ name, logoUrl, currentProfileId, onNavClick = () => {} }: Props) {
+export default function Header({ name, logoUrl, currentProfileId, tenantSlug, onNavClick = () => {} }: Props) {
   const router = useRouter();
-
+  const pathname = usePathname();
   const [tenants, setTenants] = useState<z.infer<typeof tenantListResponseSchema>>([]);
   const [selectedProfileId, setSelectedProfileId] = useState(currentProfileId);
 
@@ -71,7 +72,11 @@ export default function Header({ name, logoUrl, currentProfileId, onNavClick = (
       ),
     });
     setSelectedProfileId(profileId);
-    router.push("/");
+    if (tenantSlug) {
+      router.push(`/${tenantSlug}`);
+    } else {
+      router.push("/");
+    }
   };
 
   return (
@@ -82,10 +87,10 @@ export default function Header({ name, logoUrl, currentProfileId, onNavClick = (
             <Image src={HamburgerIcon} alt="Expand chats" className="mr-2.5 cursor-pointer" onClick={onNavClick} />
           </PopoverTrigger>
           <HeaderPopoverContent align="start">
-            <ConversationHistory />
+            <ConversationHistory tenantSlug={tenantSlug} />
           </HeaderPopoverContent>
         </Popover>
-        <Link href="/">
+        <Link href={tenantSlug ? `/${tenantSlug}` : "/"}>
           <Image src={NewChatIcon} alt="New chat" />
         </Link>
       </div>
