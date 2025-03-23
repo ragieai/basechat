@@ -8,26 +8,7 @@ const { auth } = NextAuth(authConfig);
 export default auth(async (req) => {
   const { auth, nextUrl } = req;
 
-  // Handle authentication first
-  if (!auth) {
-    if (
-      nextUrl.pathname !== "/sign-in" &&
-      nextUrl.pathname !== "/sign-up" &&
-      nextUrl.pathname !== "/reset" &&
-      nextUrl.pathname !== "/change-password" &&
-      !nextUrl.pathname.startsWith("/api/auth/callback") &&
-      !nextUrl.pathname.startsWith("/healthz")
-    ) {
-      const newUrl = new URL("/sign-in", req.nextUrl.origin);
-      if (req.nextUrl.pathname !== "/") {
-        newUrl.searchParams.set("redirectTo", req.nextUrl.toString());
-      }
-      return Response.redirect(newUrl);
-    }
-    return;
-  }
-
-  // Skip tenant validation for non-tenant routes
+  // Skip auth check for public routes
   if (
     nextUrl.pathname.startsWith("/api") ||
     nextUrl.pathname.startsWith("/sign-in") ||
@@ -45,7 +26,7 @@ export default auth(async (req) => {
 
   // If no tenant slug in URL, redirect to user's tenant
   if (!urlSlug) {
-    if (!auth.user.tenantSlug) {
+    if (!auth?.user?.tenantSlug) {
       // in theory never happens, always has a tenant slug
       return Response.redirect(new URL("/sign-in", nextUrl));
     }

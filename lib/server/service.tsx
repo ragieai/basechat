@@ -453,3 +453,8 @@ export async function getTenantBySlug(slug: string) {
   const rs = await db.select().from(schema.tenants).where(eq(schema.tenants.slug, slug)).limit(1);
   return rs.length > 0 ? rs[0] : null;
 }
+
+export async function isTenantPublic(slug: string) {
+  const tenant = await getTenantBySlug(slug);
+  return tenant?.isPublic ?? false;
+}

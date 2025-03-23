@@ -4,7 +4,6 @@ import SettingsNav from "@/app/(main)/settings/settings-nav";
 import UserSettings from "@/app/(main)/settings/users/user-settings";
 import { getMembersByTenantId } from "@/lib/server/service";
 import { adminOrRedirect } from "@/lib/server/utils";
-
 interface Props {
   params: { slug: string };
 }

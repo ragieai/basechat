@@ -3,6 +3,8 @@ import { ReactNode } from "react";
 
 import Footer from "@/app/(main)/footer";
 import Header from "@/app/(main)/header";
+import { auth } from "@/auth";
+import { getTenantBySlug } from "@/lib/server/service";
 import { authOrRedirect } from "@/lib/server/utils";
 
 interface Props {
@@ -11,24 +13,52 @@ interface Props {
 }
 
 export default async function TenantLayout({ children, params }: Props) {
-  const { tenant, profile } = await authOrRedirect();
+  const { tenant, profile, session } = await authOrRedirect();
   const { slug } = await params;
+  const tenantInUrl = await getTenantBySlug(slug);
+  let fullAccess = false;
 
-  // Verify that the tenant slug matches the URL slug
-  if (tenant.slug !== slug) {
-    // Redirect to the user's tenant welcome page instead of sign-in
-    redirect(`/${tenant.slug}`);
+  // tenant in URL is public
+  if (tenantInUrl?.isPublic) {
+    // user is authenticated AND part of this tenant
+    if (session && tenant.slug == slug) {
+      // continue with full access
+      fullAccess = true;
+    }
+    // tenant in URL is not public
+  } else {
+    // user is authenticated AND part of this tenant
+    if (session && tenant.slug == slug) {
+      // continue with full access
+      fullAccess = true;
+    } else {
+      // if user is authenticated
+      if (session) {
+        // redirect user's tenantSlug page
+        redirect(`/${tenant.slug}`);
+      } else {
+        // redirect to /sign-in
+        redirect("/sign-in");
+      }
+    }
+  }
+
+  if (fullAccess) {
+    return (
+      <div className="h-full w-full flex flex-col items-center bg-white">
+        <Header currentProfileId={profile.id} name={tenant.name} logoUrl={tenant.logoUrl} tenantSlug={tenant.slug} />
+        <div className="h-full w-full flex-1 flex justify-center overflow-auto">
+          <div className="h-full w-full flex flex-col items-center justify-center min-w-[500px]">{children}</div>
+        </div>
+        {profile.role != "user" && (
+          <Footer className="h-[80px] shrink-0 w-full bg-[#27272A] flex items-center justify-center" />
+        )}
+      </div>
+    );
   }
 
   return (
-    <div className="h-full w-full flex flex-col items-center bg-white">
-      <Header currentProfileId={profile.id} name={tenant.name} logoUrl={tenant.logoUrl} tenantSlug={tenant.slug} />
-      <div className="h-full w-full flex-1 flex justify-center overflow-auto">
-        <div className="h-full w-full flex flex-col items-center justify-center min-w-[500px]">{children}</div>
-      </div>
-      {profile.role != "user" && (
-        <Footer className="h-[80px] shrink-0 w-full bg-[#27272A] flex items-center justify-center" />
-      )}
-    </div>
+    //where user has no footer and no access to data or settings pages
+    <p>No access to footer, data or settings pages</p>
   );
 }
