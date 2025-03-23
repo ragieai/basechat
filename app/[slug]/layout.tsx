@@ -12,7 +12,7 @@ interface Props {
 
 export default async function TenantLayout({ children, params }: Props) {
   const { tenant, profile } = await authOrRedirect();
-  const slug = await params.slug;
+  const { slug } = await params;
 
   // Verify that the tenant slug matches the URL slug
   if (tenant.slug !== slug) {

@@ -21,8 +21,10 @@ export default async function DataPage({ params }: Props) {
   const { tenant } = await authOrRedirect();
   const connections = await db.select().from(schema.connections).where(eq(schema.connections.tenantId, tenant.id));
 
+  const { slug } = await params;
+
   // Verify that the tenant slug matches the URL slug
-  if (tenant.slug !== params.slug) {
+  if (tenant.slug !== slug) {
     redirect("/sign-in");
   }
 

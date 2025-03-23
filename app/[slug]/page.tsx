@@ -3,14 +3,13 @@ import { redirect } from "next/navigation";
 import Welcome from "@/app/(main)/welcome";
 import { authOrRedirect } from "@/lib/server/utils";
 
-
 interface Props {
   params: { slug: string };
 }
 
 export default async function TenantPage({ params }: Props) {
   const context = await authOrRedirect();
-  const slug = await params.slug;
+  const { slug } = await params;
 
   // Verify that the tenant slug matches the URL slug
   if (context.tenant.slug !== slug) {

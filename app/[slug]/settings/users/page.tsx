@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 
 import SettingsNav from "@/app/(main)/settings/settings-nav";
 import UserSettings from "@/app/(main)/settings/users/user-settings";
@@ -11,10 +12,11 @@ interface Props {
 export default async function UsersSettingsPage({ params }: Props) {
   const { tenant } = await adminOrRedirect();
   const members = await getMembersByTenantId(tenant.id);
+  const { slug } = await params;
 
   // Verify that the tenant slug matches the URL slug
-  if (tenant.slug !== params.slug) {
-    return Response.redirect(new URL("/sign-in", process.env.NEXT_PUBLIC_BASE_URL || ""));
+  if (tenant.slug !== slug) {
+    redirect("/sign-in");
   }
 
   return (
