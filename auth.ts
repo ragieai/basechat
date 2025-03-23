@@ -20,6 +20,10 @@ declare module "next-auth" {
     user: {
       /** User ID should always exist on the session */
       id: string;
+      /** The tenant ID */
+      tenantId: string | null;
+      /** The tenant slug */
+      tenantSlug: string | null;
 
       /**
        * By default, TypeScript merges new interface properties and overwrites existing ones.
@@ -75,6 +79,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.id = user.id;
             const tenant = await getFirstTenantByUserId(user.id);
             token.tenantId = tenant ? tenant.id : null;
+            token.tenantSlug = tenant ? tenant.slug : null;
           }
           break;
         case "update":

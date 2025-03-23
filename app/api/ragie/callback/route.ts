@@ -1,5 +1,6 @@
 import assert from "assert";
 
+import { redirect } from "next/navigation";
 import { NextRequest } from "next/server";
 
 import { saveConnection } from "@/lib/server/service";
@@ -12,5 +13,5 @@ export async function GET(request: NextRequest) {
 
   const { tenant } = await requireAdminContext();
   await saveConnection(tenant.id, connectionId, "syncing");
-  return Response.redirect(new URL("data", settings.BASE_URL));
+  redirect(`/${tenant.slug}/data`);
 }

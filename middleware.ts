@@ -18,23 +18,13 @@ export default auth(async (req) => {
       !nextUrl.pathname.startsWith("/api/auth/callback") &&
       !nextUrl.pathname.startsWith("/healthz")
     ) {
-      const newUrl = new URL("/sign-in", nextUrl.origin);
-      if (nextUrl.pathname !== "/") {
-        newUrl.searchParams.set("redirectTo", nextUrl.toString());
+      const newUrl = new URL("/sign-in", req.nextUrl.origin);
+      if (req.nextUrl.pathname !== "/") {
+        newUrl.searchParams.set("redirectTo", req.nextUrl.toString());
       }
       return Response.redirect(newUrl);
     }
     return;
-  }
-
-  // Get the tenant slug from the URL
-  const pathSegments = nextUrl.pathname.split("/").filter(Boolean);
-  const urlSlug = pathSegments[0];
-
-  // Handle root path redirect
-  if (nextUrl.pathname === "/") {
-    // Redirect to sign-in if no tenant slug in URL
-    return Response.redirect(new URL("/sign-in", nextUrl.origin));
   }
 
   // Skip tenant validation for non-tenant routes
@@ -49,10 +39,17 @@ export default auth(async (req) => {
     return;
   }
 
-  // Basic tenant route validation
-  // We'll let the layout handle the actual tenant validation
+  // Get the tenant slug from the URL
+  const pathSegments = nextUrl.pathname.split("/").filter(Boolean);
+  const urlSlug = pathSegments[0];
+
+  // If no tenant slug in URL, redirect to user's tenant
   if (!urlSlug) {
-    return Response.redirect(new URL("/sign-in", nextUrl.origin));
+    if (!auth.user.tenantSlug) {
+      // in theory never happens, always has a tenant slug
+      return Response.redirect(new URL("/sign-in", nextUrl));
+    }
+    return Response.redirect(new URL(`/${auth.user.tenantSlug}`, nextUrl));
   }
 
   return;
