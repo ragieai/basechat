@@ -458,3 +458,30 @@ export async function isTenantPublic(slug: string) {
   const tenant = await getTenantBySlug(slug);
   return tenant?.isPublic ?? false;
 }
+
+export async function getAuthenticatedMembersByTenantId(tenantId: string): Promise<Member[]> {
+  return union(
+    db
+      .select({
+        id: schema.profiles.id,
+        email: schema.users.email,
+        name: schema.users.name,
+        type: sql<MemberType>`'profile'`.as("type"),
+        role: schema.profiles.role,
+      })
+      .from(schema.profiles)
+      .innerJoin(schema.users, eq(schema.profiles.userId, schema.users.id))
+      .innerJoin(schema.tenants, eq(schema.tenants.id, tenantId))
+      .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.users.type, "authenticated"))),
+    db
+      .select({
+        id: schema.invites.id,
+        email: schema.invites.email,
+        name: schema.invites.email,
+        type: sql<MemberType>`'invite'`.as("type"),
+        role: schema.invites.role,
+      })
+      .from(schema.invites)
+      .where(eq(schema.invites.tenantId, tenantId)),
+  ).orderBy(sql`type desc`, sql`name`);
+}

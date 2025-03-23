@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import SettingsNav from "@/app/(main)/settings/settings-nav";
 import UserSettings from "@/app/(main)/settings/users/user-settings";
-import { getMembersByTenantId } from "@/lib/server/service";
+import { getAuthenticatedMembersByTenantId } from "@/lib/server/service";
 import { adminOrRedirect } from "@/lib/server/utils";
 interface Props {
   params: { slug: string };
@@ -10,7 +10,7 @@ interface Props {
 
 export default async function UsersSettingsPage({ params }: Props) {
   const { tenant } = await adminOrRedirect();
-  const members = await getMembersByTenantId(tenant.id);
+  const members = await getAuthenticatedMembersByTenantId(tenant.id);
   const { slug } = await params;
 
   // Verify that the tenant slug matches the URL slug

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, notFound } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { ReactNode, useEffect, useState } from "react";
 import { z } from "zod";
@@ -75,7 +75,7 @@ export default function Header({ name, logoUrl, currentProfileId, tenantSlug, on
     if (tenantSlug) {
       router.push(`/${tenantSlug}`);
     } else {
-      router.push("/");
+      notFound();
     }
   };
 

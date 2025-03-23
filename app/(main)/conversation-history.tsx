@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -13,9 +11,10 @@ interface Props {
   className?: string;
   tenantSlug: string | null;
 }
+type Conversation = z.infer<typeof conversationSchema>;
 
 export default function ConversationHistory({ className, tenantSlug }: Props) {
-  const [conversations, setConversations] = useState<z.infer<typeof conversationSchema>[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
 
   useEffect(() => {
     (async () => {

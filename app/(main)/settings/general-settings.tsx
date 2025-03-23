@@ -60,6 +60,7 @@ const QuestionField = ({ form, name, label }: QuestionFieldProps) => (
             placeholder="Type something"
             className="rounded-[8px] border border-[#D7D7D7] h-[58px] placeholder-[#74747A] text-[16px]"
             {...field}
+            /* type system infers field.value could be boolean because form schema includes the isPublic boolean. */
             value={field.value as string}
           />
         </FormControl>
@@ -88,6 +89,7 @@ const TextAreaField = ({ form, name, label, className, help }: TextAreaFieldProp
         </FormLabel>
         <FormControl>
           <div className="rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm">
+            {/* type system infers field.value could be boolean because form schema includes the isPublic boolean. */}
             <AutosizeTextarea className="pt-1.5" minHeight={80} {...field} value={field.value as string} />
           </div>
         </FormControl>
@@ -266,6 +268,8 @@ export default function GeneralSettings({ tenant, canUploadLogo }: Props) {
     setLoading(false);
 
     if (res.status !== 200) throw new Error("Failed to save");
+
+    toast.success("Changes saved");
 
     // If the prompts are empty strings, set them to undefined so we get the default value from the schema.
     form.reset({

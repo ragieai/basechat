@@ -12,8 +12,8 @@ const NavItem = ({ children, selected }: { children: ReactNode; selected?: boole
   <div className={cn("px-3 py-2 rounded-lg", selected ? "bg-[#F5F5F7] font-semibold" : "")}>{children}</div>
 );
 
-function getAppLocation(path: string): AppLocation {
-  if (path.includes("/settings/users")) {
+function getAppLocation(path: string, tenantSlug: string): AppLocation {
+  if (path.startsWith(`/${tenantSlug}/settings/users`)) {
     return AppLocation.SETTINGS_USERS;
   }
 
@@ -26,7 +26,7 @@ interface Props {
 
 export default function SettingsNav({ tenantSlug }: Props) {
   const pathname = usePathname();
-  const appLocation = getAppLocation(pathname);
+  const appLocation = getAppLocation(pathname, tenantSlug);
 
   return (
     <div className="w-[233px] flex flex-col pr-16">

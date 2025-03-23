@@ -10,15 +10,14 @@ import CONNECTOR_MAP from "@/lib/connector-map";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 import { adminOrRedirect } from "@/lib/server/utils";
-import { authOrRedirect } from "@/lib/server/utils";
 import ManageDataPreviewIcons from "@/public/manage-data-preview-icons.svg";
 
 interface Props {
   params: { slug: string };
 }
 
-export default async function DataPage({ params }: Props) {
-  const { tenant } = await authOrRedirect();
+export default async function DataIndexPage({ params }: Props) {
+  const { tenant } = await adminOrRedirect();
   const connections = await db.select().from(schema.connections).where(eq(schema.connections.tenantId, tenant.id));
   const { slug } = await params;
 
