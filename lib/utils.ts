@@ -31,5 +31,6 @@ export function generateSlug(input: string): string {
     .replace(/\s+/g, "-") // Replace one or more spaces with a single dash
     .replace(/[^a-z0-9-]/g, "") // Remove any characters that aren't lowercase letters, numbers, or dashes
     .replace(/-+/g, "-") // Replace multiple consecutive dashes with a single dash
-    .replace(/^-|-$/g, ""); // Remove leading and trailing dashes
+    .replace(/^-|-$/g, "") // Remove leading and trailing dashes
+    .slice(0, 30); // Limit to 30 characters
 }
