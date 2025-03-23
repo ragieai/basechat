@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 
 import authConfig from "./auth.config";
-import { getFirstTenantByUserId } from "./lib/server/service";
 
 // Wrapped middleware option. See https://authjs.dev/guides/edge-compatibility
 const { auth } = NextAuth(authConfig);
@@ -33,13 +32,9 @@ export default auth(async (req) => {
   const urlSlug = pathSegments[0];
 
   // Handle root path redirect
-  // Need to check if the user has a tenant, the tenant has a slug, and the slug is the same as the urlSlug
   if (nextUrl.pathname === "/") {
-    const tenant = await getFirstTenantByUserId(auth.user.id);
-    if (!tenant?.slug) {
-      return Response.redirect(new URL("/sign-in", nextUrl.origin));
-    }
-    return Response.redirect(new URL(`/${tenant.slug}`, nextUrl.origin));
+    // Redirect to sign-in if no tenant slug in URL
+    return Response.redirect(new URL("/sign-in", nextUrl.origin));
   }
 
   // Skip tenant validation for non-tenant routes
@@ -54,11 +49,13 @@ export default auth(async (req) => {
     return;
   }
 
-  // Validate tenant access
-  const tenant = await getFirstTenantByUserId(auth.user.id);
-  if (!tenant?.slug || tenant.slug !== urlSlug) {
+  // Basic tenant route validation
+  // We'll let the layout handle the actual tenant validation
+  if (!urlSlug) {
     return Response.redirect(new URL("/sign-in", nextUrl.origin));
   }
+
+  return;
 });
 
 export const config = {

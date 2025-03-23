@@ -35,11 +35,12 @@ interface Props {
 
 export default function Footer({ className }: Props) {
   const pathname = usePathname();
+  const tenantSlug = pathname.split("/")[1];
 
   let appLocation = AppLocation.CHAT;
-  if (pathname.startsWith("/data")) {
+  if (pathname.includes("/data")) {
     appLocation = AppLocation.DATA;
-  } else if (pathname.startsWith("/settings")) {
+  } else if (pathname.includes("/settings")) {
     appLocation = AppLocation.SETTINGS;
   }
 
@@ -55,13 +56,13 @@ export default function Footer({ className }: Props) {
   return (
     <div className={className}>
       <div className="flex">
-        <Link href="/">
+        <Link href={`/${tenantSlug}`}>
           <NavButton alt="Chat" src={chatIcon} className={chatClassName} />
         </Link>
-        <Link href="/data">
+        <Link href={`/${tenantSlug}/data`}>
           <NavButton alt="My Data" src={dataIcon} className={dataClassName} />
         </Link>
-        <Link href="/settings">
+        <Link href={`/${tenantSlug}/settings`}>
           <NavButton alt="Settings" src={settingsIcon} className={settingsClassName} />
         </Link>
       </div>

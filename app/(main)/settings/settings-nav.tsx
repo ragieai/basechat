@@ -13,23 +13,27 @@ const NavItem = ({ children, selected }: { children: ReactNode; selected?: boole
 );
 
 function getAppLocation(path: string): AppLocation {
-  if (path.startsWith("/settings/users")) {
+  if (path.includes("/settings/users")) {
     return AppLocation.SETTINGS_USERS;
   }
 
   return AppLocation.SETTINGS;
 }
 
-export default function SettingsNav() {
+interface Props {
+  tenantSlug: string;
+}
+
+export default function SettingsNav({ tenantSlug }: Props) {
   const pathname = usePathname();
   const appLocation = getAppLocation(pathname);
 
   return (
     <div className="w-[233px] flex flex-col pr-16">
-      <Link href="/settings">
+      <Link href={`/${tenantSlug}/settings`}>
         <NavItem selected={appLocation === AppLocation.SETTINGS}>General</NavItem>
       </Link>
-      <Link href="/settings/users">
+      <Link href={`/${tenantSlug}/settings/users`}>
         <NavItem selected={appLocation === AppLocation.SETTINGS_USERS}>Users</NavItem>
       </Link>
     </div>

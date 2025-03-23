@@ -10,6 +10,8 @@ const setupSchema = z.object({
 
 export async function POST(request: NextRequest) {
   const session = await requireSession();
+  // TODO: do we need authContext ?
+  // const { session } = await requireAuthContext();
   const payload = setupSchema.parse(await request.json());
   const { profileId, tenantId } = await createTenant(session.user.id, payload.name);
 

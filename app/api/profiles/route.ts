@@ -6,6 +6,8 @@ import { requireSession } from "@/lib/server/utils";
 
 export async function POST(request: NextRequest) {
   const session = await requireSession();
+  // TODO: do we need authContext ?
+  // const { session } = await requireAuthContext();
   const json = await request.json();
   const payload = updateCurrentProfileSchema.parse(json);
 

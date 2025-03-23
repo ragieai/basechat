@@ -30,7 +30,7 @@ export default function Welcome({ tenant, className }: Props) {
     const json = await res.json();
     const conversation = conversationResponseSchema.parse(json);
     setInitialMessage(content);
-    router.push(`/conversations/${conversation.id}`);
+    router.push(`/${tenant.slug}/conversations/${conversation.id}`);
   };
 
   const questions = [
