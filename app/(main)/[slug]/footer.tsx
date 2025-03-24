@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { getDataPath, getSettingsPath, getTenantPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
 
 import ChatIconOff from "../../../public/icons/chat-off.svg";
@@ -31,9 +32,10 @@ export function NavButton({ alt, src, className }: { alt: string; src: any; clas
 
 interface Props {
   className?: string;
+  tenant: { slug: string };
 }
 
-export default function Footer({ className }: Props) {
+export default function Footer({ className, tenant }: Props) {
   const pathname = usePathname();
 
   let appLocation = AppLocation.CHAT;
@@ -55,13 +57,13 @@ export default function Footer({ className }: Props) {
   return (
     <div className={className}>
       <div className="flex">
-        <Link href="/">
+        <Link href={getTenantPath(tenant.slug)}>
           <NavButton alt="Chat" src={chatIcon} className={chatClassName} />
         </Link>
-        <Link href="/data">
+        <Link href={getDataPath(tenant.slug)}>
           <NavButton alt="My Data" src={dataIcon} className={dataClassName} />
         </Link>
-        <Link href="/settings">
+        <Link href={getSettingsPath(tenant.slug)}>
           <NavButton alt="Settings" src={settingsIcon} className={settingsClassName} />
         </Link>
       </div>

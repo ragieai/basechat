@@ -8,7 +8,7 @@ import * as schema from "@/lib/server/db/schema";
 import { adminOrRedirect } from "@/lib/server/utils";
 
 import CONNECTOR_MAP from "../../../../lib/connector-map";
-import ManageDataPreviewIcons from "../../../public/manage-data-preview-icons.svg";
+import ManageDataPreviewIcons from "../../../../public/manage-data-preview-icons.svg";
 
 import AddConnectionMenu from "./add-connection-menu";
 import ManageConnectionMenu from "./manage-connection-menu";
