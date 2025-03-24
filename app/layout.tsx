@@ -4,7 +4,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 
-import { GlobalStateProvider } from "./(main)/[slug]/context";
+import { GlobalStateProvider } from "./(main)/o/[slug]/context";
 
 const inter = Inter({ subsets: ["latin"] });
 

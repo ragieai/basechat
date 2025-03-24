@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-import { useGlobalState } from "@/app/(main)/[slug]/context";
 import Chatbot from "@/components/chatbot";
 
 import Summary from "./summary";
+
+import { useGlobalState } from "@/app/(main)/[slug]/context";
 
 interface Props {
   id: string;

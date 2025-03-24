@@ -12,12 +12,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { tenantListResponseSchema, updateCurrentProfileSchema } from "@/lib/api";
 import { getTenantPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
-
-import CheckIcon from "../../../public/icons/check.svg";
-import HamburgerIcon from "../../../public/icons/hamburger.svg";
-import LogOutIcon from "../../../public/icons/log-out.svg";
-import NewChatIcon from "../../../public/icons/new-chat.svg";
-import PlusIcon from "../../../public/icons/plus.svg";
+import CheckIcon from "@/public/icons/check.svg";
+import HamburgerIcon from "@/public/icons/hamburger.svg";
+import LogOutIcon from "@/public/icons/log-out.svg";
+import NewChatIcon from "@/public/icons/new-chat.svg";
+import PlusIcon from "@/public/icons/plus.svg";
 
 import ConversationHistory from "./conversation-history";
 

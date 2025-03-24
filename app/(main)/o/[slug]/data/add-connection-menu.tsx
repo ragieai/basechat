@@ -10,8 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import CONNECTOR_MAP from "../../../../lib/connector-map";
+import CONNECTOR_MAP from "@/lib/connector-map";
 
 const inter = Inter({ subsets: ["latin"] });
 
