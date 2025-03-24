@@ -8,6 +8,7 @@ export const createConversationMessageResponseSchema = z.object({
 export const createConversationMessageRequestSchema = z.object({
   conversationId: z.string(),
   content: z.string().describe("The request message"),
+  model: z.enum(["GPT-4o", "Gemini 2.0 Flash", "Claude Sonnet 3.7"]).default("GPT-4o"),
 });
 
 export type CreateConversationMessageRequest = z.infer<typeof createConversationMessageRequestSchema>;

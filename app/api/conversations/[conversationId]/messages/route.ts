@@ -21,7 +21,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { conversationId } = await params;
   const json = await request.json();
 
-  const { content } = createConversationMessageRequestSchema.parse(json);
+  const { content, model } = createConversationMessageRequestSchema.parse(json);
 
   const conversation = await getConversation(tenant.id, profile.id, conversationId);
   const existing = await getConversationMessages(tenant.id, profile.id, conversation.id);
@@ -83,6 +83,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
   });
 
-  const [stream, messageId] = await generate(tenant.id, profile.id, conversation.id, { messages, sources });
+  const [stream, messageId] = await generate(tenant.id, profile.id, conversation.id, { messages, sources, model });
   return stream.toTextStreamResponse({ headers: { "x-message-id": messageId } });
 }

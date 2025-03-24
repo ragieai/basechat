@@ -7,7 +7,11 @@ import { DEFAULT_GROUNDING_PROMPT, DEFAULT_SYSTEM_PROMPT } from "@/lib/constants
 import { getRagieClient } from "@/lib/server/ragie";
 import { createConversationMessage, updateConversationMessageContent } from "@/lib/server/service";
 
-type GenerateContext = { messages: CoreMessage[]; sources: any[] };
+type GenerateContext = {
+  messages: CoreMessage[];
+  sources: any[];
+  model: "GPT-4o" | "Gemini 2.0 Flash" | "Claude Sonnet 3.7";
+};
 
 export async function generate(tenantId: string, profileId: string, conversationId: string, context: GenerateContext) {
   const pendingMessage = await createConversationMessage({
@@ -16,6 +20,7 @@ export async function generate(tenantId: string, profileId: string, conversation
     role: "assistant",
     content: null,
     sources: context.sources,
+    model: context.model,
   });
 
   const result = streamObject({
