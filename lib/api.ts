@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { LLMModel, LLMProvider, PROVIDER_MODELS, ALL_VALID_MODELS } from "@/lib/llm/types";
+
 export const createConversationMessageResponseSchema = z.object({
   usedSourceIndexes: z.array(z.number().describe("The indexes of the sources used in the response")),
   message: z.string().describe("The response message"),
@@ -8,7 +10,13 @@ export const createConversationMessageResponseSchema = z.object({
 export const createConversationMessageRequestSchema = z.object({
   conversationId: z.string(),
   content: z.string().describe("The request message"),
-  model: z.enum(["GPT-4o", "Gemini 2.0 Flash", "Claude Sonnet 3.7"]).default("GPT-4o"),
+  provider: z.enum(Object.keys(PROVIDER_MODELS) as [LLMProvider, ...LLMProvider[]]).default("openai"),
+  model: z
+    .string()
+    .refine((model): model is LLMModel => {
+      return ALL_VALID_MODELS.includes(model as LLMModel);
+    }, "Invalid model")
+    .default("gpt-4o"),
 });
 
 export type CreateConversationMessageRequest = z.infer<typeof createConversationMessageRequestSchema>;
