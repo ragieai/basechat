@@ -53,6 +53,7 @@ export const tenants = pgTable("tenants", {
   ...baseFields,
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
+  isPublic: boolean("is_public").notNull().default(false),
   question1: text("question1"),
   question2: text("question2"),
   question3: text("question3"),
