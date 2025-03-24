@@ -134,6 +134,13 @@
       "when": 1741388436419,
       "tag": "0018_sturdy_captain_america",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1742779386475,
+      "tag": "0019_fine_stranger",
+      "breakpoints": true
     }
   ]
 }
