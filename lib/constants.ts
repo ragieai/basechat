@@ -35,3 +35,10 @@ export const DEFAULT_EXPAND_SYSTEM_PROMPT = `The user would like you to provide 
 
 export type LLMModel = "GPT-4o" | "Gemini 2.0 Flash" | "Claude Sonnet 3.7";
 export const LLM_MODELS: LLMModel[] = ["GPT-4o", "Gemini 2.0 Flash", "Claude Sonnet 3.7"];
+
+// map LLMModel to tuple of [display name, logo svg]
+export const LLM_LOGO_MAP: Record<LLMModel, [string, string]> = {
+  "GPT-4o": ["GPT-4o", "/openai.svg"],
+  "Gemini 2.0 Flash": ["Gemini 2.0 Flash", "/gemini.svg"],
+  "Claude Sonnet 3.7": ["Claude Sonnet 3.7", "/anthropic.svg"],
+};

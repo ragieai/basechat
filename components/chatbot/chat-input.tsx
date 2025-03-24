@@ -2,13 +2,12 @@ import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { KeyboardEvent, useRef, useState } from "react";
 
-import { LLMModel, LLM_MODELS } from "@/lib/constants";
+import { LLMModel, LLM_MODELS, LLM_LOGO_MAP } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 import CheckIcon from "../../public/icons/check.svg";
 import { AutosizeTextarea, AutosizeTextAreaRef } from "../ui/autosize-textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-
 
 interface ChatInputProps {
   handleSubmit?: (text: string) => void;
@@ -72,16 +71,22 @@ export default function ChatInput(props: ChatInputProps) {
         </PopoverTrigger>
         <ModelPopoverContent>
           <div className="flex flex-col gap-1">
-            {LLM_MODELS.map((model) => (
-              <button
-                key={model}
-                className="flex items-center rounded-sm px-4 py-3 text-sm text-left hover:bg-black hover:bg-opacity-5"
-                onClick={() => setSelectedModel(model)}
-              >
-                <div className="w-4">{selectedModel === model && <Image src={CheckIcon} alt="selected" />}</div>
-                <span className="ml-3 text-md font-medium">{model}</span>
-              </button>
-            ))}
+            {LLM_MODELS.map((model) => {
+              const [displayName, logoPath] = LLM_LOGO_MAP[model];
+              return (
+                <button
+                  key={model}
+                  className="flex items-center rounded-sm px-4 py-3 text-sm text-left hover:bg-black hover:bg-opacity-5"
+                  onClick={() => setSelectedModel(model)}
+                >
+                  <div className="w-4">{selectedModel === model && <Image src={CheckIcon} alt="selected" />}</div>
+                  <div className="flex items-center ml-3">
+                    <Image src={logoPath} alt={displayName} width={16} height={16} className="mr-2" />
+                    <span>{model}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </ModelPopoverContent>
       </Popover>
