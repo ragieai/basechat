@@ -8,6 +8,7 @@ import nodemailer from "nodemailer";
 import SMTPConnection from "nodemailer/lib/smtp-connection";
 
 import { Member, MemberType } from "@/lib/api";
+import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "@/lib/llm/types";
 import * as settings from "@/lib/server/settings";
 
 import { InviteHtml, ResetPasswordHtml } from "../mail";
@@ -16,6 +17,7 @@ import db from "./db";
 import * as schema from "./db/schema";
 import { getRagieClient } from "./ragie";
 import { hashPassword } from "./utils";
+
 
 type Role = (typeof schema.rolesEnum.enumValues)[number];
 
@@ -360,6 +362,8 @@ export async function createConversationMessage(message: typeof schema.messages.
       conversationId: message.conversationId,
       content: message.content,
       sources: message.sources,
+      provider: message.provider || DEFAULT_PROVIDER,
+      model: message.model || DEFAULT_MODEL,
     })
     .returning();
   assert(rs.length === 1);
@@ -435,7 +439,10 @@ export async function getConversationMessages(tenantId: string, profileId: strin
       ),
     )
     .orderBy(asc(schema.messages.createdAt));
-  return rs.map((r) => r.messages);
+  return rs.map((r) => ({
+    ...r.messages,
+    model: r.messages.model || DEFAULT_MODEL,
+  }));
 }
 
 export async function setTenantLogo(tenantId: string, logoFileName: string, logoObjectName: string, logoUrl: string) {

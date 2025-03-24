@@ -1,5 +1,8 @@
 export type LLMProvider = "openai" | "google" | "anthropic";
 
+export const DEFAULT_MODEL = "gpt-4o";
+export const DEFAULT_PROVIDER = "openai";
+
 // Type-safe mapping of providers to their supported models
 export type ProviderModelMap = {
   openai: ["gpt-4o", "gpt-3.5-turbo"];

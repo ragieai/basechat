@@ -138,15 +138,8 @@
     {
       "idx": 19,
       "version": "7",
-      "when": 1742779386475,
-      "tag": "0019_fine_stranger",
-      "breakpoints": true
-    },
-    {
-      "idx": 20,
-      "version": "7",
-      "when": 1742829666195,
-      "tag": "0020_rapid_microchip",
+      "when": 1742834437163,
+      "tag": "0019_charming_shocker",
       "breakpoints": true
     }
   ]

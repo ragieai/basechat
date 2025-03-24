@@ -4,13 +4,20 @@ import Handlebars from "handlebars";
 
 import { createConversationMessageResponseSchema } from "@/lib/api";
 import { DEFAULT_GROUNDING_PROMPT, DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
-import { LLMModel, LLMProvider, PROVIDER_MODELS } from "@/lib/llm/types";
+import { getProvider } from "@/lib/llm/providers/factory";
+import { LLMModel, DEFAULT_MODEL, DEFAULT_PROVIDER } from "@/lib/llm/types";
 import { getRagieClient } from "@/lib/server/ragie";
 import { createConversationMessage, updateConversationMessageContent } from "@/lib/server/service";
 
-type GenerateContext = { messages: CoreMessage[]; sources: any[] };
+type GenerateContext = { messages: CoreMessage[]; sources: any[]; model: LLMModel };
 
-export async function generate(tenantId: string, profileId: string, conversationId: string, context: GenerateContext) {
+export async function generate(
+  tenantId: string,
+  profileId: string,
+  conversationId: string,
+  context: GenerateContext,
+  model: LLMModel = DEFAULT_MODEL,
+) {
   const pendingMessage = await createConversationMessage({
     tenantId,
     conversationId,
@@ -18,10 +25,9 @@ export async function generate(tenantId: string, profileId: string, conversation
     content: null,
     sources: context.sources,
   });
-  // TODO: handle different models and providers.
-  const result = streamObject({
-    messages: context.messages,
-    model: openai("gpt-4o"),
+
+  const provider = getProvider(model);
+  const result = await provider.generateStream(context.messages, {
     temperature: 0.3,
     schema: createConversationMessageResponseSchema,
     onFinish: async (event) => {
@@ -35,6 +41,7 @@ export async function generate(tenantId: string, profileId: string, conversation
       );
     },
   });
+
   return [result, pendingMessage.id] as const;
 }
 

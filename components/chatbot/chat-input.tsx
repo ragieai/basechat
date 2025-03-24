@@ -10,7 +10,7 @@ import { AutosizeTextarea, AutosizeTextAreaRef } from "../ui/autosize-textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 interface ChatInputProps {
-  handleSubmit?: (text: string) => void;
+  handleSubmit?: (text: string, model: LLMModel) => void;
 }
 
 const ModelPopoverContent = ({ children }: { children: React.ReactNode }) => (
@@ -28,7 +28,7 @@ export default function ChatInput(props: ChatInputProps) {
     setValue("");
 
     const v = value.trim();
-    v && props.handleSubmit && props.handleSubmit(v);
+    v && props.handleSubmit && props.handleSubmit(v, selectedModel);
     ref.current?.textArea.focus();
   };
 

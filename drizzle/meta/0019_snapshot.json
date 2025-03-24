@@ -1,5 +1,5 @@
 {
-  "id": "74268e08-5e85-4ed4-9dd5-7c7c842598ab",
+  "id": "1dd205db-da05-4a96-929d-895922c66013",
   "prevId": "2f14bcdd-5804-43d9-bc6e-1dea53dce87e",
   "version": "7",
   "dialect": "postgresql",
@@ -538,13 +538,20 @@
           "primaryKey": false,
           "notNull": true
         },
-        "model": {
-          "name": "model",
-          "type": "llm_model",
+        "provider": {
+          "name": "provider",
+          "type": "llm_provider",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
-          "default": "'GPT-4o'"
+          "default": "'openai'"
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'gpt-4o'"
         }
       },
       "indexes": {},
@@ -964,13 +971,13 @@
     }
   },
   "enums": {
-    "public.llm_model": {
-      "name": "llm_model",
+    "public.llm_provider": {
+      "name": "llm_provider",
       "schema": "public",
       "values": [
-        "GPT-4o",
-        "Gemini 2.0 Flash",
-        "Claude Sonnet 3.7"
+        "openai",
+        "google",
+        "anthropic"
       ]
     },
     "public.message_roles": {

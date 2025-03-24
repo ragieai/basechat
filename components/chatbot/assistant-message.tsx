@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import "./style.css";
 import CONNECTOR_MAP from "@/lib/connector-map";
-import { LLMModel } from "@/lib/constants";
+import { LLMModel } from "@/lib/llm/types";
 
 import Logo from "../tenant/logo/logo";
 
