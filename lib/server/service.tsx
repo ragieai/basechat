@@ -175,9 +175,9 @@ export async function getAuthContextByUserId(userId: string, slug: string) {
   const rs = await db
     .select()
     .from(schema.tenants)
-    .innerJoin(schema.profiles, and(eq(schema.profiles.userId, userId), eq(schema.tenants.slug, slug)))
     .innerJoin(schema.users, eq(schema.users.id, userId))
-    .where(eq(schema.users.id, userId));
+    .innerJoin(schema.profiles, eq(schema.tenants.id, schema.profiles.tenantId))
+    .where(and(eq(schema.profiles.userId, userId), eq(schema.tenants.slug, slug)));
 
   assert(rs.length === 1, "expected single record");
   const row = rs[0];
