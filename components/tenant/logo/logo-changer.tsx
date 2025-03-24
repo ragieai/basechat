@@ -16,11 +16,11 @@ interface Props {
   };
 }
 
-export default function LogoChanger({ tenant: { logoName: initialLogoName, logoUrl: initialLogoUrl, slug } }: Props) {
+export default function LogoChanger({ tenant }: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [image, setImage] = useState<string | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string | null | undefined>(initialLogoUrl);
-  const [logoName, setLogoName] = useState<string | null | undefined>(initialLogoName);
+  const [logoUrl, setLogoUrl] = useState<string | null | undefined>(tenant.logoUrl);
+  const [logoName, setLogoName] = useState<string | null | undefined>(tenant.logoName);
 
   const onLogoChange = useCallback((event: FileCreateEvent | FileDeleteEvent) => {
     if (event.action === "create") {
@@ -54,7 +54,7 @@ export default function LogoChanger({ tenant: { logoName: initialLogoName, logoU
       <UploadableLogo imageUrl={logoUrl} imageName={logoName} onChange={onLogoChange} />
       {image && (
         <CreateLogoDialog
-          slug={slug}
+          tenant={tenant}
           image={image}
           imageName={logoName}
           onCancel={onSetLogoCancel}

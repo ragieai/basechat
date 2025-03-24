@@ -20,14 +20,16 @@ export interface OnSuccessEvent {
 }
 
 interface Props {
-  slug: string;
+  tenant: {
+    slug: string;
+  };
   image: string;
   imageName?: string | null | undefined;
   onCancel: () => void;
   onSuccess: (event: OnSuccessEvent) => void;
 }
 
-export default function CreateLogoDialog({ slug, image, imageName, onCancel, onSuccess }: Props) {
+export default function CreateLogoDialog({ tenant, image, imageName, onCancel, onSuccess }: Props) {
   const [state, formAction] = useActionState(createLogo, {
     status: "pending" as const,
   });
@@ -51,7 +53,13 @@ export default function CreateLogoDialog({ slug, image, imageName, onCancel, onS
       }}
     >
       <DialogContent className="sm:max-w-[425px]">
-        <CreateLogoForm formState={state} formAction={formAction} slug={slug} image={image} imageName={imageName} />
+        <CreateLogoForm
+          formState={state}
+          formAction={formAction}
+          slug={tenant.slug}
+          image={image}
+          imageName={imageName}
+        />
       </DialogContent>
     </Dialog>
   );
