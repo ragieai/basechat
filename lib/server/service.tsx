@@ -217,6 +217,7 @@ export async function getTenantsByUserId(userId: string) {
     .select({
       id: schema.tenants.id,
       name: schema.tenants.name,
+      slug: schema.tenants.slug,
       logoUrl: schema.tenants.logoUrl,
       profileId: schema.profiles.id,
     })

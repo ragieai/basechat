@@ -66,17 +66,17 @@ export default function Header({ currentProfileId, tenant, name, onNavClick = ()
 
   const handleLogOutClick = async () => await signOut();
 
-  const handleProfileClick = async (profileId: string) => {
+  const handleProfileClick = async (tenant: z.infer<typeof tenantListResponseSchema>[number]) => {
     await fetch("/api/profiles", {
       method: "POST",
       body: JSON.stringify(
         updateCurrentProfileSchema.parse({
-          currentProfileId: profileId,
+          currentProfileId: tenant.profileId,
         }),
       ),
     });
-    setSelectedProfileId(profileId);
-    router.push("/");
+    setSelectedProfileId(tenant.profileId);
+    router.push(getTenantPath(tenant.slug));
   };
 
   return (
@@ -112,7 +112,7 @@ export default function Header({ currentProfileId, tenant, name, onNavClick = ()
               <li
                 key={i}
                 className="hover:bg-black hover:bg-opacity-5 px-4 py-3 rounded-lg cursor-pointer"
-                onClick={() => handleProfileClick(tenant.profileId)}
+                onClick={() => handleProfileClick(tenant)}
               >
                 <div className="flex items-center mb-1">
                   <div className="w-4">

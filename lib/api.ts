@@ -69,6 +69,7 @@ export const tenantListResponseSchema = z.array(
   z.object({
     id: z.string(),
     name: z.string(),
+    slug: z.string(),
     logoUrl: z.string().nullable(),
     profileId: z.string(),
   }),
