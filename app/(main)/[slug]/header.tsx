@@ -28,6 +28,7 @@ interface Props {
     logoUrl?: string | null;
     slug: string;
   };
+  name: string | null;
   className?: string;
   onNavClick?: () => void;
 }
@@ -49,7 +50,7 @@ const HeaderPopoverContent = ({
   </PopoverContent>
 );
 
-export default function Header({ currentProfileId, tenant, onNavClick = () => {} }: Props) {
+export default function Header({ currentProfileId, tenant, name, onNavClick = () => {} }: Props) {
   const router = useRouter();
 
   const [tenants, setTenants] = useState<z.infer<typeof tenantListResponseSchema>>([]);
@@ -97,7 +98,7 @@ export default function Header({ currentProfileId, tenant, onNavClick = () => {}
         <PopoverTrigger asChild>
           <div>
             <Logo
-              name={tenant.name ?? ""}
+              name={name}
               url={tenant.logoUrl}
               width={32}
               height={32}

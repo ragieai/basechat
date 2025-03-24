@@ -10,11 +10,11 @@ interface Props {
 }
 
 export default async function MainLayout({ children }: Props) {
-  const { tenant, profile } = await authOrRedirect();
+  const { tenant, profile, session } = await authOrRedirect();
 
   return (
     <div className="h-full w-full flex flex-col items-center bg-white">
-      <Header currentProfileId={profile.id} tenant={tenant} />
+      <Header currentProfileId={profile.id} tenant={tenant} name={session.user.name} />
       <div className="h-full w-full flex-1 flex justify-center overflow-auto">
         <div className="h-full w-full flex flex-col items-center justify-center min-w-[500px]">{children}</div>
       </div>
