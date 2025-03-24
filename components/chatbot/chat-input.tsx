@@ -1,14 +1,24 @@
 import { ChevronDown } from "lucide-react";
+import Image from "next/image";
 import { KeyboardEvent, useRef, useState } from "react";
 
 import { LLMModel, LLM_MODELS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
+import CheckIcon from "../../public/icons/check.svg";
 import { AutosizeTextarea, AutosizeTextAreaRef } from "../ui/autosize-textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+
 
 interface ChatInputProps {
   handleSubmit?: (text: string) => void;
 }
+
+const ModelPopoverContent = ({ children }: { children: React.ReactNode }) => (
+  <PopoverContent align="start" className={cn("bg-[#F5F5F7] w-[258px] border-none shadow-none rounded-[12px] p-6")}>
+    {children}
+  </PopoverContent>
+);
 
 export default function ChatInput(props: ChatInputProps) {
   const [value, setValue] = useState("");
@@ -60,21 +70,20 @@ export default function ChatInput(props: ChatInputProps) {
           {selectedModel}
           <ChevronDown className="h-4 w-4" />
         </PopoverTrigger>
-        <PopoverContent className="w-48 p-2" align="start" sideOffset={4}>
+        <ModelPopoverContent>
           <div className="flex flex-col gap-1">
             {LLM_MODELS.map((model) => (
               <button
                 key={model}
-                className={`rounded-md px-2 py-1.5 text-sm text-left hover:bg-accent ${
-                  selectedModel === model ? "bg-accent" : ""
-                }`}
+                className="flex items-center rounded-sm px-4 py-3 text-sm text-left hover:bg-black hover:bg-opacity-5"
                 onClick={() => setSelectedModel(model)}
               >
-                {model}
+                <div className="w-4">{selectedModel === model && <Image src={CheckIcon} alt="selected" />}</div>
+                <span className="ml-3 text-md font-medium">{model}</span>
               </button>
             ))}
           </div>
-        </PopoverContent>
+        </ModelPopoverContent>
       </Popover>
     </div>
   );
