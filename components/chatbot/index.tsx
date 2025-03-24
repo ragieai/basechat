@@ -166,7 +166,7 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
         </div>
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
-        <div className="flex flex-col w-full p-2 pl-4 rounded-[24px] border border-[#D7D7D7]">
+        <div className="flex flex-col w-full p-2 pl-4 rounded-[16px] border border-[#D7D7D7]">
           <ChatInput handleSubmit={handleSubmit} />
         </div>
       </div>
