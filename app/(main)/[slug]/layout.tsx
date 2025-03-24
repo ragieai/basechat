@@ -6,11 +6,13 @@ import Footer from "./footer";
 import Header from "./header";
 
 interface Props {
+  params: Promise<{ slug: string }>;
   children?: ReactNode;
 }
 
-export default async function MainLayout({ children }: Props) {
-  const { tenant, profile, session } = await authOrRedirect();
+export default async function MainLayout({ children, params }: Props) {
+  const p = await params;
+  const { tenant, profile, session } = await authOrRedirect(p.slug);
 
   return (
     <div className="h-full w-full flex flex-col items-center bg-white">

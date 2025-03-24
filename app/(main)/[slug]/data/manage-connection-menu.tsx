@@ -9,11 +9,22 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/component
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function ManageConnectionMenu({ id }: { id: string }) {
+interface Props {
+  id: string;
+  tenant: {
+    slug: string;
+  };
+}
+
+export default function ManageConnectionMenu({ id, tenant }: Props) {
   const router = useRouter();
 
   async function deleteConnection() {
-    const res = await fetch(`/api/connections/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/connections/${id}`, {
+      headers: { tenant: tenant.slug },
+      method: "DELETE",
+    });
+
     if (!res.ok) throw new Error("delete failed");
     router.refresh();
   }

@@ -14,21 +14,24 @@ import { DocumentResponse } from "./types";
 interface Props {
   className?: string;
   documentId: string;
+  slug: string;
   onCloseClick: () => void;
 }
 
-export default function Summary({ className, documentId, onCloseClick = () => {} }: Props) {
+export default function Summary({ className, documentId, slug, onCloseClick = () => {} }: Props) {
   const [document, setDocument] = useState<DocumentResponse | null>(null);
 
   useEffect(() => {
     (async () => {
-      const res = await fetch(`/api/documents/${documentId}`);
+      const res = await fetch(`/api/documents/${documentId}`, {
+        headers: { tenant: slug },
+      });
       if (!res.ok) throw new Error("could not retrieve summary");
 
       const json = (await res.json()) as DocumentResponse;
       setDocument(json);
     })();
-  }, [documentId]);
+  }, [documentId, slug]);
 
   const icon =
     document?.metadata.source_type && CONNECTOR_MAP[document.metadata.source_type]

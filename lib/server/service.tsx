@@ -171,12 +171,12 @@ export async function createInvites(tenantId: string, invitedBy: string, emails:
   return invites;
 }
 
-export async function getAuthContextByUserId(userId: string) {
+export async function getAuthContextByUserId(userId: string, slug: string) {
   const rs = await db
     .select()
-    .from(schema.users)
-    .innerJoin(schema.profiles, eq(schema.users.currentProfileId, schema.profiles.id))
-    .innerJoin(schema.tenants, eq(schema.profiles.tenantId, schema.tenants.id))
+    .from(schema.tenants)
+    .innerJoin(schema.profiles, and(eq(schema.profiles.userId, userId), eq(schema.tenants.slug, slug)))
+    .innerJoin(schema.users, eq(schema.users.id, userId))
     .where(eq(schema.users.id, userId));
 
   assert(rs.length === 1, "expected single record");

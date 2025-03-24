@@ -15,11 +15,19 @@ import CONNECTOR_MAP from "../../../../lib/connector-map";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function AddConnectionMenu({ className }: { className?: string }) {
+interface Props {
+  tenant: {
+    slug: string;
+  };
+}
+
+export default function AddConnectionMenu({ tenant }: Props) {
   const router = useRouter();
 
   const onSelect = async (sourceType: string) => {
-    const res = await fetch(`/api/ragie/connect/${sourceType}`);
+    const res = await fetch(`/api/ragie/connect/${sourceType}`, {
+      headers: { tenant: tenant.slug },
+    });
     if (res.status < 200 || res.status >= 300) throw new Error("Could not retrieve redirect URL");
     const { url } = (await res.json()) as { url: string };
     router.push(url);

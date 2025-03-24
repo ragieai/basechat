@@ -3,8 +3,13 @@ import { adminOrRedirect } from "@/lib/server/utils";
 import GeneralSettings from "./general-settings";
 import SettingsNav from "./settings-nav";
 
-export default async function SettingsIndexPage() {
-  const { tenant } = await adminOrRedirect();
+interface Props {
+  params: Promise<{ slug: string }>;
+}
+
+export default async function SettingsIndexPage({ params }: Props) {
+  const p = await params;
+  const { tenant } = await adminOrRedirect(p.slug);
   const canUploadLogo = !!process.env.STORAGE_ENDPOINT;
 
   return (

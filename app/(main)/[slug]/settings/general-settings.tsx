@@ -115,7 +115,11 @@ export default function GeneralSettings({ tenant, canUploadLogo }: Props) {
     setLoading(true);
 
     const payload = updateTenantSchema.parse(values);
-    const res = await fetch("/api/tenants/current", { method: "PATCH", body: JSON.stringify(payload) });
+    const res = await fetch("/api/tenants/current", {
+      method: "PATCH",
+      headers: { tenant: tenant.slug },
+      body: JSON.stringify(payload),
+    });
     setLoading(false);
 
     if (res.status !== 200) throw new Error("Failed to save");

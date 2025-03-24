@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { createInvites } from "@/lib/server/service";
-import { requireAdminContext } from "@/lib/server/utils";
+import { requireAdminContextFromRequest } from "@/lib/server/utils";
 
 const inviteSchema = z
   .object({
@@ -12,8 +12,7 @@ const inviteSchema = z
   .strict();
 
 export async function POST(request: NextRequest) {
-  const { profile, tenant } = await requireAdminContext();
-
+  const { profile, tenant } = await requireAdminContextFromRequest(request);
   const json = await request.json();
   const payload = inviteSchema.parse(json);
 

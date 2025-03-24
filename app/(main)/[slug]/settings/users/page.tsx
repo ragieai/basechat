@@ -5,14 +5,19 @@ import SettingsNav from "../settings-nav";
 
 import UserSettings from "./user-settings";
 
-export default async function SettingsUsersIndexPage() {
-  const { tenant } = await adminOrRedirect();
+interface Props {
+  params: Promise<{ slug: string }>;
+}
+
+export default async function SettingsUsersIndexPage({ params }: Props) {
+  const p = await params;
+  const { tenant } = await adminOrRedirect(p.slug);
   const members = await getMembersByTenantId(tenant.id);
 
   return (
     <div className="max-w-[1140px] w-full p-4 flex-grow flex">
       <SettingsNav tenant={tenant} />
-      <UserSettings members={members} />
+      <UserSettings tenant={tenant} members={members} />
     </div>
   );
 }

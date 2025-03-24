@@ -13,15 +13,20 @@ import ManageDataPreviewIcons from "../../../../public/manage-data-preview-icons
 import AddConnectionMenu from "./add-connection-menu";
 import ManageConnectionMenu from "./manage-connection-menu";
 
-export default async function DataIndexPage() {
-  const { tenant } = await adminOrRedirect();
+interface Props {
+  params: Promise<{ slug: string }>;
+}
+
+export default async function DataIndexPage({ params }: Props) {
+  const p = await params;
+  const { tenant } = await adminOrRedirect(p.slug);
   const connections = await db.select().from(schema.connections).where(eq(schema.connections.tenantId, tenant.id));
 
   return (
     <div className="max-w-[1140px] w-full p-4 flex-grow flex flex-col">
       <div className="flex w-full justify-between items-center pt-2">
         <h1 className="font-bold text-[32px]">Manage data</h1>
-        <AddConnectionMenu />
+        <AddConnectionMenu tenant={tenant} />
       </div>
       <>
         {connections.length > 0 ? (
@@ -48,7 +53,7 @@ export default async function DataIndexPage() {
                     <TableCell>{formatDistanceToNow(connection.createdAt)}</TableCell>
                     <TableCell>{connection.status}</TableCell>
                     <TableCell className="text-right">
-                      <ManageConnectionMenu id={connection.id} />
+                      <ManageConnectionMenu id={connection.id} tenant={tenant} />
                     </TableCell>
                   </TableRow>
                 ))}

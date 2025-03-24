@@ -25,6 +25,9 @@ import { Member, MemberRole, MemberType } from "@/lib/api";
 
 interface Props {
   members: Member[];
+  tenant: {
+    slug: string;
+  };
 }
 
 const formSchema = z.object({
@@ -50,7 +53,7 @@ const RoleSelectItem = ({ item }: { item: { name: string; value: MemberRole; des
   </>
 );
 
-export default function UserSettings({ members: initialMembers }: Props) {
+export default function UserSettings({ members: initialMembers, tenant }: Props) {
   const [members, setMembers] = useState(initialMembers);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
@@ -70,7 +73,11 @@ export default function UserSettings({ members: initialMembers }: Props) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true);
 
-    const res = await fetch("/api/invites", { method: "POST", body: JSON.stringify(values) });
+    const res = await fetch("/api/invites", {
+      method: "POST",
+      headers: { tenant: tenant.slug },
+      body: JSON.stringify(values),
+    });
     if (res.status !== 200) {
       toast.error("Invite failed.  Try again later.");
       setLoading(false);
@@ -102,7 +109,10 @@ export default function UserSettings({ members: initialMembers }: Props) {
   };
 
   const deleteInvite = async (id: string) => {
-    const res = await fetch(`/api/invites/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/invites/${id}`, {
+      method: "DELETE",
+      headers: { tenant: tenant.slug },
+    });
     if (!res.ok) {
       toast.error("Could not delete invite");
       return;
@@ -113,7 +123,10 @@ export default function UserSettings({ members: initialMembers }: Props) {
   };
 
   const deleteProfile = async (id: string) => {
-    const res = await fetch(`/api/profiles/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/profiles/${id}`, {
+      method: "DELETE",
+      headers: { tenant: tenant.slug },
+    });
     if (!res.ok) {
       const payload = errorSchema.parse(await res.json());
       toast.error(`Error: ${payload.error}`);
@@ -127,6 +140,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
   const changeProfileRole = async (id: string, role: MemberRole) => {
     const res = await fetch(`/api/profiles/${id}`, {
       method: "PATCH",
+      headers: { tenant: tenant.slug },
       body: JSON.stringify({ role }),
     });
     if (!res.ok) {
@@ -140,6 +154,7 @@ export default function UserSettings({ members: initialMembers }: Props) {
   const changeInviteRole = async (id: string, role: MemberRole) => {
     const res = await fetch(`/api/invites/${id}`, {
       method: "PATCH",
+      headers: { tenant: tenant.slug },
       body: JSON.stringify({ role }),
     });
     if (!res.ok) {
@@ -204,7 +219,6 @@ export default function UserSettings({ members: initialMembers }: Props) {
                           <FormMessage>Must use valid email addresses</FormMessage>
                           <FormControl>
                             {/* The TagInput type is incorrect, but it is functional. */}
-                            {/* @ts-expect-error */}
                             <TagInput
                               placeholder="Email address, comma separated"
                               styleClasses={{

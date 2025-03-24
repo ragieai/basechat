@@ -2,10 +2,15 @@ import assert from "assert";
 
 import argon2 from "argon2";
 import { redirect, unauthorized } from "next/navigation";
+import { z } from "zod";
 
 import { auth } from "@/auth";
 
+import { getTenantPath } from "../paths";
+
 import { getAuthContextByUserId } from "./service";
+
+const tenantSchema = z.string();
 
 export async function requireSession() {
   const session = await auth();
@@ -13,31 +18,42 @@ export async function requireSession() {
   return session;
 }
 
-export async function requireAuthContext() {
+export async function requireAuthContext(slug: string) {
   const session = await requireSession();
-  const { profile, tenant } = await getAuthContextByUserId(session.user.id);
+  const { profile, tenant } = await getAuthContextByUserId(session.user.id, slug);
   return { profile, tenant, session };
 }
 
-export async function requireAdminContext() {
-  const context = await requireAuthContext();
+export async function requireAuthContextFromRequest(request: Request) {
+  const slug = tenantSchema.parse(request.headers.get("tenant"));
+  return requireAuthContext(slug);
+}
+
+export async function requireAdminContextFromRequest(request: Request) {
+  const slug = tenantSchema.parse(request.headers.get("tenant"));
+  return requireAdminContext(slug);
+}
+
+export async function requireAdminContext(slug: string) {
+  const context = await requireAuthContext(slug);
   if (context.profile.role !== "admin") unauthorized();
   return context;
 }
 
-export async function authOrRedirect() {
+export async function authOrRedirect(slug: string) {
   try {
-    return await requireAuthContext();
+    return await requireAuthContext(slug);
   } catch (e) {
+    console.log("authOrRedirect", e);
     return redirect("/sign-in");
   }
 }
 
-export async function adminOrRedirect() {
+export async function adminOrRedirect(slug: string) {
   try {
-    return await requireAdminContext();
+    return await requireAdminContext(slug);
   } catch (e) {
-    return redirect("/");
+    return redirect(getTenantPath(slug));
   }
 }
 

@@ -25,7 +25,13 @@ export default function Welcome({ tenant, className }: Props) {
   const { setInitialMessage } = useGlobalState();
 
   const handleSubmit = async (content: string) => {
-    const res = await fetch("/api/conversations", { method: "POST", body: JSON.stringify({ title: content }) });
+    const res = await fetch("/api/conversations", {
+      method: "POST",
+      body: JSON.stringify({ title: content }),
+      headers: {
+        tenant: tenant.slug,
+      },
+    });
     if (!res.ok) throw new Error("Could not create conversation");
 
     const json = await res.json();

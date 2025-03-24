@@ -29,13 +29,16 @@ const UserMessage = ({ content }: { content: string }) => (
 
 interface Props {
   conversationId: string;
-  name: string;
-  logoUrl?: string | null;
+  tenant: {
+    name: string;
+    logoUrl?: string | null;
+    slug: string;
+  };
   initMessage?: string;
   onSelectedDocumentId: (id: string) => void;
 }
 
-export default function Chatbot({ name, logoUrl, conversationId, initMessage, onSelectedDocumentId }: Props) {
+export default function Chatbot({ tenant, conversationId, initMessage, onSelectedDocumentId }: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
   const [messages, setMessages] = useState<Message[]>([]);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});
@@ -45,7 +48,10 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
     api: `/api/conversations/${conversationId}/messages`,
     schema: createConversationMessageResponseSchema,
     fetch: async function middleware(input: RequestInfo | URL, init?: RequestInit) {
-      const res = await fetch(input, init);
+      const res = await fetch(input, {
+        ...init,
+        headers: { ...init?.headers, tenant: tenant.slug },
+      });
       const id = res.headers.get("x-message-id");
 
       assert(id);
@@ -83,13 +89,15 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
     if (!pendingMessage) return;
 
     (async () => {
-      const res = await fetch(`/api/conversations/${conversationId}/messages/${pendingMessage.id}`);
+      const res = await fetch(`/api/conversations/${conversationId}/messages/${pendingMessage.id}`, {
+        headers: { tenant: tenant.slug },
+      });
       if (!res.ok) return;
 
       const json = (await res.json()) as { id: string; sources: SourceMetadata[] };
       setSourceCache((prev) => ({ ...prev, [json.id]: json.sources }));
     })();
-  }, [conversationId, pendingMessage]);
+  }, [conversationId, pendingMessage, tenant.slug]);
 
   useEffect(() => {
     if (localInitMessage) {
@@ -97,7 +105,9 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
       setLocalInitMessage(undefined);
     } else {
       (async () => {
-        const res = await fetch(`/api/conversations/${conversationId}/messages`);
+        const res = await fetch(`/api/conversations/${conversationId}/messages`, {
+          headers: { tenant: tenant.slug },
+        });
         if (!res.ok) throw new Error("Could not load conversation");
         const json = await res.json();
         const messages = conversationMessagesResponseSchema.parse(json);
@@ -133,8 +143,8 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
             ) : (
               <Fragment key={i}>
                 <AssistantMessage
-                  name={name}
-                  logoUrl={logoUrl}
+                  name={tenant.name}
+                  logoUrl={tenant.logoUrl}
                   content={message.content}
                   id={message.id}
                   sources={message.sources}
@@ -145,8 +155,8 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
           )}
           {isLoading && (
             <AssistantMessage
-              name={name}
-              logoUrl={logoUrl}
+              name={tenant.name}
+              logoUrl={tenant.logoUrl}
               content={object?.message}
               id={pendingMessage?.id}
               sources={[]}

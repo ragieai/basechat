@@ -9,11 +9,14 @@ import Summary from "./summary";
 
 interface Props {
   id: string;
-  tenantName: string;
-  tenantLogoUrl?: string | null;
+  tenant: {
+    name: string;
+    logoUrl?: string | null;
+    slug: string;
+  };
 }
 
-export default function Conversation({ id, tenantName, tenantLogoUrl }: Props) {
+export default function Conversation({ id, tenant }: Props) {
   const [documentId, setDocumentId] = useState<string | null>(null);
   const { initialMessage, setInitialMessage } = useGlobalState();
 
@@ -28,8 +31,7 @@ export default function Conversation({ id, tenantName, tenantLogoUrl }: Props) {
   return (
     <div className="flex h-full w-full">
       <Chatbot
-        name={tenantName}
-        logoUrl={tenantLogoUrl}
+        tenant={tenant}
         conversationId={id}
         initMessage={initialMessage}
         onSelectedDocumentId={handleSelectedDocumentId}
@@ -38,6 +40,7 @@ export default function Conversation({ id, tenantName, tenantLogoUrl }: Props) {
         <Summary
           className="flex-1 min-w-[400px] w-[400px] rounded-[24px] p-8 mr-6 mb-4 bg-[#F5F5F7] overflow-y-auto"
           documentId={documentId}
+          slug={tenant.slug}
           onCloseClick={() => setDocumentId(null)}
         />
       )}

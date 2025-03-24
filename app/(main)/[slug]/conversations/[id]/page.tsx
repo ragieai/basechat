@@ -2,9 +2,14 @@ import { authOrRedirect } from "@/lib/server/utils";
 
 import Conversation from "./conversation";
 
-export default async function ConversationPage({ params }: { params: Promise<{ id: string }> }) {
-  const { tenant } = await authOrRedirect();
-  const { id } = await params;
+interface Props {
+  params: Promise<{ id: string; slug: string }>;
+}
 
-  return <Conversation tenantName={tenant.name} tenantLogoUrl={tenant.logoUrl} id={id} />;
+export default async function ConversationPage({ params }: Props) {
+  const p = await params;
+  const { tenant } = await authOrRedirect(p.slug);
+  const { id } = p;
+
+  return <Conversation tenant={tenant} id={id} />;
 }

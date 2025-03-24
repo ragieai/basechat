@@ -20,7 +20,7 @@ export default function ConversationHistory({ className, tenant }: Props) {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("/api/conversations");
+      const res = await fetch("/api/conversations", { headers: { tenant: tenant.slug } });
       const json = await res.json();
       const conversations = conversationListResponseSchema.parse(json);
       setConversations(conversations);

@@ -4,10 +4,10 @@ import { NextRequest } from "next/server";
 import { updateTenantSchema } from "@/lib/api";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
-import { requireAdminContext } from "@/lib/server/utils";
+import { requireAdminContextFromRequest } from "@/lib/server/utils";
 
 export async function PATCH(request: NextRequest) {
-  const { tenant } = await requireAdminContext();
+  const { tenant } = await requireAdminContextFromRequest(request);
 
   const json = await request.json();
   const update = updateTenantSchema.parse(json);
