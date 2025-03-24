@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import ChatInput from "@/components/chatbot/chat-input";
 import Logo from "@/components/tenant/logo/logo";
+import { getConversationPath } from "@/lib/paths";
 import * as schema from "@/lib/server/db/schema";
 
 import { useGlobalState } from "./context";
@@ -30,7 +31,7 @@ export default function Welcome({ tenant, className }: Props) {
     const json = await res.json();
     const conversation = conversationResponseSchema.parse(json);
     setInitialMessage(content);
-    router.push(`/conversations/${conversation.id}`);
+    router.push(getConversationPath(tenant.slug, conversation.id));
   };
 
   const questions = [
