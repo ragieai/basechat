@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 
 import { changeRole, deleteProfile, ServiceError } from "@/lib/server/service";
-import { requireAdminContext } from "@/lib/server/utils";
+import { requireAdminContextFromRequest } from "@/lib/server/utils";
 
 type Params = Promise<{ id: string }>;
 
@@ -17,8 +17,8 @@ function renderError(e: unknown) {
   return new Response(JSON.stringify({ error: err.message }), { status: 500 });
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: Params }) {
-  const { tenant } = await requireAdminContext();
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
+  const { tenant } = await requireAdminContextFromRequest(request);
   const { id } = await params;
 
   try {
@@ -36,7 +36,7 @@ const updateProfileRoleByIdSchema = z
   .strict();
 
 export async function PATCH(request: NextRequest, { params }: { params: Params }) {
-  const { tenant } = await requireAdminContext();
+  const { tenant } = await requireAdminContextFromRequest(request);
   const { id } = await params;
 
   const json = await request.json();

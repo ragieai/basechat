@@ -171,7 +171,7 @@ export default function GeneralSettings({ tenant, canUploadLogo }: Props) {
           <div className="mb-2">
             <Label className="font-semibold text-[16px]">Avatar</Label>
           </div>
-          <LogoChanger name={tenant.name} logoUrl={tenant.logoUrl} logoName={tenant.logoFileName} />
+          <LogoChanger tenant={tenant} />
           <hr className="w-full my-8" />
         </div>
       )}

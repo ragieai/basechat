@@ -12,9 +12,12 @@ import { deleteLogo } from "./server-actions";
 interface Props {
   onCancel: () => void;
   onSuccess: () => void;
+  tenant: {
+    slug: string;
+  };
 }
 
-export function ConfirmDeleteLogoDialog({ onCancel, onSuccess }: Props) {
+export function ConfirmDeleteLogoDialog({ onCancel, onSuccess, tenant }: Props) {
   const [state, formAction] = useActionState(deleteLogo, {
     status: "pending" as const,
   });
@@ -48,6 +51,7 @@ export function ConfirmDeleteLogoDialog({ onCancel, onSuccess }: Props) {
             </DialogClose>
             <SubmitButton>Delete</SubmitButton>
           </DialogFooter>
+          <input type="hidden" name="slug" value={tenant.slug} />
         </form>
       </DialogContent>
     </Dialog>

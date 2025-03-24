@@ -20,13 +20,14 @@ export interface OnSuccessEvent {
 }
 
 interface Props {
+  slug: string;
   image: string;
   imageName?: string | null | undefined;
   onCancel: () => void;
   onSuccess: (event: OnSuccessEvent) => void;
 }
 
-export default function CreateLogoDialog({ image, imageName, onCancel, onSuccess }: Props) {
+export default function CreateLogoDialog({ slug, image, imageName, onCancel, onSuccess }: Props) {
   const [state, formAction] = useActionState(createLogo, {
     status: "pending" as const,
   });
@@ -50,7 +51,7 @@ export default function CreateLogoDialog({ image, imageName, onCancel, onSuccess
       }}
     >
       <DialogContent className="sm:max-w-[425px]">
-        <CreateLogoForm image={image} imageName={imageName} formState={state} formAction={formAction} />
+        <CreateLogoForm formState={state} formAction={formAction} slug={slug} image={image} imageName={imageName} />
       </DialogContent>
     </Dialog>
   );
@@ -62,12 +63,14 @@ function CreateLogoForm({
   formState,
   formAction,
   onCancel,
+  slug,
 }: {
   image: string;
   imageName: string | null | undefined;
   formState: CreateLogoState;
   formAction: (payload: FormData) => void;
   onCancel?: () => void;
+  slug: string;
 }) {
   return (
     <>
@@ -75,17 +78,19 @@ function CreateLogoForm({
         <DialogTitle>Upload logo</DialogTitle>
       </DialogHeader>
       <form action={formAction}>
-        <CreateLogoFormBody image={image} imageName={imageName} onCancel={onCancel} />
+        <CreateLogoFormBody slug={slug} image={image} imageName={imageName} onCancel={onCancel} />
       </form>
     </>
   );
 }
 
 function CreateLogoFormBody({
+  slug,
   image,
   imageName,
   onCancel,
 }: {
+  slug: string;
   image: string;
   imageName?: string | null | undefined;
   onCancel?: () => void;
@@ -153,6 +158,7 @@ function CreateLogoFormBody({
         <SubmitButton pendingText="Uploading...">Upload</SubmitButton>
       </DialogFooter>
       <input ref={finalImageRef} type="file" name="file" className="hidden" />
+      <input type="hidden" name="slug" value={slug} />
     </>
   );
 }

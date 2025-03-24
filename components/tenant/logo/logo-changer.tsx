@@ -8,12 +8,15 @@ import CreateLogoDialog, { OnSuccessEvent } from "./create-logo-dialog";
 import UploadableLogo, { FileCreateEvent, FileDeleteEvent } from "./uploadable-logo";
 
 interface Props {
-  name: string;
-  logoName?: string | null;
-  logoUrl?: string | null;
+  tenant: {
+    name: string;
+    slug: string;
+    logoName?: string | null;
+    logoUrl?: string | null;
+  };
 }
 
-export default function LogoChanger({ logoName: initialLogoName, logoUrl: initialLogoUrl }: Props) {
+export default function LogoChanger({ tenant: { logoName: initialLogoName, logoUrl: initialLogoUrl, slug } }: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [image, setImage] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null | undefined>(initialLogoUrl);
@@ -50,10 +53,20 @@ export default function LogoChanger({ logoName: initialLogoName, logoUrl: initia
     <>
       <UploadableLogo imageUrl={logoUrl} imageName={logoName} onChange={onLogoChange} />
       {image && (
-        <CreateLogoDialog image={image} imageName={logoName} onCancel={onSetLogoCancel} onSuccess={onSetLogoSuccess} />
+        <CreateLogoDialog
+          slug={slug}
+          image={image}
+          imageName={logoName}
+          onCancel={onSetLogoCancel}
+          onSuccess={onSetLogoSuccess}
+        />
       )}
       {confirmDelete && (
-        <ConfirmDeleteLogoDialog onCancel={() => setConfirmDelete(false)} onSuccess={() => onDeleteLogoSuccess()} />
+        <ConfirmDeleteLogoDialog
+          tenant={tenant}
+          onCancel={() => setConfirmDelete(false)}
+          onSuccess={() => onDeleteLogoSuccess()}
+        />
       )}
     </>
   );

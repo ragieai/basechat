@@ -4,6 +4,7 @@ import assert from "assert";
 import { Readable } from "stream";
 
 import * as Minio from "minio";
+import { z } from "zod";
 
 import { deleteTenantLogo, setTenantLogo } from "@/lib/server/service";
 import { requireAuthContext } from "@/lib/server/utils";
@@ -120,17 +121,22 @@ function fileToReadable(file: File) {
   return readable;
 }
 
+const createLogoSchema = z.object({
+  slug: z.string(),
+  file: z.instanceof(File),
+});
+
 export async function createLogo(prevState: CreateLogoState, formData: FormData): Promise<CreateLogoState> {
-  const { tenant } = await requireAuthContext();
+  const parsed = createLogoSchema.parse({
+    slug: formData.get("slug"),
+    file: formData.get("file"),
+  });
+  const { tenant } = await requireAuthContext(parsed.slug);
 
   assert(process.env.STORAGE_BUCKET);
 
   const prefix = process.env.STORAGE_PREFIX;
   const bucket = process.env.STORAGE_BUCKET;
-
-  const fileData = formData.get("file");
-  assert(fileData instanceof File);
-
   const minioClient = createMinioClient();
 
   // Delete the old logo if we have one
@@ -148,7 +154,7 @@ export async function createLogo(prevState: CreateLogoState, formData: FormData)
   const objectName = `logo_${nowTimestamp}.png`;
 
   try {
-    const readable = fileToReadable(fileData);
+    const readable = fileToReadable(parsed.file);
     let uploadObjectName = `${tenant.id}/${objectName}`;
     if (prefix) {
       uploadObjectName = `${prefix}/${uploadObjectName}`;
@@ -157,12 +163,12 @@ export async function createLogo(prevState: CreateLogoState, formData: FormData)
     await minioClient.putObject(bucket, uploadObjectName, readable);
 
     const objectUrl = getObjectUrl(uploadObjectName);
-    await setTenantLogo(tenant.id, fileData.name, objectName, objectUrl);
+    await setTenantLogo(tenant.id, parsed.file.name, objectName, objectUrl);
 
     return {
       status: "success",
       url: objectUrl,
-      fileName: fileData.name,
+      fileName: parsed.file.name,
     };
   } catch (error: unknown) {
     console.log(error);
@@ -185,8 +191,15 @@ export type DeleteLogoState =
       message: string;
     };
 
+const deleteLogoSchema = z.object({
+  slug: z.string(),
+});
+
 export async function deleteLogo(prevState: DeleteLogoState, formData: FormData): Promise<DeleteLogoState> {
-  const { tenant } = await requireAuthContext();
+  const parsed = deleteLogoSchema.parse({
+    slug: formData.get("slug"),
+  });
+  const { tenant } = await requireAuthContext(parsed.slug);
 
   const minioClient = createMinioClient();
 
