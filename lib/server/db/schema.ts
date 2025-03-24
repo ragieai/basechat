@@ -52,7 +52,7 @@ export const conversations = pgTable("conversations", {
 export const tenants = pgTable("tenants", {
   ...baseFields,
   name: text("name").notNull(),
-  slug: text("slug").unique(), // TODO: Make not-null after backfilling
+  slug: text("slug").notNull().unique(),
   question1: text("question1"),
   question2: text("question2"),
   question3: text("question3"),

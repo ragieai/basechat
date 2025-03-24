@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ALTER COLUMN "slug" SET NOT NULL;

@@ -141,6 +141,13 @@
       "when": 1742747645487,
       "tag": "0019_lively_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1742782121388,
+      "tag": "0020_perfect_synch",
+      "breakpoints": true
     }
   ]
 }
