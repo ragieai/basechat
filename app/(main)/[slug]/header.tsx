@@ -28,7 +28,7 @@ interface Props {
     logoUrl?: string | null;
     slug: string;
   };
-  name: string | null;
+  name: string | undefined | null;
   className?: string;
   onNavClick?: () => void;
 }
