@@ -10,7 +10,7 @@ export default async function SettingsIndexPage() {
   return (
     <div className="flex justify-center overflow-auto w-full">
       <div className="max-w-[1140px] w-full p-4 flex-grow flex">
-        <SettingsNav />
+        <SettingsNav tenant={tenant} />
         <GeneralSettings tenant={tenant} canUploadLogo={canUploadLogo} />
       </div>
     </div>

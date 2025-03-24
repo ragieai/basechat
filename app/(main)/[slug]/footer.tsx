@@ -39,9 +39,9 @@ export default function Footer({ className, tenant }: Props) {
   const pathname = usePathname();
 
   let appLocation = AppLocation.CHAT;
-  if (pathname.startsWith("/data")) {
+  if (pathname.startsWith(getDataPath(tenant.slug))) {
     appLocation = AppLocation.DATA;
-  } else if (pathname.startsWith("/settings")) {
+  } else if (pathname.startsWith(getSettingsPath(tenant.slug))) {
     appLocation = AppLocation.SETTINGS;
   }
 

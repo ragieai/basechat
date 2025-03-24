@@ -11,7 +11,7 @@ export default async function SettingsUsersIndexPage() {
 
   return (
     <div className="max-w-[1140px] w-full p-4 flex-grow flex">
-      <SettingsNav />
+      <SettingsNav tenant={tenant} />
       <UserSettings members={members} />
     </div>
   );
