@@ -2,6 +2,7 @@ import assert from "assert";
 
 import { NextRequest } from "next/server";
 
+import { getDataPath } from "@/lib/paths";
 import { saveConnection } from "@/lib/server/service";
 import * as settings from "@/lib/server/settings";
 import { requireAdminContext } from "@/lib/server/utils";
@@ -12,5 +13,5 @@ export async function GET(request: NextRequest) {
 
   const { tenant } = await requireAdminContext();
   await saveConnection(tenant.id, connectionId, "syncing");
-  return Response.redirect(new URL("data", settings.BASE_URL));
+  return Response.redirect(new URL(getDataPath(tenant.slug), settings.BASE_URL));
 }
