@@ -32,3 +32,6 @@ IMPORTANT RULES:
 - NEVER include citations in your response`;
 
 export const DEFAULT_EXPAND_SYSTEM_PROMPT = `The user would like you to provide more information on the the last topic. Please provide a more detailed response. Re-use the information you have already been provided and expand on your previous response. Your response may be longer than typical. You do not need to note the sources you used again.`;
+
+export type LLMModel = "GPT-4o" | "Gemini" | "Claude Sonnet 3.7";
+export const LLM_MODELS: LLMModel[] = ["GPT-4o", "Gemini", "Claude Sonnet 3.7"];
