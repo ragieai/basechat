@@ -10,7 +10,8 @@ import { z } from "zod";
 import Logo from "@/components/tenant/logo/logo";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { tenantListResponseSchema, updateCurrentProfileSchema } from "@/lib/api";
-import { cn, getInitials } from "@/lib/utils";
+import { getTenantPath } from "@/lib/paths";
+import { cn } from "@/lib/utils";
 
 import CheckIcon from "../../../public/icons/check.svg";
 import HamburgerIcon from "../../../public/icons/hamburger.svg";
@@ -22,9 +23,12 @@ import ConversationHistory from "./conversation-history";
 
 interface Props {
   currentProfileId: string;
+  tenant: {
+    name?: string | null;
+    logoUrl?: string | null;
+    slug: string;
+  };
   className?: string;
-  name?: string | null;
-  logoUrl?: string | null;
   onNavClick?: () => void;
 }
 
@@ -45,7 +49,7 @@ const HeaderPopoverContent = ({
   </PopoverContent>
 );
 
-export default function Header({ name, logoUrl, currentProfileId, onNavClick = () => {} }: Props) {
+export default function Header({ currentProfileId, tenant, onNavClick = () => {} }: Props) {
   const router = useRouter();
 
   const [tenants, setTenants] = useState<z.infer<typeof tenantListResponseSchema>>([]);
@@ -82,10 +86,10 @@ export default function Header({ name, logoUrl, currentProfileId, onNavClick = (
             <Image src={HamburgerIcon} alt="Expand chats" className="mr-2.5 cursor-pointer" onClick={onNavClick} />
           </PopoverTrigger>
           <HeaderPopoverContent align="start">
-            <ConversationHistory />
+            <ConversationHistory tenant={tenant} />
           </HeaderPopoverContent>
         </Popover>
-        <Link href="/">
+        <Link href={getTenantPath(tenant.slug)}>
           <Image src={NewChatIcon} alt="New chat" />
         </Link>
       </div>
@@ -93,8 +97,8 @@ export default function Header({ name, logoUrl, currentProfileId, onNavClick = (
         <PopoverTrigger asChild>
           <div>
             <Logo
-              name={name ?? ""}
-              url={logoUrl}
+              name={tenant.name ?? ""}
+              url={tenant.logoUrl}
               width={32}
               height={32}
               className="bg-[#66666E] font-semibold text-[16px] cursor-pointer"
