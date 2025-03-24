@@ -25,7 +25,7 @@ export default function ConversationHistory({ className, tenant }: Props) {
       const conversations = conversationListResponseSchema.parse(json);
       setConversations(conversations);
     })();
-  }, []);
+  }, [tenant.slug]);
 
   return (
     <div className={className}>
