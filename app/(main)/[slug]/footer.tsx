@@ -6,12 +6,12 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
-import ChatIconOff from "../../public/icons/chat-off.svg";
-import ChatIconOn from "../../public/icons/chat-on.svg";
-import DataIconOff from "../../public/icons/data-off.svg";
-import DataIconOn from "../../public/icons/data-on.svg";
-import SettingsIconOff from "../../public/icons/settings-off.svg";
-import SettingsIconOn from "../../public/icons/settings-on.svg";
+import ChatIconOff from "../../../public/icons/chat-off.svg";
+import ChatIconOn from "../../../public/icons/chat-on.svg";
+import DataIconOff from "../../../public/icons/data-off.svg";
+import DataIconOn from "../../../public/icons/data-on.svg";
+import SettingsIconOff from "../../../public/icons/settings-off.svg";
+import SettingsIconOn from "../../../public/icons/settings-on.svg";
 
 export enum AppLocation {
   CHAT,

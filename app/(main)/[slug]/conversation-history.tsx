@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { conversationListResponseSchema, conversationSchema } from "@/lib/api";
 
-import NewChatIcon from "../../public/icons/new-chat.svg";
+import NewChatIcon from "../../../public/icons/new-chat.svg";
 
 interface Props {
   className?: string;
