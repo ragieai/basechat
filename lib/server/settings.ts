@@ -19,6 +19,12 @@ export const RAGIE_API_KEY = process.env.RAGIE_API_KEY!;
 // assert(process.env.RAGIE_WEBHOOK_SECRET);
 export const RAGIE_WEBHOOK_SECRET = process.env.RAGIE_WEBHOOK_SECRET!;
 
+// assert(process.env.OPENAI_API_KEY);
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY!;
+
+// assert(process.env.GOOGLE_API_KEY);
+export const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY!;
+
 export const SMTP_FROM = process.env.SMTP_FROM!;
 export const SMTP_HOST = process.env.SMTP_HOST!;
 export const SMTP_PORT = Number(process.env.SMTP_PORT!);

@@ -18,7 +18,6 @@ import * as schema from "./db/schema";
 import { getRagieClient } from "./ragie";
 import { hashPassword } from "./utils";
 
-
 type Role = (typeof schema.rolesEnum.enumValues)[number];
 
 export async function createTenant(userId: string, name: string) {
@@ -376,10 +375,14 @@ export async function updateConversationMessageContent(
   conversationId: string,
   messageId: string,
   content: string,
+  model?: string,
 ) {
   return await db
     .update(schema.messages)
-    .set({ content })
+    .set({
+      content,
+      ...(model ? { model } : {}),
+    })
     .where(
       and(
         eq(schema.messages.tenantId, tenantId),

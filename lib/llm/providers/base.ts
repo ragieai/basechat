@@ -3,6 +3,7 @@ import { CoreMessage, streamObject } from "ai";
 import { LLMModel } from "../types";
 
 export interface GenerateOptions {
+  model: LLMModel;
   temperature?: number;
   schema?: any;
   onFinish?: (event: { object: any }) => Promise<void>;

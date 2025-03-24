@@ -24,10 +24,13 @@ export async function generate(
     role: "assistant",
     content: null,
     sources: context.sources,
+    model,
+    provider: DEFAULT_PROVIDER,
   });
 
   const provider = getProvider(model);
   const result = await provider.generateStream(context.messages, {
+    model,
     temperature: 0.3,
     schema: createConversationMessageResponseSchema,
     onFinish: async (event) => {
@@ -38,6 +41,7 @@ export async function generate(
         conversationId,
         pendingMessage.id,
         event.object.message,
+        model,
       );
     },
   });

@@ -1,26 +1,42 @@
 import { openai } from "@ai-sdk/openai";
-import { CoreMessage, streamObject } from "ai";
+import { CoreMessage, streamObject, StreamObjectResult } from "ai";
 
-import { LLMModel, LLMProvider, PROVIDER_MODELS } from "../types";
+import { LLMModel, LLMProvider, PROVIDER_MODELS, ProviderModels } from "../types";
 
 import { GenerateOptions, LLMProvider as BaseLLMProvider } from "./base";
 
+interface StreamResponse {
+  model?: LLMModel;
+  [key: string]: any;
+}
+
 export class OpenAIProvider implements BaseLLMProvider {
-  async generateStream(messages: CoreMessage[], options: GenerateOptions) {
-    return streamObject({
+  async generateStream(
+    messages: CoreMessage[],
+    options: GenerateOptions,
+  ): Promise<StreamObjectResult<StreamResponse, any, never>> {
+    if (!this.validateModel(options.model)) {
+      throw new Error(`Model ${options.model} is not supported by OpenAI provider`);
+    }
+
+    return streamObject<StreamResponse>({
       messages,
-      model: openai("gpt-4o"), // TODO: Make model configurable
+      model: openai(options.model),
       temperature: options.temperature ?? 0.3,
       schema: options.schema,
-      onFinish: options.onFinish,
+      onFinish: async (event) => {
+        if (!event.object) return;
+        event.object.model = options.model;
+        await options.onFinish?.(event);
+      },
     });
   }
 
   validateModel(model: LLMModel): boolean {
-    return PROVIDER_MODELS.openai.includes(model);
+    return PROVIDER_MODELS.openai.includes(model as ProviderModels<"openai">);
   }
 
   getSupportedModels(): LLMModel[] {
-    return PROVIDER_MODELS.openai;
+    return [...PROVIDER_MODELS.openai];
   }
 }

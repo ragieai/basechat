@@ -11,9 +11,8 @@ const providers: Record<LLMProvider, BaseLLMProvider> = {
 };
 
 export function getProvider(model: LLMModel): BaseLLMProvider {
-  const provider = Object.entries(PROVIDER_MODELS).find(([_, models]) => models.includes(model))?.[0] as
-    | LLMProvider
-    | undefined;
+  const entries = Object.entries(PROVIDER_MODELS) as [LLMProvider, readonly LLMModel[]][];
+  const provider = entries.find(([_, models]) => models.includes(model))?.[0];
 
   if (!provider) {
     throw new Error(`No provider found for model: ${model}`);

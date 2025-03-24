@@ -1,54 +1,52 @@
-export type LLMProvider = "openai" | "google" | "anthropic";
+// Single source of truth for providers and their models
+export const PROVIDER_CONFIG = {
+  openai: {
+    models: ["gpt-4o", "gpt-3.5-turbo"] as const,
+    logo: "/openai.svg",
+  },
+  google: {
+    models: ["gemini-flash-2.0", "gemini-pro"] as const,
+    logo: "/gemini.svg",
+  },
+  anthropic: {
+    models: ["claude-sonnet-3.7", "claude-opus-3"] as const,
+    logo: "/anthropic.svg",
+  },
+} as const;
 
+// Default values
 export const DEFAULT_MODEL = "gpt-4o";
 export const DEFAULT_PROVIDER = "openai";
 
-// Type-safe mapping of providers to their supported models
-export type ProviderModelMap = {
-  openai: ["gpt-4o", "gpt-3.5-turbo"];
-  google: ["gemini-flash-2.0", "gemini-pro"];
-  anthropic: ["claude-sonnet-3.7", "claude-opus-3"];
-};
+// Derive types from the config
+export type LLMProvider = keyof typeof PROVIDER_CONFIG;
+export type LLMModel = (typeof PROVIDER_CONFIG)[LLMProvider]["models"][number];
+export type ProviderModels<T extends LLMProvider> = (typeof PROVIDER_CONFIG)[T]["models"][number];
 
-// Derive LLMModel type from ProviderModelMap
-export type LLMModel = ProviderModelMap[LLMProvider][number];
-
-// Helper type to get all models for a provider
-export type ProviderModels<T extends LLMProvider> = ProviderModelMap[T][number];
-
-// Runtime mapping of providers to their supported models
-export const PROVIDER_MODELS: Record<LLMProvider, LLMModel[]> = {
-  openai: ["gpt-4o", "gpt-3.5-turbo"],
-  google: ["gemini-flash-2.0", "gemini-pro"],
-  anthropic: ["claude-sonnet-3.7", "claude-opus-3"],
+// Runtime mappings
+export const PROVIDER_MODELS = {
+  openai: PROVIDER_CONFIG.openai.models,
+  google: PROVIDER_CONFIG.google.models,
+  anthropic: PROVIDER_CONFIG.anthropic.models,
 } as const;
 
-// Create a flat array of all valid models from all providers
-export const ALL_VALID_MODELS = Object.values(PROVIDER_MODELS).flat() as LLMModel[];
+export const ALL_VALID_MODELS = Object.values(PROVIDER_CONFIG).flatMap((config) => config.models) as LLMModel[];
 
-// Helper function to check if a model is supported by a provider
+// Helper functions
 export function isModelSupportedByProvider(model: LLMModel, provider: LLMProvider): boolean {
-  return PROVIDER_MODELS[provider].includes(model);
+  return (PROVIDER_CONFIG[provider].models as readonly string[]).includes(model);
 }
 
-// Helper function to get the provider for a given model
 export function getProviderForModel(model: LLMModel): LLMProvider | null {
-  for (const [provider, models] of Object.entries(PROVIDER_MODELS)) {
-    if (models.includes(model)) {
+  for (const [provider, config] of Object.entries(PROVIDER_CONFIG)) {
+    if ((config.models as readonly string[]).includes(model)) {
       return provider as LLMProvider;
     }
   }
   return null;
 }
 
-// Provider logos
-const PROVIDER_LOGOS = {
-  openai: "/openai.svg",
-  google: "/gemini.svg",
-  anthropic: "/anthropic.svg",
-} as const;
-
-// map LLMModel to tuple of [name, logo svg]
+// Logo mapping
 export const LLM_LOGO_MAP = Object.fromEntries(
-  ALL_VALID_MODELS.map((model) => [model, [model, PROVIDER_LOGOS[getProviderForModel(model)!]]]),
+  ALL_VALID_MODELS.map((model) => [model, [model, PROVIDER_CONFIG[getProviderForModel(model)!].logo]]),
 ) as Record<LLMModel, [string, string]>;

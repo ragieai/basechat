@@ -12,6 +12,12 @@ export const createConversationMessageResponseSchema = z.object({
       return ALL_VALID_MODELS.includes(model as LLMModel);
     }, "Invalid model")
     .default(DEFAULT_MODEL),
+  modelId: z
+    .string()
+    .refine((model): model is LLMModel => {
+      return ALL_VALID_MODELS.includes(model as LLMModel);
+    }, "Invalid model")
+    .default(DEFAULT_MODEL),
 });
 
 export const createConversationMessageRequestSchema = z.object({

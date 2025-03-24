@@ -20,7 +20,6 @@ import { SourceMetadata } from "./types";
 
 const inter = Inter({ subsets: ["latin"] });
 
-
 type AiMessage = { content: string; role: "assistant"; id?: string; sources: SourceMetadata[]; model?: LLMModel };
 type UserMessage = { content: string; role: "user" };
 type SystemMessage = { content: string; role: "system" };
@@ -61,7 +60,8 @@ export default function Chatbot({ name, logoUrl, conversationId, initMessage, on
       if (!event.object) return;
 
       const content = event.object.message;
-      setMessages((prev) => [...prev, { content: content, role: "assistant", sources: [] }]);
+      const model = event.object.model;
+      setMessages((prev) => [...prev, { content: content, role: "assistant", sources: [], model }]);
     },
   });
 
