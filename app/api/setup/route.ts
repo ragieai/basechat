@@ -11,9 +11,9 @@ const setupSchema = z.object({
 export async function POST(request: NextRequest) {
   const session = await requireSession();
   const payload = setupSchema.parse(await request.json());
-  const { profileId, tenantId } = await createTenant(session.user.id, payload.name);
+  const { profile, tenant } = await createTenant(session.user.id, payload.name);
 
-  await setCurrentProfileId(session.user.id, profileId);
+  await setCurrentProfileId(session.user.id, profile.id);
 
-  return Response.json({ id: tenantId });
+  return Response.json({ profile, tenant });
 }

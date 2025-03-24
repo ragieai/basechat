@@ -19,6 +19,7 @@ export async function requireSession() {
 }
 
 export async function requireAuthContext(slug: string) {
+  console.log("requireAuthContext", slug);
   const session = await requireSession();
   const { profile, tenant } = await getAuthContextByUserId(session.user.id, slug);
   return { profile, tenant, session };

@@ -20,7 +20,14 @@ import { hashPassword } from "./utils";
 type Role = (typeof schema.rolesEnum.enumValues)[number];
 
 export async function createTenant(userId: string, name: string) {
-  const tenants = await db.insert(schema.tenants).values({ name }).returning({ id: schema.tenants.id });
+  // TODO: properly slugify name and check for uniqueness
+  const slug = name.toLowerCase().replace(/ /g, "-");
+
+  const tenants = await db
+    .insert(schema.tenants)
+    .values({ name, slug })
+    .returning({ id: schema.tenants.id, slug: schema.tenants.slug });
+
   assert(tenants.length === 1);
   const tenantId = tenants[0].id;
 
@@ -29,9 +36,8 @@ export async function createTenant(userId: string, name: string) {
     .values({ tenantId, userId, role: "admin" })
     .returning({ id: schema.profiles.id });
   assert(profiles.length === 1);
-  const profileId = profiles[0].id;
 
-  return { tenantId, profileId };
+  return { tenant: tenants[0], profile: profiles[0] };
 }
 
 export async function deleteConnection(tenantId: string, id: string) {
