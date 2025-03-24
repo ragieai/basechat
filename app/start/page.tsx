@@ -9,11 +9,10 @@ export default async function StartPage() {
   let tenantId: string | undefined;
 
   const tenant = await getFirstTenantByUserId(session.user.id);
-  tenantId = tenant?.id;
 
-  if (!tenantId) {
+  if (!tenant) {
     redirect("/setup");
   } else {
-    redirect("/");
+    redirect(`/${tenant.slug}`);
   }
 }
