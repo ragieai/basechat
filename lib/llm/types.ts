@@ -37,3 +37,15 @@ export function getProviderForModel(model: LLMModel): LLMProvider | null {
   }
   return null;
 }
+
+// Provider logos
+const PROVIDER_LOGOS = {
+  openai: "/openai.svg",
+  google: "/gemini.svg",
+  anthropic: "/anthropic.svg",
+} as const;
+
+// map LLMModel to tuple of [name, logo svg]
+export const LLM_LOGO_MAP = Object.fromEntries(
+  ALL_VALID_MODELS.map((model) => [model, [model, PROVIDER_LOGOS[getProviderForModel(model)!]]]),
+) as Record<LLMModel, [string, string]>;

@@ -2,7 +2,7 @@ import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { KeyboardEvent, useRef, useState } from "react";
 
-import { LLMModel, LLM_MODELS, LLM_LOGO_MAP } from "@/lib/constants";
+import { LLMModel, ALL_VALID_MODELS, LLM_LOGO_MAP } from "@/lib/llm/types";
 import { cn } from "@/lib/utils";
 
 import CheckIcon from "../../public/icons/check.svg";
@@ -21,7 +21,7 @@ const ModelPopoverContent = ({ children }: { children: React.ReactNode }) => (
 
 export default function ChatInput(props: ChatInputProps) {
   const [value, setValue] = useState("");
-  const [selectedModel, setSelectedModel] = useState<LLMModel>("GPT-4o");
+  const [selectedModel, setSelectedModel] = useState<LLMModel>("gpt-4o");
   const ref = useRef<AutosizeTextAreaRef>(null);
 
   const handleSubmit = (value: string) => {
@@ -71,7 +71,7 @@ export default function ChatInput(props: ChatInputProps) {
         </PopoverTrigger>
         <ModelPopoverContent>
           <div className="flex flex-col gap-1">
-            {LLM_MODELS.map((model) => {
+            {ALL_VALID_MODELS.map((model) => {
               const [displayName, logoPath] = LLM_LOGO_MAP[model];
               return (
                 <button
