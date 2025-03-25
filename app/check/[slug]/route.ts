@@ -10,7 +10,7 @@ export async function GET(request: Request, { params }: Params) {
   const tenant = await findTenantBySlug(slug);
 
   if (!tenant?.isPublic) {
-    return Response.redirect(new URL("/sign-in", request.url));
+    return Response.redirect(getSignInUrl(request.url));
   }
 
   const session = await auth();
@@ -26,4 +26,15 @@ export async function GET(request: Request, { params }: Params) {
     await signIn("anonymous", { id: user.id, redirect: false });
   }
   return Response.redirect(new URL(`/o/${slug}`, request.url));
+}
+
+function getSignInUrl(requestUrl: string) {
+  const url = new URL(requestUrl);
+  const redirectToParam = url.searchParams.get("redirectTo");
+
+  const signInUrl = new URL("/sign-in", url);
+  if (redirectToParam) {
+    signInUrl.searchParams.set("redirectTo", redirectToParam);
+  }
+  return signInUrl;
 }
