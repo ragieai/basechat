@@ -32,7 +32,7 @@ declare module "next-auth" {
   }
 }
 
-interface AnonymousConfig extends CredentialsConfig<{ id: CredentialInput }> {
+interface AnonymousConfig extends CredentialsConfig {
   type: "credentials";
   authorize: (credentials: Partial<{ id: unknown }>, request: Request) => Promise<User | null>;
 }
@@ -42,7 +42,6 @@ export default function Anonymous(config: Partial<AnonymousConfig>): AnonymousCo
     id: "anonymous",
     name: "Anonymous",
     type: "credentials",
-    credentials: { id: {} },
     authorize: () => Promise.resolve(null),
     // @ts-expect-error
     options: config,
@@ -78,7 +77,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!credentials.id) {
           throw new Error("Invalid credentials.");
         }
-        return await findUserById(credentials.id as string);
+        const user = await findUserById(credentials.id as string);
+        if (!user?.isAnonymous) {
+          throw new Error("Invalid credentials.");
+        }
+        return user;
       },
     }),
   ],
