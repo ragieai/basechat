@@ -6,9 +6,9 @@ import { z } from "zod";
 
 import { auth } from "@/auth";
 
-import { getTenantPath } from "../paths";
+import { getCheckPath, getSignInPath, getTenantPath } from "../paths";
 
-import { getAuthContextByUserId } from "./service";
+import { findTenantBySlug, getAuthContextByUserId } from "./service";
 
 const tenantSchema = z.string();
 
@@ -44,7 +44,12 @@ export async function authOrRedirect(slug: string) {
   try {
     return await requireAuthContext(slug);
   } catch (e) {
-    return redirect("/sign-in");
+    const tenant = await findTenantBySlug(slug);
+    if (tenant?.isPublic) {
+      return redirect(getCheckPath(slug));
+    } else {
+      return redirect(getSignInPath());
+    }
   }
 }
 

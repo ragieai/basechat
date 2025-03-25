@@ -2,14 +2,15 @@ import assert from "assert";
 
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import assertNever from "assert-never";
-import NextAuth, { DefaultSession } from "next-auth";
+import NextAuth, { DefaultSession, User } from "next-auth";
+import { CommonProviderOptions, CredentialInput, CredentialsConfig } from "next-auth/providers";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
 import authConfig from "./auth.config";
 import db from "./lib/server/db";
 import * as schema from "./lib/server/db/schema";
-import { findUserByEmail, getFirstTenantByUserId } from "./lib/server/service";
+import { findUserByEmail, findUserById, getFirstTenantByUserId } from "./lib/server/service";
 import { verifyPassword } from "./lib/server/utils";
 
 declare module "next-auth" {
@@ -29,6 +30,23 @@ declare module "next-auth" {
        */
     } & DefaultSession["user"];
   }
+}
+
+interface AnonymousConfig extends CredentialsConfig<{ id: CredentialInput }> {
+  type: "credentials";
+  authorize: (credentials: Partial<{ id: unknown }>, request: Request) => Promise<User | null>;
+}
+
+export default function Anonymous(config: Partial<AnonymousConfig>): AnonymousConfig {
+  return {
+    id: "anonymous",
+    name: "Anonymous",
+    type: "credentials",
+    credentials: { id: {} },
+    authorize: () => Promise.resolve(null),
+    // @ts-expect-error
+    options: config,
+  };
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -53,6 +71,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           throw new Error("Invalid credentials.");
         }
         return user;
+      },
+    }),
+    Anonymous({
+      authorize: async (credentials: Partial<{ id: unknown }>, request: Request) => {
+        if (!credentials.id) {
+          throw new Error("Invalid credentials.");
+        }
+        return await findUserById(credentials.id as string);
       },
     }),
   ],

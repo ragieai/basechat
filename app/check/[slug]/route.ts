@@ -1,6 +1,5 @@
-import { auth } from "@/auth";
-import { createProfile, findProfileByTenantIdAndUserId, findTenantBySlug } from "@/lib/server/service";
-import { authOrRedirect } from "@/lib/server/utils";
+import { auth, signIn } from "@/auth";
+import { createGuestUser, createProfile, findProfileByTenantIdAndUserId, findTenantBySlug } from "@/lib/server/service";
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -10,7 +9,7 @@ export async function GET(request: Request, { params }: Params) {
   const { slug } = await params;
   const tenant = await findTenantBySlug(slug);
 
-  if (!tenant || !tenant.isPublic) {
+  if (!tenant?.isPublic) {
     return Response.redirect(new URL("/sign-in", request.url));
   }
 
@@ -21,10 +20,10 @@ export async function GET(request: Request, { params }: Params) {
     if (!profile) {
       await createProfile(tenant.id, session.user.id, "guest");
     }
-    return Response.redirect(new URL(`/o/${slug}`, request.url));
   } else {
-    // sign-in anonymously (creates an anon yser and profile for the tenant)
-    // redirect to tenant home or redirectTo URL if it exists
+    const user = await createGuestUser();
+    await createProfile(tenant.id, user.id, "guest");
+    await signIn("anonymous", { id: user.id, redirect: false });
   }
-  return Response.json(`Hello: ${slug}`);
+  return Response.redirect(new URL(`/o/${slug}`, request.url));
 }

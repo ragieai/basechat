@@ -64,7 +64,7 @@ export const tenants = pgTable("tenants", {
   logoUrl: text("logo_url"), // The publicly accessible URL of the object
 });
 
-export const rolesEnum = pgEnum("roles", ["admin", "user"]);
+export const rolesEnum = pgEnum("roles", ["admin", "user", "guest"]);
 
 export const invites = pgTable(
   "invites",
@@ -114,6 +114,7 @@ export const users = pgTable("users", {
   name: text("name"),
   email: text("email").unique(),
   password: text("password"),
+  isAnonymous: boolean("is_anonymous").notNull().default(false),
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
   currentProfileId: uuid("current_profile_id").references((): AnyPgColumn => profiles.id, { onDelete: "set null" }),
