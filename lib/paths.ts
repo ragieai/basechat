@@ -11,3 +11,5 @@ export const getUserSettingsPath = (slug: string) => `${getSettingsPath(slug)}/u
 export const getCheckPath = (slug: string) => `/check/${slug}`;
 
 export const getSignInPath = () => `/sign-in`;
+
+export const getStartPath = () => `/start`;
