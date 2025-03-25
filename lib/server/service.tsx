@@ -1,7 +1,7 @@
 import assert from "assert";
 
 import { render } from "@react-email/components";
-import { asc, and, eq, sql } from "drizzle-orm";
+import { asc, and, eq, ne, sql } from "drizzle-orm";
 import { union } from "drizzle-orm/pg-core";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
@@ -121,7 +121,7 @@ export async function getMembersByTenantId(tenantId: string): Promise<Member[]> 
       .from(schema.profiles)
       .innerJoin(schema.users, eq(schema.profiles.userId, schema.users.id))
       .innerJoin(schema.tenants, eq(schema.tenants.id, tenantId))
-      .where(eq(schema.profiles.tenantId, tenantId)),
+      .where(and(eq(schema.profiles.tenantId, tenantId), ne(schema.profiles.role, "guest"))),
     db
       .select({
         id: schema.invites.id,

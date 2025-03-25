@@ -51,7 +51,7 @@ export const updateTenantSchema = z.object({
 });
 
 export type MemberType = "profile" | "invite";
-export type MemberRole = "admin" | "user";
+export type MemberRole = "admin" | "user" | "guest";
 
 export interface Member {
   id: string;
