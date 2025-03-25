@@ -20,7 +20,7 @@ export default async function MainLayout({ children, params }: Props) {
       <div className="h-full w-full flex-1 flex justify-center overflow-auto">
         <div className="h-full w-full flex flex-col items-center justify-center min-w-[500px]">{children}</div>
       </div>
-      {profile.role != "user" && (
+      {profile.role == "admin" && (
         <Footer tenant={tenant} className="h-[80px] shrink-0 w-full bg-[#27272A] flex items-center justify-center" />
       )}
     </div>
