@@ -31,13 +31,18 @@ export async function createTenant(userId: string, name: string) {
   assert(tenants.length === 1);
   const tenantId = tenants[0].id;
 
+  const profile = await createProfile(tenantId, userId, "admin");
+
+  return { tenant: tenants[0], profile };
+}
+
+export async function createProfile(tenantId: string, userId: string, role: Role) {
   const profiles = await db
     .insert(schema.profiles)
-    .values({ tenantId, userId, role: "admin" })
+    .values({ tenantId, userId, role })
     .returning({ id: schema.profiles.id });
   assert(profiles.length === 1);
-
-  return { tenant: tenants[0], profile: profiles[0] };
+  return profiles[0];
 }
 
 export async function deleteConnection(tenantId: string, id: string) {
@@ -226,6 +231,12 @@ export async function getTenantsByUserId(userId: string) {
     .where(eq(schema.profiles.userId, userId));
 }
 
+export async function findTenantBySlug(slug: string) {
+  const tenants = await db.select().from(schema.tenants).where(eq(schema.tenants.slug, slug));
+  assert(tenants.length === 0 || tenants.length === 1, "expect single record");
+  return tenants.length ? tenants[0] : null;
+}
+
 export async function setCurrentProfileId(userId: string, profileId: string) {
   await db.transaction(async (tx) => {
     // Validate profile exists and is scoped to the userId
@@ -246,6 +257,15 @@ export async function deleteInviteById(tenantId: string, id: string) {
 
 export async function deleteProfileById(tenantId: string, id: string) {
   await db.delete(schema.profiles).where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.id, id)));
+}
+
+export async function findProfileByTenantIdAndUserId(tenantId: string, userId: string) {
+  const rs = await db
+    .select()
+    .from(schema.profiles)
+    .where(and(eq(schema.profiles.tenantId, tenantId), eq(schema.profiles.userId, userId)));
+  assert(rs.length === 1 || rs.length === 0, "unexpected result");
+  return rs.length ? rs[0] : null;
 }
 
 export async function findUserByEmail(email: string) {

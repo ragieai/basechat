@@ -44,7 +44,6 @@ export async function authOrRedirect(slug: string) {
   try {
     return await requireAuthContext(slug);
   } catch (e) {
-    console.log("authOrRedirect", e);
     return redirect("/sign-in");
   }
 }
