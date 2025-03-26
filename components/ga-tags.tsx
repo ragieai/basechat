@@ -16,7 +16,6 @@ export const GaTags = ({ gaKey }: { gaKey?: string }) => {
   gtag('config', '${gaKey}');
         `}
       </Script>
-      <strong>OH HAI</strong>
     </>
   );
 };
