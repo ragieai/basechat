@@ -20,8 +20,41 @@ import { hashPassword } from "./utils";
 type Role = (typeof schema.rolesEnum.enumValues)[number];
 
 export async function createTenant(userId: string, name: string) {
-  // TODO: properly slugify name and check for uniqueness
-  const slug = name.toLowerCase().replace(/ /g, "-");
+  // Remove any non-alphanumeric characters except hyphens and spaces
+  let slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    // Replace spaces and repeated hyphens with single hyphen
+    .replace(/[\s_-]+/g, "-")
+    // Remove leading/trailing hyphens
+    .replace(/^-+|-+$/g, "");
+
+  // Ensure slug is not empty
+  if (!slug) {
+    slug = "tenant";
+  }
+
+  // Check if slug exists and append number if needed
+  const existingSlugs = await db
+    .select({ slug: schema.tenants.slug })
+    .from(schema.tenants)
+    .where(eq(schema.tenants.slug, slug));
+
+  if (existingSlugs.length > 0) {
+    let counter = 1;
+    let newSlug = `${slug}-${counter}`;
+
+    while (
+      (await db.select({ slug: schema.tenants.slug }).from(schema.tenants).where(eq(schema.tenants.slug, newSlug)))
+        .length > 0
+    ) {
+      counter++;
+      newSlug = `${slug}-${counter}`;
+    }
+
+    slug = newSlug;
+  }
 
   const tenants = await db
     .insert(schema.tenants)
