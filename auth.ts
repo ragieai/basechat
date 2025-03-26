@@ -95,6 +95,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     authorized: ({ auth }) => !!auth,
+    async signIn({ user }) {
+      // Ensure the user is signed out before signing in
+      // This fixes an issue where the user goes from being anonymous to creating an account
+      await signOut({ redirect: false });
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
       switch (trigger) {
         case "signIn":
