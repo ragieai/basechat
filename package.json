@@ -52,7 +52,7 @@
     "react-dom": "^19.0.0",
     "react-easy-crop": "^5.4.1",
     "react-hook-form": "^7.54.0",
-    "react-markdown": "^9.0.1",
+    "react-markdown": "^9.1.0",
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",

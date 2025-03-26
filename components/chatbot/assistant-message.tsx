@@ -1,6 +1,7 @@
-import Image from "next/image";
-
 import "./style.css";
+import Image from "next/image";
+import Markdown from "react-markdown";
+
 import CONNECTOR_MAP from "@/lib/connector-map";
 import { LLMModel, LLM_DISPLAY_NAMES } from "@/lib/llm/types";
 
@@ -50,7 +51,7 @@ export default function AssistantMessage({ name, logoUrl, content, sources, onSe
         <Logo name={name} url={logoUrl} width={40} height={40} className="avatar text-[13px] h-[40px] w-[40px]" />
       </div>
       <div className="self-start mb-6 rounded-md ml-7">
-        {content?.length ? content : <div className="dot-pulse mt-1.5" />}
+        {content?.length ? <Markdown className="markdown">{content}</Markdown> : <div className="dot-pulse mt-1.5" />}
         <div className="flex flex-wrap mt-4">
           {dedupedSources.map((source, i) => (
             <Citation key={i} source={source} onClick={() => onSelectedDocumentId(source.documentId)} />
