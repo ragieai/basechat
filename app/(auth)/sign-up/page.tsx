@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { getSignInPath } from "@/lib/paths";
 import * as settings from "@/lib/server/settings";
 
 import { Title } from "../common";
@@ -9,7 +10,7 @@ import SignUp from "./sign-up";
 
 export default async function SignUpPage({ searchParams }: { searchParams: Promise<{ redirectTo?: string }> }) {
   const { redirectTo } = await searchParams;
-  const signInUrl = new URL("/sign-in", settings.BASE_URL);
+  const signInUrl = new URL(getSignInPath(), settings.BASE_URL);
   if (redirectTo) {
     signInUrl.searchParams.set("redirectTo", redirectTo);
   }
