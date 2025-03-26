@@ -47,7 +47,8 @@ export async function createTenant(userId: string, name: string) {
 
     while (
       (await db.select({ slug: schema.tenants.slug }).from(schema.tenants).where(eq(schema.tenants.slug, newSlug)))
-        .length > 0
+        .length > 0 &&
+      counter < 10
     ) {
       counter++;
       newSlug = `${slug}-${counter}`;
