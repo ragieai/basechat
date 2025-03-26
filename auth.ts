@@ -3,14 +3,14 @@ import assert from "assert";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import assertNever from "assert-never";
 import NextAuth, { DefaultSession, User } from "next-auth";
-import { CommonProviderOptions, CredentialInput, CredentialsConfig } from "next-auth/providers";
+import { CredentialsConfig } from "next-auth/providers";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
 import authConfig from "./auth.config";
 import db from "./lib/server/db";
 import * as schema from "./lib/server/db/schema";
-import { findUserByEmail, findUserById, getFirstTenantByUserId } from "./lib/server/service";
+import { findUserByEmail, findUserById } from "./lib/server/service";
 import { verifyPassword } from "./lib/server/utils";
 
 declare module "next-auth" {
@@ -102,8 +102,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (user) {
             assert(user.id, "expected AdapterUser");
             token.id = user.id;
-            const tenant = await getFirstTenantByUserId(user.id);
-            token.tenantId = tenant ? tenant.id : null;
           }
           break;
         case "update":
