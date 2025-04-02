@@ -11,10 +11,10 @@ export default function Reset() {
   const [state, resetPasswordAction, pending] = useActionState(handleResetPassword, {});
 
   useEffect(() => {
-    if (state.email) {
+    if (state.email && !state.error) {
       toast.info(`Email sent to ${state.email}`);
     }
-  }, [state.email]);
+  }, [state.email, state.error]);
 
   return (
     <form className="flex flex-col w-full" action={resetPasswordAction}>

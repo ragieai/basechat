@@ -4,6 +4,7 @@ import { z, ZodError } from "zod";
 
 import auth from "@/auth";
 import { getChangePasswordPath } from "@/lib/paths";
+import { findUserByEmail } from "@/lib/server/service";
 
 interface ResetFormState {
   error?: string[];
@@ -19,11 +20,25 @@ export async function handleResetPassword(prevState: ResetFormState, formData: F
     return { error: e.errors.map((e) => e.message) };
   }
 
-  await auth.api.forgetPassword({
-    body: {
-      email,
-      callbackURL: getChangePasswordPath(),
-    },
-  });
-  return { email };
+  try {
+    // First check if user exists
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return {
+        error: ["No account found with this email address"],
+      };
+    }
+
+    await auth.api.forgetPassword({
+      body: {
+        email,
+        callbackURL: getChangePasswordPath(),
+      },
+    });
+    return { email };
+  } catch (error) {
+    return {
+      error: ["An error occurred while processing your request"],
+    };
+  }
 }
