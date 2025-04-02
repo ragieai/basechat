@@ -257,18 +257,16 @@ export async function acceptInvite(userId: string, inviteId: string) {
   return profile;
 }
 
-async function getTenantIdsSubquery(userId: string) {
+export async function getTenantsByUserId(userId: string) {
   const res = await db
     .select({
       tenantId: schema.profiles.tenantId,
     })
     .from(schema.profiles)
-    .where(and(ne(schema.profiles.role, "guest"), eq(schema.profiles.userId, userId)));
-  return res.map((obj) => obj.tenantId);
-}
+    .where(and(eq(schema.profiles.userId, userId)));
 
-export async function getTenantsByUserId(userId: string) {
-  const tenantIds = await getTenantIdsSubquery(userId);
+  const tenantIds = res.map((obj) => obj.tenantId);
+
   return db
     .select({
       id: schema.tenants.id,
@@ -278,7 +276,7 @@ export async function getTenantsByUserId(userId: string) {
       logoUrl: schema.tenants.logoUrl,
     })
     .from(schema.tenants)
-    .innerJoin(schema.profiles, eq(schema.tenants.id, schema.profiles.tenantId))
+    .leftJoin(schema.profiles, and(eq(schema.tenants.id, schema.profiles.tenantId), ne(schema.profiles.role, "guest")))
     .where(inArray(schema.tenants.id, tenantIds))
     .groupBy(schema.tenants.id);
 }
@@ -557,4 +555,8 @@ export async function deleteTenantLogo(tenantId: string) {
     .update(schema.tenants)
     .set({ logoUrl: null, logoObjectName: null, logoFileName: null })
     .where(eq(schema.tenants.id, tenantId));
+}
+
+export function linkUsers(fromUserId: string, toUserId: string) {
+  return db.update(schema.profiles).set({ userId: toUserId }).where(eq(schema.profiles.userId, fromUserId));
 }

@@ -2,12 +2,13 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { anonymous } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 import * as settings from "@/lib/server/settings";
 
-import { sendResetPasswordEmail } from "./lib/server/service";
+import { linkUsers, sendResetPasswordEmail } from "./lib/server/service";
 import { hashPassword, verifyPassword } from "./lib/server/utils";
 
 const socialProviders: Record<string, unknown> = {};
@@ -40,6 +41,9 @@ export const auth = betterAuth({
   plugins: [
     anonymous({
       emailDomainName: "example.com",
+      onLinkAccount: async ({ anonymousUser, newUser }) => {
+        await linkUsers(anonymousUser.user.id, newUser.user.id);
+      },
     }),
     nextCookies(), // This must be the last plugin
   ],
