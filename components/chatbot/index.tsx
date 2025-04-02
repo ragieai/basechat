@@ -37,9 +37,10 @@ interface Props {
   };
   initMessage?: string;
   onSelectedDocumentId: (id: string) => void;
+  isShared: boolean;
 }
 
-export default function Chatbot({ tenant, conversationId, initMessage, onSelectedDocumentId }: Props) {
+export default function Chatbot({ tenant, conversationId, initMessage, onSelectedDocumentId, isShared }: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
   const [messages, setMessages] = useState<Message[]>([]);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});
@@ -239,18 +240,20 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
         <div className="flex flex-col w-full p-2 pl-4 rounded-[16px] border border-[#D7D7D7]">
-          <ChatInput
-            handleSubmit={handleSubmit}
-            selectedModel={selectedModel}
-            onModelChange={setSelectedModel}
-            isBreadth={isBreadth}
-            onBreadthChange={setIsBreadth}
-            rerankEnabled={rerankEnabled}
-            onRerankChange={setRerankEnabled}
-            prioritizeRecent={prioritizeRecent}
-            onPrioritizeRecentChange={setPrioritizeRecent}
-            enabledModels={tenant.enabledModels}
-          />
+          {!isShared && (
+            <ChatInput
+              handleSubmit={handleSubmit}
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
+              isBreadth={isBreadth}
+              onBreadthChange={setIsBreadth}
+              rerankEnabled={rerankEnabled}
+              onRerankChange={setRerankEnabled}
+              prioritizeRecent={prioritizeRecent}
+              onPrioritizeRecentChange={setPrioritizeRecent}
+              enabledModels={tenant.enabledModels}
+            />
+          )}
         </div>
       </div>
     </div>
