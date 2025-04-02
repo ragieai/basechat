@@ -11,5 +11,5 @@ export default async function ConversationPage({ params }: Props) {
   const { tenant } = await authOrRedirect(p.slug);
   const { id } = p;
 
-  return <Conversation tenant={tenant} id={id} />;
+  return <Conversation tenant={tenant} id={id} isShared={false} />;
 }

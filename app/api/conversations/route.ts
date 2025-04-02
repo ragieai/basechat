@@ -4,20 +4,17 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
+import { createConversationRequest } from "@/lib/api";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 import { requireAuthContextFromRequest } from "@/lib/server/utils";
 
-const createConversationRequest = z.object({
-  title: z.string(),
-});
-
 export async function POST(request: NextRequest) {
   const { profile, tenant } = await requireAuthContextFromRequest(request);
   const json = await request.json();
-  const { title } = createConversationRequest.parse(json);
+  const { title, messages } = createConversationRequest.parse(json);
 
-  const rs = await db
+  const [conversation] = await db
     .insert(schema.conversations)
     .values({
       tenantId: tenant.id,
@@ -26,8 +23,22 @@ export async function POST(request: NextRequest) {
     })
     .returning();
 
-  assert(rs.length === 1);
-  return Response.json({ id: rs[0].id });
+  assert(conversation);
+
+  // If continuing a conversation, add the initial messages
+  if (messages?.length) {
+    await db.insert(schema.messages).values(
+      messages.map((message) => ({
+        tenantId: tenant.id,
+        conversationId: conversation.id,
+        content: message.content,
+        role: message.role,
+        sources: [], // Initialize with empty sources for continued conversations
+      })),
+    );
+  }
+
+  return Response.json({ id: conversation.id });
 }
 
 export async function GET(request: NextRequest) {

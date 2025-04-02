@@ -17,9 +17,10 @@ interface Props {
     id: string;
     enabledModels: LLMModel[];
   };
+  isShared: boolean;
 }
 
-export default function Conversation({ id, tenant }: Props) {
+export default function Conversation({ id, tenant, isShared }: Props) {
   const [documentId, setDocumentId] = useState<string | null>(null);
   const { initialMessage, setInitialMessage, initialModel, setInitialModel } = useGlobalState();
 

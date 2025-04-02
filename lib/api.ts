@@ -101,3 +101,76 @@ export const setupSchema = z.object({
     id: z.string(),
   }),
 });
+
+export interface SharedConversationResponse {
+  conversation: {
+    id: string;
+    title: string;
+  };
+  messages: any[];
+  isOwner: boolean;
+  share: {
+    accessType: AccessType;
+    expiresAt?: string;
+    createdAt: Date;
+  };
+}
+
+export const createShareRequestSchema = z
+  .object({
+    tenantSlug: z.string(),
+    accessType: z.enum(["public", "organization", "email"]).default("public"),
+    recipientEmails: z.array(z.string().email()).optional(),
+    expiresAt: z
+      .string()
+      .datetime()
+      .optional()
+      .refine((date) => !date || new Date(date) > new Date(), {
+        message: "Expiration date must be in the future",
+      }),
+  })
+  .refine((data) => data.accessType !== "email" || (data.recipientEmails && data.recipientEmails.length > 0), {
+    message: "recipientEmails required when accessType is 'email'",
+  });
+
+export const createConversationRequest = z.object({
+  title: z.string(),
+  messages: z
+    .array(
+      z.object({
+        content: z.string(),
+        role: z.enum(["assistant", "system", "user"]),
+      }),
+    )
+    .optional(),
+});
+
+export interface ShareButtonProps {
+  conversationId: string;
+  className?: string;
+}
+
+export interface ShareSettings {
+  accessType: AccessType;
+  email?: string;
+  expiresAt?: number;
+  shareId?: string;
+}
+
+export const EXPIRES_AT_OPTIONS = [
+  { label: "Never", value: 0 },
+  { label: "1 hour", value: 1 },
+  { label: "6 hours", value: 6 },
+  { label: "12 hours", value: 12 },
+  { label: "24 hours", value: 24 },
+  { label: "3 days", value: 72 },
+  { label: "7 days", value: 168 },
+];
+
+export const ACCESS_TYPES = [
+  { label: "Public - Anyone with the link", value: "public" },
+  { label: "Organization - Only members", value: "organization" },
+  { label: "Email - Specific person", value: "email" },
+] as const;
+
+export type AccessType = (typeof ACCESS_TYPES)[number]["value"];
