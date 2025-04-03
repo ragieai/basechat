@@ -1,6 +1,6 @@
-import { z } from "better-auth";
 import { eq, and } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 import db from "@/lib/server/db";
 import { sharedConversations } from "@/lib/server/db/schema";

@@ -176,6 +176,9 @@ export default function ShareDialog({
                         try {
                           const response = await fetch(`/api/conversations/${conversationId}/share/${share.shareId}`, {
                             method: "DELETE",
+                            body: JSON.stringify({
+                              tenantSlug: window.location.pathname.split("/")[2],
+                            }),
                           });
                           if (!response.ok) throw new Error("Failed to delete share link");
                           setExistingShares((shares) => shares.filter((s) => s.shareId !== share.shareId));

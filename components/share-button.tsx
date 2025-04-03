@@ -24,11 +24,8 @@ export function ShareButton({ conversationId }: ShareButtonProps) {
       setIsLoading(true);
       const response = await fetch(`/api/conversations/${conversationId}/share`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          tenant: window.location.pathname.split("/")[2], //TODO: we can get slug from actual tenant??
-        },
         body: JSON.stringify({
+          tenantSlug: window.location.pathname.split("/")[2],
           accessType: settings.accessType,
           recipientEmails: settings.accessType === "email" ? [settings.email!] : undefined,
           expiresAt: settings.expiresAt ? new Date(settings.expiresAt).toISOString() : undefined,
@@ -43,9 +40,7 @@ export function ShareButton({ conversationId }: ShareButtonProps) {
       setShareSettings({ ...settings, shareId });
       setIsShared(true);
     } catch (error) {
-      toast.error("Failed to share conversation", {
-        description: error instanceof Error ? error.message : "An unknown error occurred",
-      });
+      toast.error("Failed to share conversation");
     } finally {
       setIsLoading(false);
     }
