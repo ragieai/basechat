@@ -3,43 +3,30 @@ import { NextRequest } from "next/server";
 
 import { sharedConversationResponseSchema } from "@/lib/api";
 import db from "@/lib/server/db";
-import { conversations, messages, sharedConversations } from "@/lib/server/db/schema";
-import { requireAuthContextFromRequest } from "@/lib/server/utils";
+import { conversations, messages, sharedConversations, tenants } from "@/lib/server/db/schema";
+import { requireSession } from "@/lib/server/utils";
 
-// Get a shared conversation
+// Get information about a share
 export async function GET(request: NextRequest, { params }: { params: Promise<{ shareId: string }> }) {
   try {
     const { shareId } = await params;
-    const { profile, tenant } = await requireAuthContextFromRequest(request);
+    const session = await requireSession();
 
-    // Get share record with conversation
+    // Get share record with conversation and tenant
     const [share] = await db
       .select({
         share: sharedConversations,
         conversation: conversations,
+        tenant: tenants,
       })
       .from(sharedConversations)
       .leftJoin(conversations, eq(conversations.id, sharedConversations.conversationId))
+      .leftJoin(tenants, eq(tenants.id, conversations.tenantId))
       .where(eq(sharedConversations.shareId, shareId))
       .limit(1);
 
-    if (!share || !share.conversation) {
+    if (!share || !share.conversation || !share.tenant) {
       return new Response("Share not found", { status: 404 });
-    }
-
-    // Check access permissions
-    if (share.share.expiresAt && new Date(share.share.expiresAt) < new Date()) {
-      return new Response("Share link has expired", { status: 403 });
-    }
-
-    if (share.share.accessType === "organization") {
-      if (share.share.tenantId !== tenant.id) {
-        return new Response("Not authorized", { status: 403 });
-      }
-    } else if (share.share.accessType === "email") {
-      if (!("email" in profile) || !share.share.recipientEmails?.includes(profile.email as string)) {
-        return new Response("Not authorized", { status: 403 });
-      }
     }
 
     // Get conversation messages
@@ -50,12 +37,23 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .orderBy(messages.createdAt);
 
     const responseData = {
+      share: {
+        shareId: share.share.shareId,
+        accessType: share.share.accessType,
+        expiresAt: share.share.expiresAt,
+        recipientEmails: share.share.recipientEmails,
+        createdBy: share.share.createdBy,
+      },
       conversation: share.conversation,
       messages: conversationMessages,
-      isOwner: profile.id === share.conversation.profileId,
+      tenant: {
+        id: share.tenant.id,
+        slug: share.tenant.slug,
+      },
+      isOwner: session?.user.id === share.share.createdBy,
     };
-    const validatedData = sharedConversationResponseSchema.parse(responseData);
-    return Response.json(validatedData);
+
+    return Response.json(responseData);
   } catch (error) {
     console.error("Error fetching shared conversation:", error);
     return new Response("Internal Server Error", { status: 500 });

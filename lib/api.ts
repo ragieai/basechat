@@ -103,10 +103,20 @@ export const setupSchema = z.object({
 });
 
 export const sharedConversationResponseSchema = z.object({
+  share: z.object({
+    shareId: z.string(),
+    accessType: z.enum(["public", "organization", "email"]),
+    expiresAt: z.string().datetime().nullable(),
+    recipientEmails: z.array(z.string()).nullable(),
+    createdBy: z.string(),
+  }),
   conversation: z.object({
     id: z.string(),
     title: z.string(),
-    profileId: z.string(),
+  }),
+  tenant: z.object({
+    id: z.string(),
+    slug: z.string(),
   }),
   messages: conversationMessagesResponseSchema,
   isOwner: z.boolean(),
