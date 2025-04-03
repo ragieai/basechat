@@ -18,9 +18,10 @@ interface Props {
     enabledModels: LLMModel[];
   };
   isShared: boolean;
+  onIdChange?: (id: string) => void;
 }
 
-export default function Conversation({ id, tenant, isShared }: Props) {
+export default function Conversation({ id, tenant, isShared, onIdChange }: Props) {
   const [documentId, setDocumentId] = useState<string | null>(null);
   const { initialMessage, setInitialMessage, initialModel, setInitialModel } = useGlobalState();
 
@@ -38,6 +39,11 @@ export default function Conversation({ id, tenant, isShared }: Props) {
   useEffect(() => {
     setInitialMessage("");
   }, [setInitialMessage]);
+
+  useEffect(() => {
+    onIdChange?.(id);
+    return () => onIdChange?.("");
+  }, [id, onIdChange]);
 
   const handleSelectedDocumentId = async (id: string) => {
     setDocumentId(id);

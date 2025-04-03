@@ -145,11 +145,6 @@ export const createConversationRequest = z.object({
     .optional(),
 });
 
-export interface ShareButtonProps {
-  conversationId: string;
-  className?: string;
-}
-
 export interface ShareSettings {
   accessType: AccessType;
   email?: string;
