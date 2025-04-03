@@ -131,6 +131,34 @@ export const messages = pgTable(
   }),
 );
 
+// Enum for share access types
+export const shareAccessTypesEnum = pgEnum("share_access_type", ["public", "organization", "email"]);
+
+export const sharedConversations = pgTable(
+  "shared_conversations",
+  {
+    ...baseTenantFields,
+
+    // original conversation
+    conversationId: uuid("conversation_id")
+      .references(() => conversations.id, { onDelete: "cascade" })
+      .notNull(),
+    shareId: uuid("share_id").notNull().unique().defaultRandom(),
+    createdBy: uuid("created_by")
+      .references(() => profiles.id, { onDelete: "cascade" })
+      .notNull(),
+
+    // Access control
+    accessType: shareAccessTypesEnum("access_type").notNull().default("public"),
+    recipientEmails: json("recipient_emails").$type<string[]>().default([]),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "string" }),
+  },
+  (t) => ({
+    shareIdIdx: index("shared_conversations_share_id_idx").on(t.shareId),
+    conversationIdIdx: index("shared_conversations_conversation_id_idx").on(t.conversationId),
+  }),
+);
+
 /** Based on Auth.js example schema: https://authjs.dev/getting-started/adapters/drizzle */
 
 export const users = pgTable("users", {

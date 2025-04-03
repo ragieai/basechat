@@ -218,6 +218,13 @@
       "when": 1743542276333,
       "tag": "0030_legal_namor",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1743691730089,
+      "tag": "0031_amazing_jack_murdock",
+      "breakpoints": true
     }
   ]
 }
