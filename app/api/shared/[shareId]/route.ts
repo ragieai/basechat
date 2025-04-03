@@ -1,6 +1,7 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
+import { sharedConversationResponseSchema } from "@/lib/api";
 import db from "@/lib/server/db";
 import { conversations, messages, sharedConversations } from "@/lib/server/db/schema";
 import { requireAuthContextFromRequest } from "@/lib/server/utils";
@@ -10,7 +11,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { shareId } = await params;
     const { profile, tenant } = await requireAuthContextFromRequest(request);
-    // TODO: put tenantslug in the headers for when making this request tenant: slug
 
     // Get share record with conversation
     const [share] = await db
@@ -49,11 +49,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .where(eq(messages.conversationId, share.conversation.id))
       .orderBy(messages.createdAt);
 
-    return Response.json({
+    const responseData = {
       conversation: share.conversation,
       messages: conversationMessages,
       isOwner: profile.id === share.conversation.profileId,
-    });
+    };
+    const validatedData = sharedConversationResponseSchema.parse(responseData);
+    return Response.json(validatedData);
   } catch (error) {
     console.error("Error fetching shared conversation:", error);
     return new Response("Internal Server Error", { status: 500 });

@@ -16,8 +16,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const validationResult = createShareRequestSchema.safeParse(body);
     if (!validationResult.success) return new NextResponse("Invalid request body", { status: 400 });
 
-    const { tenantSlug } = validationResult.data;
-    const { profile, tenant } = await requireAuthContext(tenantSlug);
+    const { slug } = validationResult.data;
+    const { profile, tenant } = await requireAuthContext(slug);
 
     // Verify conversation ownership
     const conversation = await getConversation(tenant.id, profile.id, conversationId);

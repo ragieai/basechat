@@ -15,10 +15,7 @@ export default function SharedDialog({
 }) {
   //TODO: we can get slug from actual tenant??
   const shareUrl = settings.shareId
-    ? new URL(
-        `/o/${window.location.pathname.split("/")[2]}/share/${settings.shareId}`,
-        window.location.origin,
-      ).toString()
+    ? new URL(`/o/${settings.slug}/share/${settings.shareId}`, window.location.origin).toString()
     : "";
 
   const getShareDescription = () => {

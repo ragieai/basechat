@@ -3,7 +3,10 @@
 import assert from "assert";
 
 import { experimental_useObject as useObject } from "ai/react";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+
 
 import { useGlobalState } from "@/app/(main)/o/[slug]/context";
 import {
@@ -12,6 +15,8 @@ import {
   createConversationMessageResponseSchema,
 } from "@/lib/api";
 import { getProviderForModel, LLMModel, modelSchema } from "@/lib/llm/types";
+
+import PrimaryButton from "../primary-button";
 
 import AssistantMessage from "./assistant-message";
 import ChatInput from "./chat-input";
@@ -27,7 +32,7 @@ const UserMessage = ({ content }: { content: string }) => (
 );
 
 interface Props {
-  conversationId: string;
+  conversationId?: string;
   tenant: {
     name: string;
     logoUrl?: string | null;
@@ -37,13 +42,23 @@ interface Props {
   };
   initMessage?: string;
   onSelectedDocumentId: (id: string) => void;
-  isShared: boolean;
+  shareId?: string;
+  messages?: Message[];
 }
 
-export default function Chatbot({ tenant, conversationId, initMessage, onSelectedDocumentId, isShared }: Props) {
+export default function Chatbot({
+  tenant,
+  conversationId,
+  initMessage,
+  onSelectedDocumentId,
+  shareId,
+  messages: initialMessages,
+}: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages ?? []);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});
+  const [isContinueLoading, setIsContinueLoading] = useState(false);
+  const router = useRouter();
   const [pendingMessage, setPendingMessage] = useState<null | { id: string; model: LLMModel }>(null);
   const pendingMessageRef = useRef<null | { id: string; model: LLMModel }>(null);
   pendingMessageRef.current = pendingMessage;
@@ -121,8 +136,9 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       return;
     }
 
+    // Can't send messages from the share page; will always have a conversationId
     const payload: CreateConversationMessageRequest = {
-      conversationId,
+      conversationId: conversationId!,
       content,
       model,
       isBreadth,
@@ -162,7 +178,7 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
     if (localInitMessage) {
       handleSubmit(localInitMessage, selectedModel);
       setLocalInitMessage(undefined);
-    } else {
+    } else if (!shareId || !initialMessages) {
       (async () => {
         const res = await fetch(`/api/conversations/${conversationId}/messages`, {
           headers: { tenant: tenant.slug },
@@ -191,6 +207,32 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
         .map((m) => (m.role === "assistant" && m.id && sourceCache[m.id] ? { ...m, sources: sourceCache[m.id] } : m)),
     [messages, sourceCache],
   );
+
+  const handleContinueConversation = async () => {
+    setIsContinueLoading(true);
+    try {
+      // Create a new conversation with the same messages
+      const response = await fetch("/api/conversations", {
+        method: "POST",
+        body: JSON.stringify({
+          // TODO: pass in conversation title along with initialMessages
+          title: `Shared from "${messages[1]?.content || "conversation"}"`,
+          messages: messages.map(({ content, role }) => ({ content, role })),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create conversation");
+      }
+
+      const { id } = await response.json();
+      router.push(`/o/${tenant.slug}/conversations/${id}`);
+    } catch (error) {
+      console.error("Failed to continue conversation:", error);
+    } finally {
+      setIsContinueLoading(false);
+    }
+  };
 
   // Ensure selected model is in enabled models list
   useEffect(() => {
@@ -236,11 +278,18 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
               tenantId={tenant.id}
             />
           )}
+          {shareId && (
+            <div className="flex justify-center mt-8">
+              <PrimaryButton onClick={handleContinueConversation} disabled={isContinueLoading}>
+                {isContinueLoading ? <Loader2 className="animate-spin" /> : "Continue Conversation"}
+              </PrimaryButton>
+            </div>
+          )}
         </div>
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
         <div className="flex flex-col w-full p-2 pl-4 rounded-[16px] border border-[#D7D7D7]">
-          {!isShared && (
+          {!shareId && (
             <ChatInput
               handleSubmit={handleSubmit}
               selectedModel={selectedModel}

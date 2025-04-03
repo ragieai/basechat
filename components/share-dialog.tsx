@@ -62,6 +62,7 @@ export default function ShareDialog({
       accessType,
       email: accessType === "email" ? email : undefined,
       expiresAt: parsedExpiresAt > 0 ? Date.now() + parsedExpiresAt * 60 * 60 * 1000 : undefined,
+      slug: window.location.pathname.split("/")[2], //TODO: we can get slug from actual tenant??
     });
     fetchExistingShares();
   };
@@ -177,7 +178,7 @@ export default function ShareDialog({
                           const response = await fetch(`/api/conversations/${conversationId}/share/${share.shareId}`, {
                             method: "DELETE",
                             body: JSON.stringify({
-                              tenantSlug: window.location.pathname.split("/")[2],
+                              slug: window.location.pathname.split("/")[2],
                             }),
                           });
                           if (!response.ok) throw new Error("Failed to delete share link");

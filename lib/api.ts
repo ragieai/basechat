@@ -102,23 +102,21 @@ export const setupSchema = z.object({
   }),
 });
 
-export interface SharedConversationResponse {
-  conversation: {
-    id: string;
-    title: string;
-  };
-  messages: any[];
-  isOwner: boolean;
-  share: {
-    accessType: AccessType;
-    expiresAt?: string;
-    createdAt: Date;
-  };
-}
+export const sharedConversationResponseSchema = z.object({
+  conversation: z.object({
+    id: z.string(),
+    title: z.string(),
+    profileId: z.string(),
+  }),
+  messages: conversationMessagesResponseSchema,
+  isOwner: z.boolean(),
+});
+
+export type SharedConversationResponse = z.infer<typeof sharedConversationResponseSchema>;
 
 export const createShareRequestSchema = z
   .object({
-    tenantSlug: z.string(),
+    slug: z.string(),
     accessType: z.enum(["public", "organization", "email"]).default("public"),
     recipientEmails: z.array(z.string().email()).optional(),
     expiresAt: z
@@ -150,6 +148,7 @@ export interface ShareSettings {
   email?: string;
   expiresAt?: number;
   shareId?: string;
+  slug: string;
 }
 
 export const EXPIRES_AT_OPTIONS = [

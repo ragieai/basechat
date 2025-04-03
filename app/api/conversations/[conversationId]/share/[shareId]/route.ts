@@ -9,7 +9,7 @@ import { requireAuthContext } from "@/lib/server/utils";
 
 // Schema for validating request body
 const deleteShareSchema = z.object({
-  tenantSlug: z.string(),
+  slug: z.string(),
 });
 
 // Delete a share
@@ -24,8 +24,8 @@ export async function DELETE(
     const validationResult = deleteShareSchema.safeParse(body);
     if (!validationResult.success) return new NextResponse("Invalid request body", { status: 400 });
 
-    const { tenantSlug } = validationResult.data;
-    const { profile, tenant } = await requireAuthContext(tenantSlug);
+    const { slug } = validationResult.data;
+    const { profile, tenant } = await requireAuthContext(slug);
 
     // Verify conversation ownership
     await getConversation(tenant.id, profile.id, conversationId);

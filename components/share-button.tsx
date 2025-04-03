@@ -2,7 +2,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { ShareSettings } from "@/lib/api";
 import ShareIcon from "@/public/icons/share.svg";
@@ -22,10 +21,12 @@ export function ShareButton({ conversationId }: ShareButtonProps) {
   const handleShare = async (settings: ShareSettings) => {
     try {
       setIsLoading(true);
+      // TODO: is there a better way to get the tenant slug?
+      const slug = window.location.pathname.split("/")[2];
       const response = await fetch(`/api/conversations/${conversationId}/share`, {
         method: "POST",
         body: JSON.stringify({
-          tenantSlug: window.location.pathname.split("/")[2],
+          slug,
           accessType: settings.accessType,
           recipientEmails: settings.accessType === "email" ? [settings.email!] : undefined,
           expiresAt: settings.expiresAt ? new Date(settings.expiresAt).toISOString() : undefined,
@@ -37,7 +38,11 @@ export function ShareButton({ conversationId }: ShareButtonProps) {
       }
 
       const { shareId } = await response.json();
-      setShareSettings({ ...settings, shareId });
+      setShareSettings({
+        ...settings,
+        shareId,
+        slug,
+      });
       setIsShared(true);
     } catch (error) {
       toast.error("Failed to share conversation");
