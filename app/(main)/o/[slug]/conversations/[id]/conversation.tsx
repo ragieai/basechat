@@ -28,6 +28,7 @@ export default function Conversation({ conversationId, tenant, shareId }: Props)
   const [documentId, setDocumentId] = useState<string | null>(null);
   const { initialMessage, setInitialMessage, initialModel, setInitialModel } = useGlobalState();
   const [sharedData, setSharedData] = useState<SharedConversationResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(!!shareId);
   const router = useRouter();
 
   // Check if the initial model is still in the enabled models list
@@ -45,33 +46,23 @@ export default function Conversation({ conversationId, tenant, shareId }: Props)
     setInitialMessage("");
   }, [setInitialMessage]);
 
+  // Fetch shared conversation data if this is a shared view
   useEffect(() => {
     if (!shareId) return;
 
     const fetchSharedConversation = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch(`/api/shared/${shareId}`, {
-          headers: {
-            // TODO: don't need header here
-            tenant: tenant.slug,
-          },
-        });
+        const response = await fetch(`/api/shared/${shareId}`);
         if (!response.ok) {
-          if (response.status === 403) {
-            throw new Error("You don't have permission to view this conversation");
-          }
-          if (response.status === 404) {
-            throw new Error("Shared conversation not found");
-          }
           throw new Error("Failed to load shared conversation");
         }
         const data = await response.json();
 
-        // TODO: is this the right tenant in this case?
-        // may need to get the tenant by the user that is the owner of this share link
+        // If owner, redirect to the original conversation
         if (data.isOwner) {
           toast.info("Redirecting to your conversation");
-          router.push(`/o/${tenant.slug}/conversations/${data.conversation.id}`);
+          router.push(`/o/${data.tenant.slug}/conversations/${data.conversation.id}`);
           return;
         }
 
@@ -79,18 +70,20 @@ export default function Conversation({ conversationId, tenant, shareId }: Props)
       } catch (error) {
         const message = error instanceof Error ? error.message : "An error occurred";
         toast.error(message);
-        router.push(`/o/${tenant.slug}`); // TODO: is this the right tenant in this case?
+        router.push(`/o/${tenant.slug}`); // back tenant home page
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchSharedConversation();
-  }, [conversationId, shareId, router]);
+  }, [shareId, router, tenant.slug]);
 
   const handleSelectedDocumentId = async (id: string) => {
     setDocumentId(id);
   };
 
-  if (shareId && !sharedData) {
+  if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="text-center">
@@ -108,6 +101,7 @@ export default function Conversation({ conversationId, tenant, shareId }: Props)
         initMessage={initialMessage}
         onSelectedDocumentId={handleSelectedDocumentId}
         shareId={shareId}
+        messages={sharedData?.messages}
       />
       {documentId && !shareId && (
         <div className="absolute top-0 left-0 right-0 lg:static">

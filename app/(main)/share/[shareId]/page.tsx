@@ -1,79 +1,61 @@
 import { Metadata } from "next";
-import { headers } from "next/headers";
 
-import { auth } from "@/auth";
-import { sharedConversationResponseSchema } from "@/lib/api";
-import { isUserInTenant } from "@/lib/server/service";
-import { requireSession } from "@/lib/server/utils";
+import { getShareByShareId, isUserInTenant } from "@/lib/server/service";
+import requireSession from "@/lib/server/session";
 
 interface Props {
   params: Promise<{ shareId: string }>;
 }
 
 async function getRedirectUrl(shareId: string) {
-  const headersList = await headers();
-  const protocol = headersList.get("x-forwarded-proto") || "http";
-  const host = headersList.get("host") || "";
-  const baseUrl = `${protocol}://${host}`;
-
   try {
-    // API call will create session and get shareInfo
-    const response = await fetch(`${baseUrl}/check-share/${shareId}`, {
-      cache: "no-store",
-    });
+    // Get share info directly from the database
+    const share = await getShareByShareId(shareId);
+    const session = await requireSession();
 
-    if (!response.ok) {
-      console.error("Failed to fetch share info:", response.status);
+    if (!share || !share.conversation || !share.tenant) {
+      console.error("Share not found");
       return "/";
-    }
-
-    const { session, shareInfo } = await response.json();
-    //await requireSession();
-    // TODO: do we need to a session?
-
-    console.log("shareInfo", shareInfo);
-    console.log("session", session);
-
-    const result = sharedConversationResponseSchema.safeParse(shareInfo);
-    if (!result.success) {
-      console.error("Invalid share data:", result.error);
-      return "/";
-    }
-
-    const data = result.data;
-
-    //console.log("data", data);
-
-    // Check if authentication is required
-    if (data.share.accessType !== "public" && !session) {
-      return `/sign-in?callbackUrl=/share/${shareId}`;
     }
 
     // If user is the owner of the conversation, redirect to the conversation page
-    if (session && data.isOwner) {
-      return `/o/${data.tenant.slug}/conversations/${data.conversation.id}`;
+    const isOwner = share.share.createdBy === session?.user.id;
+    if (isOwner) {
+      return `/o/${share.tenant.slug}/conversations/${share.conversation.id}`;
     }
 
     // Check if share has expired
-    if (data.share.expiresAt && new Date(data.share.expiresAt) < new Date()) {
+    if (share.share.expiresAt && new Date(share.share.expiresAt) < new Date()) {
       return "/";
     }
 
+    // Check if authentication is required
+    if (share.share.accessType !== "public" && !session) {
+      return `/sign-in?callbackUrl=/share/${shareId}`;
+    }
+
     // Check email access
-    if (data.share.accessType === "email" && session) {
-      if (!data.share.recipientEmails?.includes(session.user.email)) {
+    if (share.share.accessType === "email" && session) {
+      if (!share.share.recipientEmails?.includes(session.user.email)) {
         return "/";
       }
     }
 
     // Check organization access
-    if (data.share.accessType === "organization" && session) {
-      if (!isUserInTenant(session.user.id, data.tenant.id)) {
+    if (share.share.accessType === "organization" && session) {
+      const hasAccess = await isUserInTenant(session.user.id, share.tenant.id);
+      if (!hasAccess) {
         return "/";
       }
     }
 
-    return `/o/${data.tenant.slug}/share/${shareId}`;
+    // If no session, redirect to check-share which will handle anonymous auth
+    if (!session) {
+      return `/check-share/${shareId}`;
+    }
+
+    // All checks passed, redirect to the proper share URL
+    return `/o/${share.tenant.slug}/share/${shareId}`;
   } catch (error) {
     console.error("Error resolving share:", error);
     return "/";

@@ -2,6 +2,7 @@ import auth from "@/auth";
 import { createProfile, findProfileByTenantIdAndUserId, findTenantBySlug } from "@/lib/server/service";
 import getSession from "@/lib/server/session";
 import { BASE_URL } from "@/lib/server/settings";
+import { getSignInUrl } from "@/lib/utils";
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -31,15 +32,4 @@ export async function GET(request: Request, { params }: Params) {
     await createProfile(tenant.id, userId, "guest");
   }
   return Response.redirect(new URL(`/o/${slug}`, BASE_URL));
-}
-
-function getSignInUrl(requestUrl: string) {
-  const url = new URL(requestUrl);
-  const redirectToParam = url.searchParams.get("redirectTo");
-
-  const signInUrl = new URL("/sign-in", BASE_URL);
-  if (redirectToParam) {
-    signInUrl.searchParams.set("redirectTo", redirectToParam);
-  }
-  return signInUrl;
 }

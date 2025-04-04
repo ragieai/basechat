@@ -7,7 +7,6 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
-
 import { useGlobalState } from "@/app/(main)/o/[slug]/context";
 import {
   conversationMessagesResponseSchema,
@@ -278,6 +277,7 @@ export default function Chatbot({
               tenantId={tenant.id}
             />
           )}
+          {/** TODO: only allow continue conversation if you are already part of this tenant */}
           {shareId && (
             <div className="flex justify-center mt-8">
               <PrimaryButton onClick={handleContinueConversation} disabled={isContinueLoading}>
@@ -288,8 +288,8 @@ export default function Chatbot({
         </div>
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
-        <div className="flex flex-col w-full p-2 pl-4 rounded-[16px] border border-[#D7D7D7]">
-          {!shareId && (
+        {!shareId && (
+          <div className="flex flex-col w-full p-2 pl-4 rounded-[16px] border border-[#D7D7D7]">
             <ChatInput
               handleSubmit={handleSubmit}
               selectedModel={selectedModel}
@@ -302,8 +302,8 @@ export default function Chatbot({
               onPrioritizeRecentChange={setPrioritizeRecent}
               enabledModels={tenant.enabledModels}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

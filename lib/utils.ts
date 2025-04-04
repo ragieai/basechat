@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import { BASE_URL } from "./server/settings";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -38,4 +40,15 @@ export function getAvatarNumber(tenantId: string, max: number = 3): number {
 
   // Use the hash to get a number between 1 and max
   return Math.abs(hash % max) + 1;
+}
+
+export function getSignInUrl(requestUrl: string) {
+  const url = new URL(requestUrl);
+  const redirectToParam = url.searchParams.get("redirectTo");
+
+  const signInUrl = new URL("/sign-in", BASE_URL);
+  if (redirectToParam) {
+    signInUrl.searchParams.set("redirectTo", redirectToParam);
+  }
+  return signInUrl;
 }
