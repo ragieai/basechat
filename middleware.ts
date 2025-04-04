@@ -37,6 +37,9 @@ function getUnauthenticatedRedirectPath(pathname: string) {
   if (pathname.startsWith("/o")) {
     const slug = pathname.split("/")[2];
     return `/check/${slug}`;
+  } else if (pathname.startsWith("/share")) {
+    const shareId = pathname.split("/")[2];
+    return `/check-share/${shareId}`;
   } else {
     return "/sign-in";
   }

@@ -12,7 +12,6 @@ import { LLMModel } from "@/lib/llm/types";
 
 import Summary from "./summary";
 
-
 interface Props {
   conversationId?: string;
   tenant: {
@@ -53,6 +52,7 @@ export default function Conversation({ conversationId, tenant, shareId }: Props)
       try {
         const response = await fetch(`/api/shared/${shareId}`, {
           headers: {
+            // TODO: don't need header here
             tenant: tenant.slug,
           },
         });

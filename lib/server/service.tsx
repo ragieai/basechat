@@ -257,6 +257,22 @@ export async function acceptInvite(userId: string, inviteId: string) {
   return profile;
 }
 
+export async function isUserInTenant(userId: string, tenantId: string) {
+  const profiles = await db
+    .select({ id: schema.profiles.id })
+    .from(schema.profiles)
+    .where(
+      and(
+        eq(schema.profiles.tenantId, tenantId),
+        eq(schema.profiles.userId, userId),
+        ne(schema.profiles.role, "guest"),
+      ),
+    )
+    .limit(1);
+
+  return profiles.length > 0;
+}
+
 async function getTenantIdsSubquery(userId: string) {
   const res = await db
     .select({
@@ -287,6 +303,23 @@ export async function findTenantBySlug(slug: string) {
   const tenants = await db.select().from(schema.tenants).where(eq(schema.tenants.slug, slug));
   assert(tenants.length === 0 || tenants.length === 1, "expect single record");
   return tenants.length ? tenants[0] : null;
+}
+
+export async function getShareByShareId(shareId: string) {
+  const rs = await db
+    .select({
+      share: schema.sharedConversations,
+      conversation: schema.conversations,
+      tenant: schema.tenants,
+    })
+    .from(schema.sharedConversations)
+    .leftJoin(schema.conversations, eq(schema.conversations.id, schema.sharedConversations.conversationId))
+    .leftJoin(schema.tenants, eq(schema.tenants.id, schema.conversations.tenantId))
+    .where(eq(schema.sharedConversations.shareId, shareId))
+    .limit(1);
+
+  assert(rs.length === 0 || rs.length === 1, "expect single record");
+  return rs.length ? rs[0] : null;
 }
 
 export async function setCurrentProfileId(userId: string, profileId: string) {

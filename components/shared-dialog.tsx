@@ -13,10 +13,8 @@ export default function SharedDialog({
   settings: ShareSettings & { shareId?: string };
   onClose: () => void;
 }) {
-  //TODO: we can get slug from actual tenant??
-  const shareUrl = settings.shareId
-    ? new URL(`/o/${settings.slug}/share/${settings.shareId}`, window.location.origin).toString()
-    : "";
+  // Use the new share URL format without tenant slug
+  const shareUrl = settings.shareId ? new URL(`/share/${settings.shareId}`, window.location.origin).toString() : "";
 
   const getShareDescription = () => {
     switch (settings.accessType) {

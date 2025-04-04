@@ -1,33 +1,32 @@
 import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
-import { sharedConversationResponseSchema } from "@/lib/api";
 import db from "@/lib/server/db";
-import { conversations, messages, sharedConversations, tenants } from "@/lib/server/db/schema";
+import { messages } from "@/lib/server/db/schema";
+import { getShareByShareId } from "@/lib/server/service";
 import { requireSession } from "@/lib/server/utils";
 
 // Get information about a share
 export async function GET(request: NextRequest, { params }: { params: Promise<{ shareId: string }> }) {
   try {
     const { shareId } = await params;
-    const session = await requireSession();
+    const share = await getShareByShareId(shareId);
 
-    // Get share record with conversation and tenant
-    const [share] = await db
-      .select({
-        share: sharedConversations,
-        conversation: conversations,
-        tenant: tenants,
-      })
-      .from(sharedConversations)
-      .leftJoin(conversations, eq(conversations.id, sharedConversations.conversationId))
-      .leftJoin(tenants, eq(tenants.id, conversations.tenantId))
-      .where(eq(sharedConversations.shareId, shareId))
-      .limit(1);
+    if (!share) {
+      console.log("no share");
+    }
+    if (!share?.conversation) {
+      console.log("no conversation");
+    }
+    if (!share?.tenant) {
+      console.log("no tenant");
+    }
 
     if (!share || !share.conversation || !share.tenant) {
-      return new Response("Share not found", { status: 404 });
+      return new Response("Shared conversation not found", { status: 404 });
     }
+
+    const session = await requireSession();
 
     // Get conversation messages
     const conversationMessages = await db
@@ -35,6 +34,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .from(messages)
       .where(eq(messages.conversationId, share.conversation.id))
       .orderBy(messages.createdAt);
+
+    const isOwner = share.share.createdBy === session.user.id;
 
     const responseData = {
       share: {
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         id: share.tenant.id,
         slug: share.tenant.slug,
       },
-      isOwner: session?.user.id === share.share.createdBy,
+      isOwner: isOwner,
     };
 
     return Response.json(responseData);

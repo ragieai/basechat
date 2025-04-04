@@ -145,7 +145,7 @@ export const sharedConversations = pgTable(
       .notNull(),
     shareId: uuid("share_id").notNull().unique().defaultRandom(),
     createdBy: uuid("created_by")
-      .references(() => profiles.id, { onDelete: "cascade" })
+      .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
 
     // Access control

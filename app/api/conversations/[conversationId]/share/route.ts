@@ -22,13 +22,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // Verify conversation ownership
     const conversation = await getConversation(tenant.id, profile.id, conversationId);
 
+    console.log("CREATING SHARE");
+    console.log("profile", profile);
+    console.log("tenant", tenant);
     // Create share record
     const [share] = await db
       .insert(sharedConversations)
       .values({
         conversationId: conversation.id,
         tenantId: tenant.id,
-        createdBy: profile.id,
+        createdBy: profile.userId,
         accessType: body.accessType,
         recipientEmails: body.recipientEmails || [],
         expiresAt: body.expiresAt,
