@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { getShareByShareId, isUserInTenant } from "@/lib/server/service";
 import requireSession from "@/lib/server/session";
@@ -78,12 +79,5 @@ export default async function ShareResolutionPage({ params }: Props) {
   const { shareId } = await params;
   const redirectUrl = await getRedirectUrl(shareId);
 
-  // This will trigger a client-side redirect
-  return (
-    <script
-      dangerouslySetInnerHTML={{
-        __html: `window.location.href = '${redirectUrl}';`,
-      }}
-    />
-  );
+  redirect(redirectUrl);
 }
