@@ -213,10 +213,17 @@ export default function Chatbot({
       // Create a new conversation with the same messages
       const response = await fetch("/api/conversations", {
         method: "POST",
+        headers: {
+          tenant: tenant.slug,
+        },
         body: JSON.stringify({
           // TODO: pass in conversation title along with initialMessages
           title: `Shared from "${messages[1]?.content || "conversation"}"`,
-          messages: messages.map(({ content, role }) => ({ content, role })),
+          messages: messages.map((message) => ({
+            content: message.content,
+            role: message.role,
+            ...(message.role === "assistant" && message.model ? { model: message.model } : {}),
+          })),
         }),
       });
 
