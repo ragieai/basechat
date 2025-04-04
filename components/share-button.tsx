@@ -11,9 +11,10 @@ import SharedDialog from "./shared-dialog";
 
 interface ShareButtonProps {
   conversationId: string;
+  slug: string;
 }
 
-export function ShareButton({ conversationId }: ShareButtonProps) {
+export function ShareButton({ conversationId, slug }: ShareButtonProps) {
   const [isShared, setIsShared] = useState(false);
   const [shareSettings, setShareSettings] = useState<ShareSettings | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,8 +22,6 @@ export function ShareButton({ conversationId }: ShareButtonProps) {
   const handleShare = async (settings: ShareSettings) => {
     try {
       setIsLoading(true);
-      // TODO: is there a better way to get the tenant slug?
-      const slug = window.location.pathname.split("/")[2];
       const response = await fetch(`/api/conversations/${conversationId}/share`, {
         method: "POST",
         body: JSON.stringify({
@@ -41,7 +40,6 @@ export function ShareButton({ conversationId }: ShareButtonProps) {
       setShareSettings({
         ...settings,
         shareId,
-        slug,
       });
       setIsShared(true);
     } catch (error) {
@@ -61,7 +59,7 @@ export function ShareButton({ conversationId }: ShareButtonProps) {
       {isShared ? (
         <SharedDialog settings={shareSettings!} onClose={() => setIsShared(false)} />
       ) : (
-        <ShareDialog conversationId={conversationId} onShare={handleShare} isLoading={isLoading} />
+        <ShareDialog conversationId={conversationId} onShare={handleShare} isLoading={isLoading} slug={slug} />
       )}
     </Dialog>
   );

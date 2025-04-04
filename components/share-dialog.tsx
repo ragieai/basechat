@@ -14,10 +14,12 @@ export default function ShareDialog({
   conversationId,
   onShare,
   isLoading,
+  slug,
 }: {
   conversationId: string;
   onShare: (data: ShareSettings) => void;
   isLoading: boolean;
+  slug: string;
 }) {
   const [accessType, setAccessType] = useState<AccessType>("public");
   const [email, setEmail] = useState("");
@@ -38,7 +40,7 @@ export default function ShareDialog({
       setIsLoadingShares(true);
       const response = await fetch(`/api/conversations/${conversationId}/shares`, {
         headers: {
-          tenant: window.location.pathname.split("/")[2], //TODO: we can get slug from actual tenant??
+          tenant: slug,
         },
       });
       if (!response.ok) throw new Error("Failed to fetch shares");
@@ -62,7 +64,7 @@ export default function ShareDialog({
       accessType,
       email: accessType === "email" ? email : undefined,
       expiresAt: parsedExpiresAt > 0 ? Date.now() + parsedExpiresAt * 60 * 60 * 1000 : undefined,
-      slug: window.location.pathname.split("/")[2], //TODO: we can get slug from actual tenant??
+      slug,
     });
     fetchExistingShares();
   };
@@ -178,7 +180,7 @@ export default function ShareDialog({
                           const response = await fetch(`/api/conversations/${conversationId}/share/${share.shareId}`, {
                             method: "DELETE",
                             body: JSON.stringify({
-                              slug: window.location.pathname.split("/")[2],
+                              slug,
                             }),
                           });
                           if (!response.ok) throw new Error("Failed to delete share link");

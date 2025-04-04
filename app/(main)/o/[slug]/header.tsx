@@ -124,7 +124,7 @@ export default function Header({ isAnonymous, tenant, name, email, onNavClick = 
         </div>
       ) : (
         <div className="flex items-center gap-4">
-          {conversationId && <ShareButton conversationId={conversationId} />}
+          {conversationId && <ShareButton conversationId={conversationId} slug={tenant.slug} />}
           <Popover>
             <PopoverTrigger asChild>
               <div>
