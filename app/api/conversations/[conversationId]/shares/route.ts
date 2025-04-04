@@ -9,7 +9,6 @@ import { requireAuthContextFromRequest } from "@/lib/server/utils";
 // Get all shares for a conversation
 export async function GET(request: NextRequest, { params }: { params: Promise<{ conversationId: string }> }) {
   try {
-    // TODO: put tenant slug in headers when making this request tenant: slug
     const { profile, tenant } = await requireAuthContextFromRequest(request);
     const { conversationId } = await params;
 
