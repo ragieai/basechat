@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { z } from "zod";
 
+import { ShareButton } from "@/components/share-button";
 import Logo from "@/components/tenant/logo/logo";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { tenantListResponseSchema, updateCurrentProfileSchema } from "@/lib/api";
@@ -54,6 +55,8 @@ const HeaderPopoverContent = ({
 export default function Header({ isAnonymous, tenant, name, email, onNavClick = () => {} }: Props) {
   const router = useRouter();
   const [tenants, setTenants] = useState<z.infer<typeof tenantListResponseSchema>>([]);
+  const [conversationId, setConversationId] = useState<string>("");
+  const pathname = usePathname();
 
   useEffect(() => {
     (async () => {
@@ -62,6 +65,16 @@ export default function Header({ isAnonymous, tenant, name, email, onNavClick = 
       setTenants(tenants);
     })();
   }, []);
+
+  useEffect(() => {
+    const pathSegments = pathname.split("/");
+    const conversationsIndex = pathSegments.indexOf("conversations");
+    if (conversationsIndex !== -1 && pathSegments[conversationsIndex + 1]) {
+      setConversationId(pathSegments[conversationsIndex + 1]);
+    } else {
+      setConversationId("");
+    }
+  }, [pathname]);
 
   const handleLogOutClick = async () =>
     await signOut({
@@ -109,72 +122,75 @@ export default function Header({ isAnonymous, tenant, name, email, onNavClick = 
           <Image src={AnonProfileIcon} alt={name || "Guest"} />
         </div>
       ) : (
-        <Popover>
-          <PopoverTrigger asChild>
-            <div>
-              <Logo
-                name={name}
-                width={32}
-                height={32}
-                className="bg-[#66666E] font-semibold text-[16px] cursor-pointer"
-                initialCount={1}
-              />
-            </div>
-          </PopoverTrigger>
-          <HeaderPopoverContent align="end" className="p-4 w-[332px] flex flex-col">
-            <div className="text-sm text-gray-500 font-semibold ml-6 mb-3 mt-3">{email}</div>
+        <div className="flex items-center gap-4">
+          {conversationId && <ShareButton conversationId={conversationId} slug={tenant.slug} />}
+          <Popover>
+            <PopoverTrigger asChild>
+              <div>
+                <Logo
+                  name={name}
+                  width={32}
+                  height={32}
+                  className="bg-[#66666E] font-semibold text-[16px] cursor-pointer"
+                  initialCount={1}
+                />
+              </div>
+            </PopoverTrigger>
+            <HeaderPopoverContent align="end" className="p-4 w-[332px] flex flex-col">
+              <div className="text-sm text-gray-500 font-semibold ml-6 mb-3 mt-3">{email}</div>
 
-            {/* Scrollable container for tenants list */}
-            <div className="max-h-[calc(100vh-330px)] overflow-y-auto pr-1 scrollbar-thin mb-4">
-              <ul>
-                {tenants.map((tenantItem, i) => (
-                  <li
-                    key={i}
-                    className="hover:bg-black hover:bg-opacity-5 px-4 py-3 rounded-lg cursor-pointer"
-                    onClick={() => handleProfileClick(tenantItem)}
-                  >
-                    <div className="flex items-center mb-1">
-                      <div className="w-4">
-                        {tenant.id === tenantItem.id && <Image src={CheckIcon} alt="selected" />}
-                      </div>
-                      <Logo
-                        name={tenantItem.name}
-                        url={tenantItem.logoUrl}
-                        width={40}
-                        height={40}
-                        className="ml-3 text-[16px] w-[40px] h-[40px]"
-                        tenantId={tenantItem.id}
-                      />
-                      <div className="ml-4">
-                        {tenantItem.name}
-                        <div className="text-xs text-gray-500">
-                          {tenantItem.userCount ?? 1} User{(tenantItem.userCount ?? 1) === 1 ? "" : "s"}
+              {/* Scrollable container for tenants list */}
+              <div className="max-h-[calc(100vh-330px)] overflow-y-auto pr-1 scrollbar-thin mb-4">
+                <ul>
+                  {tenants.map((tenantItem, i) => (
+                    <li
+                      key={i}
+                      className="hover:bg-black hover:bg-opacity-5 px-4 py-3 rounded-lg cursor-pointer"
+                      onClick={() => handleProfileClick(tenantItem)}
+                    >
+                      <div className="flex items-center mb-1">
+                        <div className="w-4">
+                          {tenant.id === tenantItem.id && <Image src={CheckIcon} alt="selected" />}
+                        </div>
+                        <Logo
+                          name={tenantItem.name}
+                          url={tenantItem.logoUrl}
+                          width={40}
+                          height={40}
+                          className="ml-3 text-[16px] w-[40px] h-[40px]"
+                          tenantId={tenantItem.id}
+                        />
+                        <div className="ml-4">
+                          {tenantItem.name}
+                          <div className="text-xs text-gray-500">
+                            {tenantItem.userCount ?? 1} User{(tenantItem.userCount ?? 1) === 1 ? "" : "s"}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Fixed bottom options */}
-            <div className="mt-auto">
-              <hr className="mb-4 bg-black border-none h-[1px] opacity-10" />
-
-              <Link className="flex cursor-pointer mb-4" href="/setup">
-                <Image src={PlusIcon} alt="New Chatbot" className="mr-3" />
-                New Chatbot
-              </Link>
-
-              <hr className="mb-4 bg-black border-none h-[1px] opacity-10" />
-
-              <div className="flex cursor-pointer" onClick={handleLogOutClick}>
-                <Image src={LogOutIcon} alt="Log out" className="mr-3" />
-                Log out
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
-          </HeaderPopoverContent>
-        </Popover>
+
+              {/* Fixed bottom options */}
+              <div className="mt-auto">
+                <hr className="mb-4 bg-black border-none h-[1px] opacity-10" />
+
+                <Link className="flex cursor-pointer mb-4" href="/setup">
+                  <Image src={PlusIcon} alt="New Chatbot" className="mr-3" />
+                  New Chatbot
+                </Link>
+
+                <hr className="mb-4 bg-black border-none h-[1px] opacity-10" />
+
+                <div className="flex cursor-pointer" onClick={handleLogOutClick}>
+                  <Image src={LogOutIcon} alt="Log out" className="mr-3" />
+                  Log out
+                </div>
+              </div>
+            </HeaderPopoverContent>
+          </Popover>
+        </div>
       )}
     </header>
   );
