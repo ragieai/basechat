@@ -286,6 +286,23 @@ export async function findTenantBySlug(slug: string) {
   return tenants.length ? tenants[0] : null;
 }
 
+export async function getShareByShareId(shareId: string) {
+  const rs = await db
+    .select({
+      share: schema.sharedConversations,
+      conversation: schema.conversations,
+      tenant: schema.tenants,
+    })
+    .from(schema.sharedConversations)
+    .leftJoin(schema.conversations, eq(schema.conversations.id, schema.sharedConversations.conversationId))
+    .leftJoin(schema.tenants, eq(schema.tenants.id, schema.conversations.tenantId))
+    .where(eq(schema.sharedConversations.id, shareId))
+    .limit(1);
+
+  assert(rs.length === 0 || rs.length === 1, "expect single record");
+  return rs.length ? rs[0] : null;
+}
+
 export async function setCurrentProfileId(userId: string, profileId: string) {
   await db.transaction(async (tx) => {
     // Validate profile exists and is scoped to the userId

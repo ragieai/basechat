@@ -24,9 +24,10 @@ interface Props {
     overrideRerank: boolean | null;
     overridePrioritizeRecent: boolean | null;
   };
+  readOnly: boolean;
 }
 
-export default function Conversation({ id, tenant }: Props) {
+export default function Conversation({ id, tenant, readOnly }: Props) {
   const [documentId, setDocumentId] = useState<string | null>(null);
   const { initialMessage, setInitialMessage, initialModel, setInitialModel } = useGlobalState();
 
@@ -57,6 +58,7 @@ export default function Conversation({ id, tenant }: Props) {
         conversationId={id}
         initMessage={initialMessage}
         onSelectedDocumentId={handleSelectedDocumentId}
+        readOnly={readOnly}
       />
       {documentId && (
         <div className="absolute top-0 left-0 right-0 lg:static">

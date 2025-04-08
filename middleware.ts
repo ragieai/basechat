@@ -15,7 +15,8 @@ export async function middleware(request: NextRequest) {
       pathname !== "/change-password" &&
       !pathname.startsWith("/check") &&
       !pathname.startsWith("/api/auth/callback") &&
-      !pathname.startsWith("/healthz")
+      !pathname.startsWith("/healthz") &&
+      !pathname.startsWith("/share")
     ) {
       const redirectPath = getUnauthenticatedRedirectPath(pathname);
       const newUrl = new URL(redirectPath, BASE_URL);
@@ -37,6 +38,9 @@ function getUnauthenticatedRedirectPath(pathname: string) {
   if (pathname.startsWith("/o")) {
     const slug = pathname.split("/")[2];
     return `/check/${slug}`;
+  } else if (pathname.startsWith("/share")) {
+    const shareId = pathname.split("/")[2];
+    return `/share/${shareId}`;
   } else {
     return "/sign-in";
   }
