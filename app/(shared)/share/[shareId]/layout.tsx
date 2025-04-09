@@ -3,34 +3,12 @@ import { ReactNode } from "react";
 
 import Header from "@/app/(main)/o/[slug]/header";
 import RagieLogo from "@/components/ragie-logo";
-import { LLMModel } from "@/lib/llm/types";
-import { getShareById, getUserById } from "@/lib/server/service";
+import { getShareData, getUserById } from "@/lib/server/service";
 import { getSession } from "@/lib/server/utils";
+
 interface Props {
   params: Promise<{ shareId: string }>;
   children?: ReactNode;
-}
-
-export async function getShareData(shareId: string) {
-  const shareResult = await getShareById(shareId);
-  if (!shareResult) {
-    return null;
-  }
-
-  const { share, tenant, conversation } = shareResult;
-  if (!share || !tenant || !conversation) {
-    return null;
-  }
-
-  // Format tenant object
-  const formattedTenant = {
-    name: tenant?.name || "",
-    logoUrl: tenant?.logoUrl || null,
-    slug: tenant?.slug || "",
-    id: tenant?.id || "",
-  };
-
-  return { share, formattedTenant, conversation };
 }
 
 export default async function SharedLayout({ children, params }: Props) {

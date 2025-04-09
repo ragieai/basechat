@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
-import { getShareData } from "./layout";
+import { getShareData } from "@/lib/server/service";
+
 import ReadOnlyConversation from "./read-only-conversation";
 
 export default async function SharedConversationPage({ params }: { params: Promise<{ shareId: string }> }) {

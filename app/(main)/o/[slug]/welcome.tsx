@@ -79,7 +79,16 @@ export default function Welcome({ tenant, className }: Props) {
       }
       setSettingsLoaded(true);
     }
-  }, [enabledModels, tenant.overrideBreadth, tenant.overrideRerank, tenant.overridePrioritizeRecent]);
+  }, [
+    tenant.isBreadth,
+    tenant.overrideBreadth,
+    tenant.rerankEnabled,
+    tenant.overrideRerank,
+    tenant.prioritizeRecent,
+    tenant.overridePrioritizeRecent,
+    tenant.defaultModel,
+    enabledModels,
+  ]);
 
   // Save settings to localStorage whenever they change
   useEffect(() => {

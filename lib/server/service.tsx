@@ -303,6 +303,28 @@ export async function getShareById(shareId: string) {
   return rs.length ? rs[0] : null;
 }
 
+export async function getShareData(shareId: string) {
+  const shareResult = await getShareById(shareId);
+  if (!shareResult) {
+    return null;
+  }
+
+  const { share, tenant, conversation } = shareResult;
+  if (!share || !tenant || !conversation) {
+    return null;
+  }
+
+  // Format tenant object
+  const formattedTenant = {
+    name: tenant?.name || "",
+    logoUrl: tenant?.logoUrl || null,
+    slug: tenant?.slug || "",
+    id: tenant?.id || "",
+  };
+
+  return { share, formattedTenant, conversation };
+}
+
 export async function setCurrentProfileId(userId: string, profileId: string) {
   await db.transaction(async (tx) => {
     // Validate profile exists and is scoped to the userId
