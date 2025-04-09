@@ -17,6 +17,7 @@ export function ShareButton({ conversationId, slug }: ShareButtonProps) {
   const [isShared, setIsShared] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [shareId, setShareId] = useState<string | null>(null);
+
   const handleShare = async () => {
     try {
       setIsLoading(true);
@@ -31,7 +32,7 @@ export function ShareButton({ conversationId, slug }: ShareButtonProps) {
         throw new Error("Failed to create share link");
       }
 
-      const { shareIdResponse } = await response.json();
+      const { shareId: shareIdResponse } = await response.json();
       setShareId(shareIdResponse);
       setIsShared(true);
     } catch (error) {
@@ -48,15 +49,18 @@ export function ShareButton({ conversationId, slug }: ShareButtonProps) {
           <Image src={ShareIcon} alt="Share conversation" />
         </button>
       </DialogTrigger>
-      {isShared ? (
+      {isShared && shareId ? (
         <SharedDialog
           shareId={shareId}
           conversationId={conversationId}
           slug={slug}
-          onClose={() => setIsShared(false)}
+          onClose={() => {
+            setIsShared(false);
+            setShareId(null);
+          }}
         />
       ) : (
-        <ShareDialog conversationId={conversationId} onShare={handleShare} isLoading={isLoading} slug={slug} />
+        <ShareDialog onShare={handleShare} isLoading={isLoading} />
       )}
     </Dialog>
   );

@@ -1,27 +1,12 @@
 import { Loader2 } from "lucide-react";
 
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ShareSettings } from "@/lib/api";
 
 import PrimaryButton from "./primary-button";
 
-export default function ShareDialog({
-  conversationId,
-  onShare,
-  isLoading,
-  slug,
-}: {
-  conversationId: string;
-  onShare: (data: ShareSettings) => void;
-  isLoading: boolean;
-  slug: string;
-}) {
+export default function ShareDialog({ onShare, isLoading }: { onShare: () => void; isLoading: boolean }) {
   const handleShare = async () => {
-    await onShare({
-      accessType: "public",
-      expiresAt: undefined,
-      slug,
-    });
+    await onShare();
   };
 
   return (
