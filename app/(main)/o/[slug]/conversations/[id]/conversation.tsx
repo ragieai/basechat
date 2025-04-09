@@ -58,7 +58,6 @@ export default function Conversation({ id, tenant }: Props) {
         initMessage={initialMessage}
         onSelectedDocumentId={handleSelectedDocumentId}
       />
-
       {documentId && (
         <div className="absolute top-0 left-0 right-0 lg:static">
           <Summary

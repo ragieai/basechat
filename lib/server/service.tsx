@@ -286,7 +286,7 @@ export async function findTenantBySlug(slug: string) {
   return tenants.length ? tenants[0] : null;
 }
 
-export async function getShareByShareId(shareId: string) {
+export async function getShareById(shareId: string) {
   const rs = await db
     .select({
       share: schema.sharedConversations,

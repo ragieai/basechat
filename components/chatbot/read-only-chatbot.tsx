@@ -96,25 +96,22 @@ export default function ReadOnlyChatbot({ tenant, conversationId, onSelectedDocu
             }
 
             if (message.role === "assistant") {
-              // Ensure assistant message specific props are accessed safely
               return (
                 <Fragment key={key}>
                   <AssistantMessage
                     name={tenant.name}
                     logoUrl={tenant.logoUrl}
                     content={message.content}
-                    id={message.id} // Pass ID directly (AssistantMessage should handle undefined if necessary)
-                    sources={message.sources || []} // Default sources to empty array if undefined
+                    id={message.id}
+                    sources={message.sources || []}
                     onSelectedDocumentId={onSelectedDocumentId}
-                    model={message.model} // Pass model (AssistantMessage should handle undefined)
-                    isGenerating={false} // Never generating in read-only mode
+                    model={message.model}
+                    isGenerating={false}
                     tenantId={tenant.id}
                   />
                 </Fragment>
               );
             }
-
-            // Fallback for unknown roles (shouldn't happen with schema validation)
             return null;
           })}
         </div>

@@ -1,19 +1,19 @@
+import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 
 import Header from "@/app/(main)/o/[slug]/header";
 import RagieLogo from "@/components/ragie-logo";
 import { SearchSettings } from "@/lib/api";
 import { LLMModel } from "@/lib/llm/types";
-import { getShareByShareId, getUserById } from "@/lib/server/service";
+import { getShareById, getUserById } from "@/lib/server/service";
 import { getOptionalSession } from "@/lib/server/utils";
-
 interface Props {
   params: Promise<{ shareId: string }>;
   children?: ReactNode;
 }
 
 export async function getShareData(shareId: string) {
-  const shareResult = await getShareByShareId(shareId);
+  const shareResult = await getShareById(shareId);
   if (!shareResult) {
     return null;
   }
@@ -49,9 +49,8 @@ export default async function SharedLayout({ children, params }: Props) {
 
   const shareData = await getShareData(shareId);
   if (!shareData) {
-    return <div>Share not found</div>;
+    redirect("/sign-in");
   }
-
   const { formattedTenant } = shareData;
 
   return (

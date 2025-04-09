@@ -70,7 +70,7 @@ export default function Header({ isAnonymous, tenant, name, email, onNavClick = 
         }
       })();
     }
-  }, [hasSession]); // Add hasSession to the dependency array
+  }, [hasSession]);
 
   useEffect(() => {
     const pathSegments = pathname.split("/");
