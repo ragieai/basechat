@@ -2,10 +2,8 @@ import { Check, Copy, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ShareSettings } from "@/lib/api";
 
 export default function SharedDialog({
@@ -56,27 +54,36 @@ export default function SharedDialog({
   };
 
   return (
-    <DialogContent className="sm:max-w-[425px] max-h-[90vh]">
+    <DialogContent className="sm:max-w-[425px] max-h-[90vh] !rounded-2xl [&>button]:hidden">
       <DialogHeader>
-        <DialogTitle>Share Link Created</DialogTitle>
-        <DialogDescription>Anyone with this link can view this chat.</DialogDescription>
+        <DialogTitle className="!text-md">Share public link to this chat</DialogTitle>
+        <DialogDescription className="!text-black">Anyone with this link can view this chat.</DialogDescription>
       </DialogHeader>
 
       <div className="flex flex-col gap-4 py-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="shareUrl">Share URL</Label>
-          <div className="flex gap-2">
-            <Input id="shareUrl" type="text" value={shareUrl} readOnly className="flex-1" />
-            <Button type="button" variant="outline" size="icon" onClick={handleCopyUrl} className="shrink-0">
-              {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-            </Button>
+          <div className="relative">
+            <Input id="shareUrl" type="text" value={shareUrl} readOnly className="pr-24" />
+            <button
+              type="button"
+              onClick={handleCopyUrl}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-100 rounded flex items-center gap-1.5"
+            >
+              <Copy className="h-4 w-4 text-black" />
+              <span className="text-sm text-black">{isCopied ? "Copied" : "Copy"}</span>
+            </button>
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col items-center w-full">
-          <Button onClick={handleStopSharing} disabled={isDeleting} variant="destructive" className="w-full">
-            {isDeleting ? <Loader2 className="animate-spin" /> : "Stop sharing"}
-          </Button>
+        <DialogFooter className="flex !justify-start w-full mt-4 !flex-row">
+          <button
+            onClick={handleStopSharing}
+            disabled={isDeleting}
+            className="text-red-500 hover:text-red-600 text-sm font-semibold"
+          >
+            {isDeleting ? <Loader2 className="animate-spin h-4 w-4 inline-block mr-2" /> : null}
+            Stop sharing
+          </button>
         </DialogFooter>
       </div>
     </DialogContent>
