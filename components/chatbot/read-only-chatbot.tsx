@@ -38,7 +38,7 @@ export default function ReadOnlyChatbot({ tenant, conversationId, onSelectedDocu
     let isMounted = true; // Flag to prevent state updates on unmounted component
     (async () => {
       try {
-        const res = await fetch(`/share/conversations/${conversationId}/messages`);
+        const res = await fetch(`/api/share/conversations/${conversationId}/messages`);
         console.log(res);
         if (!res.ok) {
           console.error("Could not load conversation:", res.statusText);
