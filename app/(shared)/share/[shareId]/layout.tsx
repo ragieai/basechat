@@ -3,10 +3,9 @@ import { ReactNode } from "react";
 
 import Header from "@/app/(main)/o/[slug]/header";
 import RagieLogo from "@/components/ragie-logo";
-import { SearchSettings } from "@/lib/api";
 import { LLMModel } from "@/lib/llm/types";
 import { getShareById, getUserById } from "@/lib/server/service";
-import { getOptionalSession } from "@/lib/server/utils";
+import { getSession } from "@/lib/server/utils";
 interface Props {
   params: Promise<{ shareId: string }>;
   children?: ReactNode;
@@ -29,9 +28,6 @@ export async function getShareData(shareId: string) {
     logoUrl: tenant?.logoUrl || null,
     slug: tenant?.slug || "",
     id: tenant?.id || "",
-    enabledModels: (tenant?.enabledModels as LLMModel[]) || [],
-    defaultModel: (tenant?.defaultModel as LLMModel | null) || null,
-    searchSettings: null as SearchSettings | null,
   };
 
   return { share, formattedTenant, conversation };
@@ -39,7 +35,7 @@ export async function getShareData(shareId: string) {
 
 export default async function SharedLayout({ children, params }: Props) {
   const { shareId } = await params;
-  const session = await getOptionalSession();
+  const session = await getSession();
 
   // can show logged in users a proper header if they are logged in, but it is not required
   let user = null;
@@ -60,7 +56,7 @@ export default async function SharedLayout({ children, params }: Props) {
         tenant={formattedTenant}
         name={session?.user.name}
         email={session?.user.email}
-        hasSession={!!session}
+        isLoggedIn={!!session}
       />
       <main className="flex-1 w-full overflow-y-auto">
         <div className="w-full max-w-[717px] lg:max-w-full px-4 mx-auto h-full flex flex-col items-center justify-center">

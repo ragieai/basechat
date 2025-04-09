@@ -11,7 +11,7 @@ export default async function SharedConversationPage({ params }: { params: Promi
   if (!shareData) {
     redirect("/sign-in");
   }
-  const { formattedTenant, conversation, share } = shareData;
+  const { formattedTenant, conversation } = shareData;
 
-  return <ReadOnlyConversation tenant={formattedTenant} id={conversation.id} share={share} />;
+  return <ReadOnlyConversation tenant={formattedTenant} id={conversation.id} />;
 }

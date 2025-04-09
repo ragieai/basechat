@@ -4,21 +4,21 @@ import { toast } from "sonner";
 
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ShareSettings } from "@/lib/api";
 
 export default function SharedDialog({
-  settings,
+  shareId,
+  conversationId,
+  slug,
   onClose,
 }: {
-  settings: ShareSettings & {
-    shareId?: string;
-    conversationId: string;
-  };
+  shareId: string | null;
+  conversationId: string;
+  slug: string;
   onClose: () => void;
 }) {
   const [isCopied, setIsCopied] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const shareUrl = settings.shareId ? new URL(`/share/${settings.shareId}`, window.location.origin).toString() : "";
+  const shareUrl = shareId ? new URL(`/share/${shareId}`, window.location.origin).toString() : "";
 
   const handleCopyUrl = async () => {
     try {
@@ -31,14 +31,14 @@ export default function SharedDialog({
   };
 
   const handleStopSharing = async () => {
-    if (!settings.shareId) return;
+    if (!shareId) return;
 
     try {
       setIsDeleting(true);
-      const response = await fetch(`/api/conversations/${settings.conversationId}/shares/${settings.shareId}`, {
+      const response = await fetch(`/api/conversations/${conversationId}/shares/${shareId}`, {
         method: "DELETE",
         body: JSON.stringify({
-          slug: settings.slug,
+          slug,
         }),
       });
 

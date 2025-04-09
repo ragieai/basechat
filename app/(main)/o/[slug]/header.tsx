@@ -31,9 +31,9 @@ interface Props {
   name: string | undefined | null;
   email: string | undefined | null;
   isAnonymous: boolean;
+  isLoggedIn: boolean;
   className?: string;
   onNavClick?: () => void;
-  hasSession: boolean;
 }
 
 const HeaderPopoverContent = ({
@@ -53,7 +53,7 @@ const HeaderPopoverContent = ({
   </PopoverContent>
 );
 
-export default function Header({ isAnonymous, tenant, name, email, onNavClick = () => {}, hasSession }: Props) {
+export default function Header({ isAnonymous, tenant, name, email, isLoggedIn, onNavClick = () => {} }: Props) {
   const router = useRouter();
   const [tenants, setTenants] = useState<z.infer<typeof tenantListResponseSchema>>([]);
   const [conversationId, setConversationId] = useState<string>("");
@@ -61,7 +61,7 @@ export default function Header({ isAnonymous, tenant, name, email, onNavClick = 
 
   useEffect(() => {
     // Only fetch tenants if there is an active session
-    if (hasSession) {
+    if (isLoggedIn) {
       (async () => {
         const res = await fetch("/api/tenants");
         if (res.ok) {
@@ -70,16 +70,11 @@ export default function Header({ isAnonymous, tenant, name, email, onNavClick = 
         }
       })();
     }
-  }, [hasSession]);
+  }, [isLoggedIn]);
 
   useEffect(() => {
-    const pathSegments = pathname.split("/");
-    const conversationsIndex = pathSegments.indexOf("conversations");
-    if (conversationsIndex !== -1 && pathSegments[conversationsIndex + 1]) {
-      setConversationId(pathSegments[conversationsIndex + 1]);
-    } else {
-      setConversationId("");
-    }
+    const conversationIdMatch = pathname.match(/\/o\/[^/]+\/conversations\/([^/]+)/);
+    setConversationId(conversationIdMatch ? conversationIdMatch[1] : "");
   }, [pathname]);
 
   const handleLogOutClick = async () =>

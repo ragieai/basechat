@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-import { createShareRequestSchema } from "@/lib/api";
 import db from "@/lib/server/db";
 import { sharedConversations } from "@/lib/server/db/schema";
 import { getConversation } from "@/lib/server/service";
@@ -13,10 +12,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Parse the request body
     const body = await request.json().catch(() => ({}));
-    const validationResult = createShareRequestSchema.safeParse(body);
-    if (!validationResult.success) return new NextResponse("Invalid request body", { status: 400 });
-
-    const { slug } = validationResult.data;
+    const { slug } = body;
     const { profile, tenant } = await requireAuthContext(slug);
 
     // Verify conversation ownership
@@ -28,9 +24,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         conversationId: conversation.id,
         tenantId: tenant.id,
         createdBy: profile.id,
-        accessType: body.accessType,
-        recipientEmails: body.recipientEmails || [],
-        expiresAt: body.expiresAt,
       })
       .returning();
 
@@ -54,10 +47,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const shares = await db
       .select({
         shareId: sharedConversations.id,
-        accessType: sharedConversations.accessType,
         createdAt: sharedConversations.createdAt,
-        expiresAt: sharedConversations.expiresAt,
-        recipientEmails: sharedConversations.recipientEmails,
       })
       .from(sharedConversations)
       .where(eq(sharedConversations.conversationId, conversationId))

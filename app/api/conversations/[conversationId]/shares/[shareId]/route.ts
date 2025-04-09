@@ -7,11 +7,6 @@ import { sharedConversations } from "@/lib/server/db/schema";
 import { getConversation } from "@/lib/server/service";
 import { requireAuthContext } from "@/lib/server/utils";
 
-// Schema for validating request body
-const deleteShareSchema = z.object({
-  slug: z.string(),
-});
-
 // Delete a share
 export async function DELETE(
   request: NextRequest,
@@ -21,10 +16,7 @@ export async function DELETE(
   try {
     // Parse the request body
     const body = await request.json().catch(() => ({}));
-    const validationResult = deleteShareSchema.safeParse(body);
-    if (!validationResult.success) return new NextResponse("Invalid request body", { status: 400 });
-
-    const { slug } = validationResult.data;
+    const { slug } = body;
     const { profile, tenant } = await requireAuthContext(slug);
 
     // Verify conversation ownership

@@ -44,7 +44,7 @@ export async function requireAdminContext(slug: string) {
   return context;
 }
 
-export async function getOptionalSession() {
+export async function getSession() {
   const session = await auth.api.getSession({
     headers: await headers(), // you need to pass the headers object.
   });

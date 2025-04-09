@@ -1,14 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { z } from "zod";
 
 import ReadOnlyChatbot from "@/components/chatbot/read-only-chatbot";
-import { SearchSettings, ShareSettings } from "@/lib/api";
-import { LLMModel } from "@/lib/llm/types";
-import { sharedConversations } from "@/lib/server/db/schema";
 
 import Summary from "../../../(main)/o/[slug]/conversations/[id]/summary";
+
 interface Props {
   id: string;
   tenant: {
@@ -16,26 +13,11 @@ interface Props {
     logoUrl?: string | null;
     slug: string;
     id: string;
-    enabledModels: LLMModel[];
-    defaultModel: LLMModel | null;
-    searchSettings: SearchSettings | null;
-  };
-  share: {
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    tenantId: string;
-    conversationId: string;
-    createdBy: string;
-    accessType: "email" | "public" | "organization";
-    recipientEmails: string[] | null;
-    expiresAt: string | null;
   };
 }
 
-export default function ReadOnlyConversation({ id, tenant, share }: Props) {
+export default function ReadOnlyConversation({ id, tenant }: Props) {
   const [documentId, setDocumentId] = useState<string | null>(null);
-  const createdBy = share.createdBy;
 
   const handleSelectedDocumentId = async (id: string) => {
     setDocumentId(id);
@@ -43,12 +25,7 @@ export default function ReadOnlyConversation({ id, tenant, share }: Props) {
 
   return (
     <div className="relative lg:flex h-full w-full">
-      <ReadOnlyChatbot
-        tenant={tenant}
-        conversationId={id}
-        onSelectedDocumentId={handleSelectedDocumentId}
-        createdBy={createdBy}
-      />
+      <ReadOnlyChatbot tenant={tenant} conversationId={id} onSelectedDocumentId={handleSelectedDocumentId} />
       {documentId && (
         <div className="absolute top-0 left-0 right-0 lg:static">
           <Summary

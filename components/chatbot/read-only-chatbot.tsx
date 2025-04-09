@@ -26,10 +26,9 @@ interface Props {
     id: string;
   };
   onSelectedDocumentId: (id: string) => void;
-  createdBy: string;
 }
 
-export default function ReadOnlyChatbot({ tenant, conversationId, onSelectedDocumentId, createdBy }: Props) {
+export default function ReadOnlyChatbot({ tenant, conversationId, onSelectedDocumentId }: Props) {
   // Use the inferred Message type for state
   const [messages, setMessages] = useState<Message[]>([]);
   const container = useRef<HTMLDivElement>(null);
@@ -39,10 +38,7 @@ export default function ReadOnlyChatbot({ tenant, conversationId, onSelectedDocu
     let isMounted = true; // Flag to prevent state updates on unmounted component
     (async () => {
       try {
-        const res = await fetch(`/public/conversations/${conversationId}/messages`, {
-          method: "POST",
-          body: JSON.stringify({ createdBy, tenantId: tenant.id }),
-        });
+        const res = await fetch(`/public/conversations/${conversationId}/messages`);
         console.log(res);
         if (!res.ok) {
           console.error("Could not load conversation:", res.statusText);
@@ -68,7 +64,7 @@ export default function ReadOnlyChatbot({ tenant, conversationId, onSelectedDocu
     return () => {
       isMounted = false; // Cleanup function to set flag on unmount
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Run only once on mount
+     
   }, [conversationId, tenant.slug]);
 
   // Scroll to bottom when messages load/change
