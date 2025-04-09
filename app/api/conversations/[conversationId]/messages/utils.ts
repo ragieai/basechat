@@ -104,7 +104,6 @@ export async function generate(tenantId: string, profileId: string, conversation
   let specialPrompt = undefined;
   if (provider === "groq") {
     if (context.model.match(/^deepseek/)) {
-      console.log(`Using deepseek prompt`);
       specialPrompt = SPECIAL_DEEPSEEK_PROMPT;
     } else {
       specialPrompt = SPECIAL_LLAMA_PROMPT;
