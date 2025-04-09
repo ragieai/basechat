@@ -108,3 +108,22 @@ export const setupSchema = z.object({
     id: z.string(),
   }),
 });
+
+export const sharedConversationResponseSchema = z.object({
+  share: z.object({
+    shareId: z.string(),
+    createdBy: z.string(),
+  }),
+  conversation: z.object({
+    id: z.string(),
+    title: z.string(),
+  }),
+  tenant: z.object({
+    id: z.string(),
+    slug: z.string(),
+  }),
+  messages: conversationMessagesResponseSchema,
+  isOwner: z.boolean(),
+});
+
+export type SharedConversationResponse = z.infer<typeof sharedConversationResponseSchema>;

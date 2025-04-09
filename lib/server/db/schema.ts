@@ -138,6 +138,23 @@ export const messages = pgTable(
   }),
 );
 
+export const sharedConversations = pgTable(
+  "shared_conversations",
+  {
+    ...baseTenantFields,
+    // original conversation
+    conversationId: uuid("conversation_id")
+      .references(() => conversations.id, { onDelete: "cascade" })
+      .notNull(),
+    createdBy: uuid("created_by")
+      .references(() => profiles.id, { onDelete: "cascade" })
+      .notNull(),
+  },
+  (t) => ({
+    conversationIdIdx: index("shared_conversations_conversation_id_idx").on(t.conversationId),
+  }),
+);
+
 /** Based on Auth.js example schema: https://authjs.dev/getting-started/adapters/drizzle */
 
 export const users = pgTable("users", {
