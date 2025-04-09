@@ -43,10 +43,9 @@ interface Props {
   };
   initMessage?: string;
   onSelectedDocumentId: (id: string) => void;
-  readOnly: boolean;
 }
 
-export default function Chatbot({ tenant, conversationId, initMessage, onSelectedDocumentId, readOnly }: Props) {
+export default function Chatbot({ tenant, conversationId, initMessage, onSelectedDocumentId }: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
   const [messages, setMessages] = useState<Message[]>([]);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});

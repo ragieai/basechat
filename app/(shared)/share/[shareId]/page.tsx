@@ -1,6 +1,7 @@
-import Conversation from "@/app/(main)/o/[slug]/conversations/[id]/conversation";
+import { redirect } from "next/navigation";
 
 import { getShareData } from "./layout";
+import ReadOnlyConversation from "./read-only-conversation";
 
 export default async function SharedConversationPage({ params }: { params: Promise<{ shareId: string }> }) {
   const p = await params;
@@ -8,10 +9,9 @@ export default async function SharedConversationPage({ params }: { params: Promi
 
   const shareData = await getShareData(shareId);
   if (!shareData) {
-    return <div>Share not found</div>;
+    redirect("/sign-in");
   }
+  const { formattedTenant, conversation, share } = shareData;
 
-  const { formattedTenant, conversation } = shareData;
-
-  return <Conversation tenant={formattedTenant} id={conversation.id} readOnly={true} />;
+  return <ReadOnlyConversation tenant={formattedTenant} id={conversation.id} share={share} />;
 }

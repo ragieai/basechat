@@ -16,6 +16,7 @@ export async function middleware(request: NextRequest) {
       !pathname.startsWith("/check") &&
       !pathname.startsWith("/api/auth/callback") &&
       !pathname.startsWith("/healthz") &&
+      !pathname.startsWith("/public") &&
       !pathname.startsWith("/share")
     ) {
       const redirectPath = getUnauthenticatedRedirectPath(pathname);

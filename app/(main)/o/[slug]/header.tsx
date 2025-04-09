@@ -33,6 +33,7 @@ interface Props {
   isAnonymous: boolean;
   className?: string;
   onNavClick?: () => void;
+  hasSession: boolean;
 }
 
 const HeaderPopoverContent = ({
@@ -52,19 +53,24 @@ const HeaderPopoverContent = ({
   </PopoverContent>
 );
 
-export default function Header({ isAnonymous, tenant, name, email, onNavClick = () => {} }: Props) {
+export default function Header({ isAnonymous, tenant, name, email, onNavClick = () => {}, hasSession }: Props) {
   const router = useRouter();
   const [tenants, setTenants] = useState<z.infer<typeof tenantListResponseSchema>>([]);
   const [conversationId, setConversationId] = useState<string>("");
   const pathname = usePathname();
 
   useEffect(() => {
-    (async () => {
-      const res = await fetch("/api/tenants");
-      const tenants = tenantListResponseSchema.parse(await res.json());
-      setTenants(tenants);
-    })();
-  }, []);
+    // Only fetch tenants if there is an active session
+    if (hasSession) {
+      (async () => {
+        const res = await fetch("/api/tenants");
+        if (res.ok) {
+          const tenants = tenantListResponseSchema.parse(await res.json());
+          setTenants(tenants);
+        }
+      })();
+    }
+  }, [hasSession]); // Add hasSession to the dependency array
 
   useEffect(() => {
     const pathSegments = pathname.split("/");

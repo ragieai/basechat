@@ -27,7 +27,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .values({
         conversationId: conversation.id,
         tenantId: tenant.id,
-        createdBy: profile.userId,
+        createdBy: profile.id,
         accessType: body.accessType,
         recipientEmails: body.recipientEmails || [],
         expiresAt: body.expiresAt,
