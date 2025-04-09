@@ -27,15 +27,29 @@ export const PROVIDER_CONFIG = {
     } as const,
   },
   groq: {
-    models: ["meta-llama/llama-4-scout-17b-16e-instruct"] as const,
-    logo: "/meta.svg",
+    models: [
+      "meta-llama/llama-4-scout-17b-16e-instruct",
+      "meta-llama/llama-4-maverick-17b-128e-instruct",
+      "deepseek-r1-distill-llama-70b",
+      "deepseek-r1-distill-qwen-32b",
+    ] as const,
+    logos: {
+      "meta-llama/llama-4-scout-17b-16e-instruct": "/meta.svg",
+      "meta-llama/llama-4-maverick-17b-128e-instruct": "/meta.svg",
+      "deepseek-r1-distill-llama-70b": "/deepseek.svg",
+      "deepseek-r1-distill-qwen-32b": "/deepseek.svg",
+    } as const,
     displayNames: {
       "meta-llama/llama-4-scout-17b-16e-instruct": "Llama 4 Scout",
+      "meta-llama/llama-4-maverick-17b-128e-instruct": "Llama 4 Maverick",
+      "deepseek-r1-distill-llama-70b": "DeepSeek R1 Llama 70B",
+      "deepseek-r1-distill-qwen-32b": "DeepSeek R1 Qwen 32B",
     } as const,
   },
 } as const;
 
 export const SPECIAL_LLAMA_PROMPT = `It is extremely important that you only respond in the "message" field in JSON format. Use the "usedSourceIndexes" field for any sources used, or an empty array if no sources are used. Do not return any fields that do not match the given schema.`;
+export const SPECIAL_DEEPSEEK_PROMPT = `It is extremely important that you only respond in the "message" field in JSON format. Do not return any <think> tags outside of the "message" field. Only return text in the "message" field. You may think, but do not return any text in <think> tags. Return all of your text in the "message" field. Use the "usedSourceIndexes" field for any sources used, or an empty array if no sources are used. Do not return any fields that do not match the given schema.`;
 
 // Default values
 // If adding a new provider, update app/api/conversations/[conversationId]/messages/utils.ts using the vercel ai-sdk
@@ -85,7 +99,12 @@ export function getProviderForModel(model: string): LLMProvider | null {
 export const LLM_LOGO_MAP = Object.fromEntries(
   ALL_VALID_MODELS.map((model) => {
     const provider = getProviderForModel(model);
-    return [model, [model, provider ? PROVIDER_CONFIG[provider].logo : ""]];
+    if (!provider) return [model, [model, ""]];
+
+    const config = PROVIDER_CONFIG[provider];
+    const logoPath = "logos" in config ? config.logos[model as keyof typeof config.logos] : config.logo;
+
+    return [model, [model, logoPath]];
   }),
 ) as Record<LLMModel, [string, string]>;
 

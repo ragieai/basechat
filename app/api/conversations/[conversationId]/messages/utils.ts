@@ -14,6 +14,7 @@ import {
   getProviderForModel,
   LLMModel,
   SPECIAL_LLAMA_PROMPT,
+  SPECIAL_DEEPSEEK_PROMPT,
 } from "@/lib/llm/types";
 import { getRagieClient } from "@/lib/server/ragie";
 import {
@@ -100,13 +101,23 @@ export async function generate(tenantId: string, profileId: string, conversation
       model = anthropic(DEFAULT_MODEL);
   }
 
+  let specialPrompt = undefined;
+  if (provider === "groq") {
+    if (context.model.match(/^deepseek/)) {
+      console.log(`Using deepseek prompt`);
+      specialPrompt = SPECIAL_DEEPSEEK_PROMPT;
+    } else {
+      specialPrompt = SPECIAL_LLAMA_PROMPT;
+    }
+  }
+
   let result;
   try {
     result = await streamObject({
       messages: context.messages,
       model,
       temperature: 0.3,
-      system: provider === "groq" ? SPECIAL_LLAMA_PROMPT : undefined,
+      system: specialPrompt,
       schema: createConversationMessageResponseSchema,
       onFinish: async (event) => {
         if (!event.object) {
