@@ -46,17 +46,19 @@ export default function SignUp({ redirectTo }: { redirectTo?: string }) {
       return;
     }
 
+    const callbackURL = redirectTo || getStartPath();
+
     await signUp.email({
       name: `${data.firstName} ${data.lastName}`,
       email: data.email,
       password: data.password,
-      callbackURL: getStartPath(),
+      callbackURL,
       fetchOptions: {
         onError: (error) => {
           dispatch({ type: "setError", error: [error.error.message] });
         },
         onSuccess: () => {
-          router.push(getStartPath());
+          router.push(callbackURL);
         },
       },
     });
