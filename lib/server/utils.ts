@@ -44,6 +44,13 @@ export async function requireAdminContext(slug: string) {
   return context;
 }
 
+export async function getSession() {
+  const session = await auth.api.getSession({
+    headers: await headers(), // you need to pass the headers object.
+  });
+  return session;
+}
+
 export async function authOrRedirect(slug: string) {
   try {
     return await requireAuthContext(slug);

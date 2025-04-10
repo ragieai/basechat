@@ -136,7 +136,16 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
         }
       }
     }
-  }, [enabledModels, tenant.overrideBreadth, tenant.overrideRerank, tenant.overridePrioritizeRecent]);
+  }, [
+    tenant.isBreadth,
+    tenant.overrideBreadth,
+    tenant.rerankEnabled,
+    tenant.overrideRerank,
+    tenant.prioritizeRecent,
+    tenant.overridePrioritizeRecent,
+    tenant.defaultModel,
+    enabledModels,
+  ]);
 
   // Save user settings to localStorage whenever they change
   useEffect(() => {

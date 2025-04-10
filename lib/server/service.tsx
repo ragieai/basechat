@@ -286,6 +286,45 @@ export async function findTenantBySlug(slug: string) {
   return tenants.length ? tenants[0] : null;
 }
 
+export async function getShareById(shareId: string) {
+  const rs = await db
+    .select({
+      share: schema.sharedConversations,
+      conversation: schema.conversations,
+      tenant: schema.tenants,
+    })
+    .from(schema.sharedConversations)
+    .leftJoin(schema.conversations, eq(schema.conversations.id, schema.sharedConversations.conversationId))
+    .leftJoin(schema.tenants, eq(schema.tenants.id, schema.conversations.tenantId))
+    .where(eq(schema.sharedConversations.id, shareId))
+    .limit(1);
+
+  assert(rs.length === 0 || rs.length === 1, "expect single record");
+  return rs.length ? rs[0] : null;
+}
+
+export async function getShareData(shareId: string) {
+  const shareResult = await getShareById(shareId);
+  if (!shareResult) {
+    return null;
+  }
+
+  const { share, tenant, conversation } = shareResult;
+  if (!share || !tenant || !conversation) {
+    return null;
+  }
+
+  // Format tenant object
+  const formattedTenant = {
+    name: tenant?.name || "",
+    logoUrl: tenant?.logoUrl || null,
+    slug: tenant?.slug || "",
+    id: tenant?.id || "",
+  };
+
+  return { share, formattedTenant, conversation };
+}
+
 export async function setCurrentProfileId(userId: string, profileId: string) {
   await db.transaction(async (tx) => {
     // Validate profile exists and is scoped to the userId

@@ -1,6 +1,6 @@
 {
-  "id": "c1a2f98f-f26d-4f2e-aec8-9deb29ed3ef4",
-  "prevId": "f962954a-8bed-4f7b-a715-082163a6ca58",
+  "id": "6ad26bab-170a-4755-9454-259e1f3d9069",
+  "prevId": "c59ab382-5564-4cd8-8070-4d2a011e17ab",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -96,8 +96,12 @@
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -188,8 +192,12 @@
           "name": "authenticators_user_id_users_id_fk",
           "tableFrom": "authenticators",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -199,7 +207,9 @@
         "authenticators_credential_id_unique": {
           "name": "authenticators_credential_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["credential_id"]
+          "columns": [
+            "credential_id"
+          ]
         }
       },
       "policies": {},
@@ -268,8 +278,12 @@
           "name": "connections_tenant_id_tenants_id_fk",
           "tableFrom": "connections",
           "tableTo": "tenants",
-          "columnsFrom": ["tenant_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -279,7 +293,9 @@
         "connections_ragie_connection_id_unique": {
           "name": "connections_ragie_connection_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["ragie_connection_id"]
+          "columns": [
+            "ragie_connection_id"
+          ]
         }
       },
       "policies": {},
@@ -373,8 +389,12 @@
           "name": "conversations_tenant_id_tenants_id_fk",
           "tableFrom": "conversations",
           "tableTo": "tenants",
-          "columnsFrom": ["tenant_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -382,8 +402,12 @@
           "name": "conversations_profile_id_profiles_id_fk",
           "tableFrom": "conversations",
           "tableTo": "profiles",
-          "columnsFrom": ["profile_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -451,8 +475,12 @@
           "name": "invites_tenant_id_tenants_id_fk",
           "tableFrom": "invites",
           "tableTo": "tenants",
-          "columnsFrom": ["tenant_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -460,8 +488,12 @@
           "name": "invites_invited_by_id_profiles_id_fk",
           "tableFrom": "invites",
           "tableTo": "profiles",
-          "columnsFrom": ["invited_by_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "invited_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -471,7 +503,10 @@
         "invites_tenant_id_email_unique": {
           "name": "invites_tenant_id_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["tenant_id", "email"]
+          "columns": [
+            "tenant_id",
+            "email"
+          ]
         }
       },
       "policies": {},
@@ -606,8 +641,12 @@
           "name": "messages_tenant_id_tenants_id_fk",
           "tableFrom": "messages",
           "tableTo": "tenants",
-          "columnsFrom": ["tenant_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -615,8 +654,12 @@
           "name": "messages_conversation_id_conversations_id_fk",
           "tableFrom": "messages",
           "tableTo": "conversations",
-          "columnsFrom": ["conversation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "conversation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -694,8 +737,12 @@
           "name": "profiles_tenant_id_tenants_id_fk",
           "tableFrom": "profiles",
           "tableTo": "tenants",
-          "columnsFrom": ["tenant_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -703,8 +750,12 @@
           "name": "profiles_user_id_users_id_fk",
           "tableFrom": "profiles",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -714,105 +765,10 @@
         "profiles_tenant_id_user_id_unique": {
           "name": "profiles_tenant_id_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["tenant_id", "user_id"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.search_settings": {
-      "name": "search_settings",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_breadth": {
-          "name": "is_breadth",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "rerank_enabled": {
-          "name": "rerank_enabled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "prioritize_recent": {
-          "name": "prioritize_recent",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "override_breadth": {
-          "name": "override_breadth",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "override_rerank": {
-          "name": "override_rerank",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "override_prioritize_recent": {
-          "name": "override_prioritize_recent",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "search_settings_tenant_id_tenants_id_fk": {
-          "name": "search_settings_tenant_id_tenants_id_fk",
-          "tableFrom": "search_settings",
-          "tableTo": "tenants",
-          "columnsFrom": ["tenant_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "search_settings_tenant_id_unique": {
-          "name": "search_settings_tenant_id_unique",
-          "nullsNotDistinct": false,
-          "columns": ["tenant_id"]
+          "columns": [
+            "tenant_id",
+            "user_id"
+          ]
         }
       },
       "policies": {},
@@ -881,8 +837,12 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -892,9 +852,119 @@
         "sessions_token_unique": {
           "name": "sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": ["token"]
+          "columns": [
+            "token"
+          ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.shared_conversations": {
+      "name": "shared_conversations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "conversation_id": {
+          "name": "conversation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "shared_conversations_conversation_id_idx": {
+          "name": "shared_conversations_conversation_id_idx",
+          "columns": [
+            {
+              "expression": "conversation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "shared_conversations_tenant_id_tenants_id_fk": {
+          "name": "shared_conversations_tenant_id_tenants_id_fk",
+          "tableFrom": "shared_conversations",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "shared_conversations_conversation_id_conversations_id_fk": {
+          "name": "shared_conversations_conversation_id_conversations_id_fk",
+          "tableFrom": "shared_conversations",
+          "tableTo": "conversations",
+          "columnsFrom": [
+            "conversation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "shared_conversations_created_by_profiles_id_fk": {
+          "name": "shared_conversations_created_by_profiles_id_fk",
+          "tableFrom": "shared_conversations",
+          "tableTo": "profiles",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1010,6 +1080,48 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'claude-3-7-sonnet-latest'"
+        },
+        "is_breadth": {
+          "name": "is_breadth",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "rerank_enabled": {
+          "name": "rerank_enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "prioritize_recent": {
+          "name": "prioritize_recent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "override_breadth": {
+          "name": "override_breadth",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "override_rerank": {
+          "name": "override_rerank",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
+        "override_prioritize_recent": {
+          "name": "override_prioritize_recent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
         }
       },
       "indexes": {},
@@ -1019,7 +1131,9 @@
         "tenants_slug_unique": {
           "name": "tenants_slug_unique",
           "nullsNotDistinct": false,
-          "columns": ["slug"]
+          "columns": [
+            "slug"
+          ]
         }
       },
       "policies": {},
@@ -1096,8 +1210,12 @@
           "name": "users_current_profile_id_profiles_id_fk",
           "tableFrom": "users",
           "tableTo": "profiles",
-          "columnsFrom": ["current_profile_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "current_profile_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1107,7 +1225,9 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
       "policies": {},
@@ -1171,12 +1291,20 @@
     "public.message_roles": {
       "name": "message_roles",
       "schema": "public",
-      "values": ["assistant", "system", "user"]
+      "values": [
+        "assistant",
+        "system",
+        "user"
+      ]
     },
     "public.roles": {
       "name": "roles",
       "schema": "public",
-      "values": ["admin", "user", "guest"]
+      "values": [
+        "admin",
+        "user",
+        "guest"
+      ]
     }
   },
   "schemas": {},
