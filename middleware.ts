@@ -20,7 +20,9 @@ export async function middleware(request: NextRequest) {
       const redirectPath = getUnauthenticatedRedirectPath(pathname);
       const newUrl = new URL(redirectPath, BASE_URL);
       if (pathname !== "/") {
-        newUrl.searchParams.set("redirectTo", request.nextUrl.toString());
+        const redirectTo = new URL(pathname, BASE_URL);
+        redirectTo.search = request.nextUrl.search;
+        newUrl.searchParams.set("redirectTo", redirectTo.toString());
       }
       return Response.redirect(newUrl);
     }
