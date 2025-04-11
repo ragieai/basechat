@@ -215,10 +215,9 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
                         <FormItem>
                           <FormMessage>Must use valid email addresses</FormMessage>
                           <FormControl>
-                            <input
-                              type="text"
+                            <textarea
                               placeholder="Email addresses, comma separated"
-                              className="w-full rounded-lg border border-[#D946EF] bg-[#F5F5F7] px-3 py-2 shadow-none"
+                              className="w-full rounded-lg border border-[#D946EF] bg-[#F5F5F7] px-3 py-2 shadow-none min-h-[80px] max-h-[200px] resize-none overflow-y-auto"
                               onChange={(e) => handleEmailsChange(e.target.value)}
                             />
                           </FormControl>
