@@ -239,6 +239,13 @@
       "when": 1744210399724,
       "tag": "0033_fresh_baron_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1744229244299,
+      "tag": "0034_abandoned_mindworm",
+      "breakpoints": true
     }
   ]
 }

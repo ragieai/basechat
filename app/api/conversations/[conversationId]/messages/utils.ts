@@ -1,3 +1,5 @@
+import assert from "assert";
+
 import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
 import { groq } from "@ai-sdk/groq";
@@ -15,7 +17,7 @@ import {
   LLMModel,
   SPECIAL_LLAMA_PROMPT,
 } from "@/lib/llm/types";
-import { getRagieClient } from "@/lib/server/ragie";
+import { getRagieClient, getRagieSettingsByTenantId, getTenantRagieClient } from "@/lib/server/ragie";
 import {
   createConversationMessage,
   updateConversationMessageContent,
@@ -170,8 +172,22 @@ export async function getRetrievalSystemPrompt(
   rerankEnabled: boolean,
   prioritizeRecent: boolean,
 ) {
-  const response = await getRagieClient().retrievals.retrieve({
-    partition: tenantId,
+  const { ragieApiKey, ragiePartition } = await getRagieSettingsByTenantId(tenantId);
+
+  let client;
+  let partition;
+  if (ragieApiKey) {
+    client = await getTenantRagieClient(ragieApiKey);
+    partition = ragiePartition || undefined;
+  } else {
+    client = getRagieClient();
+    partition = tenantId;
+  }
+
+  assert(!!client, "No client found");
+
+  const response = await client.retrievals.retrieve({
+    partition,
     query,
     topK: isBreadth ? 32 : 6,
     rerank: rerankEnabled,

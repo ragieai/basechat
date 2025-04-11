@@ -81,6 +81,8 @@ export const tenants = pgTable("tenants", {
   overrideBreadth: boolean("override_breadth").default(true),
   overrideRerank: boolean("override_rerank").default(true),
   overridePrioritizeRecent: boolean("override_prioritize_recent").default(true),
+  ragieApiKey: text("ragie_api_key"),
+  ragiePartition: text("ragie_partition"),
 });
 
 export const rolesEnum = pgEnum("roles", ["admin", "user", "guest"]);
