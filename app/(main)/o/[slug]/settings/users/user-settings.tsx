@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import assertNever from "assert-never";
-import { Tag, TagInput } from "emblor";
 import { Loader2, MoreHorizontal, Trash } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -57,8 +56,6 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
   const [members, setMembers] = useState(initialMembers);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setLoading] = useState(false);
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,8 +63,16 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
   });
 
   const resetForm = () => {
-    setTags([]);
     form.reset();
+  };
+
+  const handleEmailsChange = (value: string) => {
+    form.clearErrors();
+    const emails = value
+      .split(",")
+      .map((email) => email.trim())
+      .filter(Boolean);
+    form.setValue("emails", emails);
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -99,14 +104,6 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
 
     setMembers([...members, ...newMembers]);
   }
-
-  const handleSetTags = (tags: Tag[]) => {
-    form.clearErrors();
-    setTags(tags);
-
-    const emails = (tags as Tag[]).map((t) => t.text);
-    form.setValue("emails", emails);
-  };
 
   const deleteInvite = async (id: string) => {
     const res = await fetch(`/api/invites/${id}`, {
@@ -218,20 +215,10 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
                         <FormItem>
                           <FormMessage>Must use valid email addresses</FormMessage>
                           <FormControl>
-                            {/* The TagInput type is incorrect, but it is functional. */}
-                            <TagInput
-                              placeholder="Email address, comma separated"
-                              styleClasses={{
-                                input: "shadow-none",
-                                inlineTagsContainer: "rounded-lg border border-[#D946EF] bg-[#F5F5F7] px-1 py-1.5",
-                                tag: { body: "pl-3 hover:bg-[#ffffff] bg-[#ffffff]" },
-                              }}
-                              tags={tags}
-                              setTags={(tags) => handleSetTags(tags as Tag[])}
-                              addTagsOnBlur
-                              activeTagIndex={activeTagIndex}
-                              setActiveTagIndex={setActiveTagIndex}
-                              {...field}
+                            <textarea
+                              placeholder="Email addresses, comma separated"
+                              className="w-full rounded-lg border border-[#D946EF] bg-[#F5F5F7] px-3 py-2 shadow-none min-h-[80px] max-h-[200px] resize-none overflow-y-auto"
+                              onChange={(e) => handleEmailsChange(e.target.value)}
                             />
                           </FormControl>
                         </FormItem>
@@ -260,11 +247,7 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
                       )}
                     />
                     <DialogFooter className="mt-8">
-                      {/*
-                        disabled is set based on `tags` instead of formState because
-                        TagInput tracks input state outside of formState... not ideal
-                       */}
-                      <PrimaryButton type="submit" disabled={!tags.length}>
+                      <PrimaryButton type="submit" disabled={!form.getValues("emails")?.length}>
                         Send invite
                         {isLoading && <Loader2 size={18} className="ml-2 animate-spin" />}
                       </PrimaryButton>
