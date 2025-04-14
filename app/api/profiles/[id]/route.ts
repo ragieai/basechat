@@ -32,7 +32,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
 
   try {
     await deleteProfile(tenant.id, id);
-    // TODO: add clean up for conversations and messages
   } catch (e) {
     return renderError(e);
   }

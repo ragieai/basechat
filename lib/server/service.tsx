@@ -413,7 +413,38 @@ export async function deleteProfile(tenantId: string, profileId: string) {
   if (lastAdmin) {
     throw new ServiceError("Cannot delete the last admin");
   }
+
+  // Delete all messages and conversations for this profile
+  await deleteProfileMessagesAndConversations(tenantId, profileId);
+
+  // Finally delete the profile
   return await deleteProfileById(tenantId, profileId);
+}
+
+async function deleteProfileMessagesAndConversations(tenantId: string, profileId: string) {
+  // First get all conversations for this profile
+  const conversations = await db
+    .select({ id: schema.conversations.id })
+    .from(schema.conversations)
+    .where(and(eq(schema.conversations.tenantId, tenantId), eq(schema.conversations.profileId, profileId)));
+
+  // Delete all messages for these conversations
+  if (conversations.length > 0) {
+    await db.delete(schema.messages).where(
+      and(
+        eq(schema.messages.tenantId, tenantId),
+        inArray(
+          schema.messages.conversationId,
+          conversations.map((c) => c.id),
+        ),
+      ),
+    );
+  }
+
+  // Delete all conversations for this profile
+  await db
+    .delete(schema.conversations)
+    .where(and(eq(schema.conversations.tenantId, tenantId), eq(schema.conversations.profileId, profileId)));
 }
 
 async function isLastAdmin(tenantId: string, profileId: string) {

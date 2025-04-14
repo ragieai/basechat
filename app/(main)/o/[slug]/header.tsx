@@ -203,7 +203,24 @@ export default function Header({ isAnonymous, tenant, name, email, onNavClick = 
                                   return;
                                 }
                                 toast.info("Left chatbot");
-                                // TODO: Refresh tenants list, set current profile / tenant
+                                // Find a new tenant to switch to
+                                const newTenant = tenants.find((t) => t.id !== tenantItem.id);
+                                if (!newTenant) {
+                                  // If no other tenants, redirect to setup page
+                                  // TODO: create empty state
+                                  router.push("/setup");
+                                  return;
+                                }
+                                // Set new current tenant and navigate
+                                await fetch("/api/profiles", {
+                                  method: "POST",
+                                  body: JSON.stringify(
+                                    updateCurrentProfileSchema.parse({
+                                      tenantId: newTenant.id,
+                                    }),
+                                  ),
+                                });
+                                router.push(getTenantPath(newTenant.slug));
                               }}
                             >
                               Leave chatbot
