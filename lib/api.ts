@@ -92,6 +92,7 @@ export const tenantListResponseSchema = z.array(
     slug: z.string(),
     logoUrl: z.string().nullable(),
     userCount: z.number().nullable(),
+    profileRole: z.enum(["admin", "user", "guest"]).nullable(),
   }),
 );
 

@@ -147,7 +147,12 @@ export default function Header({ isAnonymous, tenant, name, email, onNavClick = 
                       />
                       <div className="ml-4">
                         {tenantItem.name}
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 flex items-center gap-2">
+                          {tenantItem.profileRole === "admin" && (
+                            <span className="bg-[#989898] text-[#F5F5F7] w-[45px] h-[18px] rounded-[4px] px-1 py-0.5 text-[12px] font-medium flex items-center justify-center">
+                              Admin
+                            </span>
+                          )}
                           {tenantItem.userCount ?? 1} User{(tenantItem.userCount ?? 1) === 1 ? "" : "s"}
                         </div>
                       </div>
