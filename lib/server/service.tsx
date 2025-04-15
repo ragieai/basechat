@@ -279,7 +279,7 @@ export async function getTenantsByUserId(userId: string) {
     .from(schema.tenants)
     .leftJoin(schema.profiles, and(eq(schema.tenants.id, schema.profiles.tenantId), ne(schema.profiles.role, "guest")))
     .where(inArray(schema.tenants.id, tenantIds))
-    .groupBy(schema.tenants.id, schema.profiles.role, schema.profiles.id);
+    .groupBy(schema.tenants.id, schema.profiles.id);
 }
 
 export async function findTenantBySlug(slug: string) {
