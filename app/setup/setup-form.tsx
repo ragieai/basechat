@@ -63,7 +63,7 @@ export default function SetupForm() {
         ></FormField>
         <button
           type="submit"
-          className="bg-[#D946EF] fond-semibold text-white flex justify-center w-full py-2.5 rounded-[54px]"
+          className="bg-[#D946EF] font-semibold text-white flex justify-center w-full py-2.5 rounded-[54px]"
         >
           Build my chatbot
         </button>

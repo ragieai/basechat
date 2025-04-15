@@ -15,7 +15,7 @@ function unwrap(e: unknown): Error {
 function renderError(e: unknown) {
   const err = unwrap(e);
   const message = err instanceof ServiceError ? err.message : "Unexpected error";
-  return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+  return new Response(JSON.stringify({ error: message }), { status: 500 });
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Params }) {
