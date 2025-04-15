@@ -257,29 +257,49 @@ export async function acceptInvite(userId: string, inviteId: string) {
 }
 
 export async function getTenantsByUserId(userId: string) {
-  const res = await db
+  const profileInfo = await db
     .select({
       tenantId: schema.profiles.tenantId,
+      profileId: schema.profiles.id,
+      profileRole: schema.profiles.role,
     })
     .from(schema.profiles)
     .where(and(eq(schema.profiles.userId, userId)));
 
-  const tenantIds = res.map((obj) => obj.tenantId);
+  const tenantIds = profileInfo.map((obj) => obj.tenantId);
 
-  return db
+  const tenantIdToProfile = new Map<string, { profileId: string; profileRole: string }>();
+
+  for (const { tenantId, profileId, profileRole } of profileInfo.values()) {
+    tenantIdToProfile.set(tenantId, { profileId, profileRole });
+  }
+
+  const tenantInfo = await db
     .select({
       id: schema.tenants.id,
       userCount: sql<number>`COUNT(*)`.mapWith(Number).as("user_count"),
       name: schema.tenants.name,
       slug: schema.tenants.slug,
       logoUrl: schema.tenants.logoUrl,
-      profileId: schema.profiles.id,
-      profileRole: schema.profiles.role,
     })
     .from(schema.tenants)
     .leftJoin(schema.profiles, and(eq(schema.tenants.id, schema.profiles.tenantId), ne(schema.profiles.role, "guest")))
     .where(inArray(schema.tenants.id, tenantIds))
-    .groupBy(schema.tenants.id, schema.profiles.id);
+    .groupBy(schema.tenants.id);
+
+  const result = [];
+
+  for (const item of tenantInfo.values()) {
+    const profileInfo = tenantIdToProfile.get(item.id);
+    if (profileInfo === undefined) {
+      continue;
+    }
+    result.push({
+      ...profileInfo,
+      ...item,
+    });
+  }
+  return result;
 }
 
 export async function findTenantBySlug(slug: string) {
