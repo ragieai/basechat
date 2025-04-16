@@ -182,51 +182,56 @@ export default function Header({ isAnonymous, tenant, name, email, onNavClick = 
                             height={16}
                             width={16}
                             alt="Options"
-                            className="flex-shrink-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                            className={cn(
+                              "flex-shrink-0 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity",
+                              tenantItem.lastAdmin && "opacity-0 cursor-not-allowed",
+                            )}
                             onClick={(e) => e.stopPropagation()}
                           />
                         </PopoverTrigger>
-                        <TenantPopoverContent>
-                          <button
-                            className="text-sm text-black hover:text-gray-700"
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              const res = await fetch(`/api/profiles/${tenantItem.profileId}`, {
-                                method: "DELETE",
-                                headers: { tenant: tenantItem.slug },
-                              });
-                              if (!res.ok) {
-                                try {
-                                  const payload = errorSchema.parse(await res.json());
-                                  toast.error(`Error: ${payload.error}`);
-                                } catch (e) {
-                                  toast.error(`Error: ${res.statusText || "An unexpected error occurred"}`);
+                        {!tenantItem.lastAdmin && (
+                          <TenantPopoverContent>
+                            <button
+                              className="text-sm text-black hover:text-gray-700"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                const res = await fetch(`/api/profiles/${tenantItem.profileId}`, {
+                                  method: "DELETE",
+                                  headers: { tenant: tenantItem.slug },
+                                });
+                                if (!res.ok) {
+                                  try {
+                                    const payload = errorSchema.parse(await res.json());
+                                    toast.error(`Error: ${payload.error}`);
+                                  } catch (e) {
+                                    toast.error(`Error: ${res.statusText || "An unexpected error occurred"}`);
+                                  }
+                                  return;
                                 }
-                                return;
-                              }
-                              toast.info("Left chatbot");
-                              // Find a new tenant to switch to
-                              const newTenant = tenants.find((t) => t.id !== tenantItem.id);
-                              if (!newTenant) {
-                                // If no other tenants, go to empty state
-                                router.push("/empty");
-                                return;
-                              }
-                              // Set new current tenant and navigate
-                              await fetch("/api/profiles", {
-                                method: "POST",
-                                body: JSON.stringify(
-                                  updateCurrentProfileSchema.parse({
-                                    tenantId: newTenant.id,
-                                  }),
-                                ),
-                              });
-                              router.push(getTenantPath(newTenant.slug));
-                            }}
-                          >
-                            Leave chatbot
-                          </button>
-                        </TenantPopoverContent>
+                                toast.info("Left chatbot");
+                                // Find a new tenant to switch to
+                                const newTenant = tenants.find((t) => t.id !== tenantItem.id);
+                                if (!newTenant) {
+                                  // If no other tenants, go to empty state
+                                  router.push("/empty");
+                                  return;
+                                }
+                                // Set new current tenant and navigate
+                                await fetch("/api/profiles", {
+                                  method: "POST",
+                                  body: JSON.stringify(
+                                    updateCurrentProfileSchema.parse({
+                                      tenantId: newTenant.id,
+                                    }),
+                                  ),
+                                });
+                                router.push(getTenantPath(newTenant.slug));
+                              }}
+                            >
+                              Leave chatbot
+                            </button>
+                          </TenantPopoverContent>
+                        )}
                       </Popover>
                     </div>
                   </li>

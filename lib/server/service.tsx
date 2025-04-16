@@ -294,9 +294,12 @@ export async function getTenantsByUserId(userId: string) {
     if (profileInfo === undefined) {
       continue;
     }
+
+    const lastAdmin = profileInfo.profileRole === "admin" && (await isLastAdmin(item.id, profileInfo.profileId));
     result.push({
       ...profileInfo,
       ...item,
+      lastAdmin,
     });
   }
   return result;
