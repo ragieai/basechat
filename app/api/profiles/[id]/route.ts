@@ -2,7 +2,7 @@ import { unauthorized } from "next/navigation";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { changeRole, deleteProfile, ServiceError } from "@/lib/server/service";
+import { changeRole, deleteProfile, isProfileDeleteAllowed, ServiceError } from "@/lib/server/service";
 import { requireAdminContextFromRequest, requireAuthContextFromRequest } from "@/lib/server/utils";
 
 type Params = Promise<{ id: string }>;
@@ -22,16 +22,8 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
   const { profile, tenant } = await requireAuthContextFromRequest(request);
   const { id } = await params;
 
-  if (profile.role === "user") {
-    if (profile.id !== id) {
-      unauthorized();
-    }
-  } else {
-    await requireAdminContextFromRequest(request);
-  }
-
   try {
-    await deleteProfile(tenant.id, id);
+    await deleteProfile(tenant.id, id, profile);
   } catch (e) {
     return renderError(e);
   }
