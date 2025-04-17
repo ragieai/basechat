@@ -35,6 +35,7 @@ export default async function DataIndexPage({ params }: Props) {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead className="w-[200px]">Date added</TableHead>
+                  <TableHead className="w-[200px]">Last synced</TableHead>
                   <TableHead className="w-[50px]">Status</TableHead>
                 </TableRow>
               </TableHeader>
@@ -49,7 +50,12 @@ export default async function DataIndexPage({ params }: Props) {
                       />
                       <div>{connection.name}</div>
                     </TableCell>
-                    <TableCell>{formatDistanceToNow(connection.createdAt)}</TableCell>
+                    <TableCell>{formatDistanceToNow(connection.createdAt, { addSuffix: true })}</TableCell>
+                    <TableCell>
+                      {connection.lastSyncedAt
+                        ? formatDistanceToNow(connection.lastSyncedAt, { addSuffix: true })
+                        : "-"}
+                    </TableCell>
                     <TableCell>{connection.status}</TableCell>
                     <TableCell className="text-right">
                       <ManageConnectionMenu id={connection.id} tenant={tenant} />

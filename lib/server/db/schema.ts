@@ -42,6 +42,7 @@ export const connections = pgTable("connections", {
   name: text().notNull(),
   status: text().notNull(),
   sourceType: text().notNull(),
+  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true, mode: "date" }),
 });
 
 export const conversations = pgTable(
