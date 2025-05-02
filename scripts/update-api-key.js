@@ -3,7 +3,6 @@ import crypto from "crypto";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { pgTable, text } from "drizzle-orm/pg-core";
-import "dotenv/config";
 
 // run with: npm run update-api-key myApiKey123 myPartition
 // API key will be encrypted
