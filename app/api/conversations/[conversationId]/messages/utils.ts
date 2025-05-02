@@ -10,9 +10,8 @@ import Handlebars from "handlebars";
 import { createConversationMessageResponseSchema } from "@/lib/api";
 import { DEFAULT_GROUNDING_PROMPT, DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER, getProviderForModel, LLMModel, SPECIAL_LLAMA_PROMPT } from "@/lib/llm/types";
-import { createConversationMessage, updateConversationMessageContent } from "@/lib/server/service";
 import { getRagieClientAndPartition } from "@/lib/server/ragie";
-
+import { createConversationMessage, updateConversationMessageContent } from "@/lib/server/service";
 
 type GenerateContext = {
   messages: CoreMessage[];
