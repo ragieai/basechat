@@ -51,7 +51,7 @@
     "next-themes": "^0.4.4",
     "nodemailer": "^6.9.16",
     "pg": "^8.13.1",
-    "ragie": "^1.4.5",
+    "ragie": "^1.6.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
