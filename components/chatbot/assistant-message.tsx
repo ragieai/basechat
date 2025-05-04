@@ -34,7 +34,7 @@ interface Props {
   name: string;
   logoUrl?: string | null;
   sources: SourceMetadata[];
-  onSelectedDocumentId: (id: string) => void;
+  onSelectedSource: (source: SourceMetadata) => void;
   model: LLMModel;
   isGenerating?: boolean;
 }
@@ -44,7 +44,7 @@ export default function AssistantMessage({
   logoUrl,
   content,
   sources,
-  onSelectedDocumentId,
+  onSelectedSource,
   model,
   isGenerating,
   tenantId,
@@ -76,7 +76,7 @@ export default function AssistantMessage({
         )}
         <div className="flex flex-wrap mt-4">
           {dedupedSources.map((source, i) => (
-            <Citation key={i} source={source} onClick={() => onSelectedDocumentId(source.documentId)} />
+            <Citation key={i} source={source} onClick={() => onSelectedSource(source)} />
           ))}
         </div>
         <div className="text-xs text-muted-foreground">

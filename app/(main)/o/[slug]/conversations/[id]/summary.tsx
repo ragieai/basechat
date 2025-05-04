@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 
+import { SourceMetadata } from "@/components/chatbot/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import CONNECTOR_MAP from "@/lib/connector-map";
 import { cn } from "@/lib/utils";
@@ -13,21 +14,20 @@ import { DocumentResponse } from "./types";
 
 interface Props {
   className?: string;
-  documentId: string;
+  source: SourceMetadata;
   slug: string;
   onCloseClick: () => void;
-  audioLinks: string[];
 }
 
 //if document.name ends with .mp3, we need audio player
 
-export default function Summary({ className, documentId, slug, audioLinks, onCloseClick = () => {} }: Props) {
+export default function Summary({ className, source, slug, onCloseClick = () => {} }: Props) {
   const [document, setDocument] = useState<DocumentResponse | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`/api/documents/${documentId}`, {
+        const res = await fetch(`/api/documents/${source.documentId}`, {
           headers: { tenant: slug },
         });
 
@@ -50,9 +50,8 @@ export default function Summary({ className, documentId, slug, audioLinks, onClo
         console.error("Error fetching document:", error);
       }
     })();
-  }, [documentId, slug]);
+  }, [source.documentId, slug]);
 
-  const isAudioFile = document?.name.toLowerCase().endsWith(".mp3");
   //TODO: support icons for more file types
   const icon =
     document?.metadata.source_type && CONNECTOR_MAP[document.metadata.source_type]
@@ -77,21 +76,13 @@ export default function Summary({ className, documentId, slug, audioLinks, onClo
             </a>
           </div>
           <hr className="mb-6" />
-          {isAudioFile && audioLinks.length > 0 && (
+          {source.streamUrl && (
             <div className="mb-6">
-              <audio
-                controls
-                className="w-full"
-                src={audioLinks[0]} // First link is stream URL
-              >
+              <audio controls className="w-full" src={source.streamUrl}>
                 Your browser does not support the audio element.
               </audio>
-              {audioLinks[1] && (
-                <a
-                  href={audioLinks[1]} // Second link is download URL
-                  target="_blank"
-                  className="text-[#7749F8] flex items-center mt-2"
-                >
+              {source.downloadUrl && (
+                <a href={source.downloadUrl} target="_blank" className="text-[#7749F8] flex items-center mt-2">
                   Download audio
                   <Image src={ExternalLinkIcon} alt="Download" className="ml-1" />
                 </a>
