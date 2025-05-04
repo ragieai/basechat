@@ -69,7 +69,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     model: model,
   });
 
-  let sources: { documentId: string; documentName: string }[] = [];
+  let sources: { documentId: string; documentName: string; streamUrl?: string; downloadUrl?: string }[] = [];
 
   const { content: systemMessageContent, sources: ragSources } = await getRetrievalSystemPrompt(
     tenant,

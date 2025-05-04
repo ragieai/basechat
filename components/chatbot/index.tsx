@@ -43,9 +43,10 @@ interface Props {
   };
   initMessage?: string;
   onSelectedDocumentId: (id: string) => void;
+  onAudioLinks: (links: string[]) => void;
 }
 
-export default function Chatbot({ tenant, conversationId, initMessage, onSelectedDocumentId }: Props) {
+export default function Chatbot({ tenant, conversationId, initMessage, onSelectedDocumentId, onAudioLinks }: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
   const [messages, setMessages] = useState<Message[]>([]);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});
@@ -226,6 +227,12 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
 
       const json = (await res.json()) as { id: string; sources: SourceMetadata[] };
       setSourceCache((prev) => ({ ...prev, [json.id]: json.sources }));
+
+      const validAudioLinks: string[] = [
+        ...json.sources.map((source) => source.streamUrl).filter((url): url is string => !!url),
+        ...json.sources.map((source) => source.downloadUrl).filter((url): url is string => !!url),
+      ];
+      onAudioLinks(validAudioLinks);
     })();
   }, [conversationId, pendingMessage, tenant.slug]);
 

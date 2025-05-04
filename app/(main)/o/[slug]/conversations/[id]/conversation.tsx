@@ -28,6 +28,8 @@ interface Props {
 
 export default function Conversation({ id, tenant }: Props) {
   const [documentId, setDocumentId] = useState<string | null>(null);
+  // first link is stream, second link is download
+  const [audioLinks, setAudioLinks] = useState<string[]>([]);
   const { initialMessage, setInitialMessage, initialModel, setInitialModel } = useGlobalState();
 
   // Move the default model logic outside useEffect
@@ -50,6 +52,10 @@ export default function Conversation({ id, tenant }: Props) {
     setDocumentId(id);
   };
 
+  const handleAudioLinks = async (links: string[]) => {
+    setAudioLinks(links);
+  };
+
   return (
     <div className="relative lg:flex h-full w-full">
       <Chatbot
@@ -57,6 +63,7 @@ export default function Conversation({ id, tenant }: Props) {
         conversationId={id}
         initMessage={initialMessage}
         onSelectedDocumentId={handleSelectedDocumentId}
+        onAudioLinks={handleAudioLinks}
       />
       {documentId && (
         <div className="absolute top-0 left-0 right-0 lg:static lg:h-full">
@@ -65,6 +72,7 @@ export default function Conversation({ id, tenant }: Props) {
             documentId={documentId}
             slug={tenant.slug}
             onCloseClick={() => setDocumentId(null)}
+            audioLinks={audioLinks}
           />
         </div>
       )}
