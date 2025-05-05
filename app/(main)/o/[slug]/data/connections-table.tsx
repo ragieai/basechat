@@ -17,9 +17,10 @@ interface Props {
     slug: string;
   };
   connections: any[];
+  userName: string | null;
 }
 
-export default function ConnectionsTable({ tenant, connections }: Props) {
+export default function ConnectionsTable({ tenant, connections, userName }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 12;
 
@@ -60,6 +61,7 @@ export default function ConnectionsTable({ tenant, connections }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[600px]">Name</TableHead>
+              <TableHead className="w-[200px]">Added by</TableHead>
               <TableHead className="w-[200px]">Date added</TableHead>
               <TableHead className="w-[200px]">Last synced</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
@@ -76,7 +78,9 @@ export default function ConnectionsTable({ tenant, connections }: Props) {
                   />
                   <div>{connection.name}</div>
                 </TableCell>
-                {/**TODO: add document count and added by TableCell s here */}
+                {/**TODO: add document count TableCell here */}
+                <TableCell>{connection.addedBy || userName || "-"}</TableCell>
+                {/**TODO: get added by from real data source here */}
                 <TableCell>{formatDistanceToNow(connection.createdAt, { addSuffix: true })}</TableCell>
                 <TableCell>
                   {connection.lastSyncedAt ? formatDistanceToNow(connection.lastSyncedAt, { addSuffix: true }) : "-"}

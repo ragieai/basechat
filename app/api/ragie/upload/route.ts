@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
     // Get the form data
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const metadata = JSON.parse(formData.get("metadata") as string);
     if (!file) {
       return Response.json({ error: "No file provided" }, { status: 400 });
     }
@@ -21,6 +22,7 @@ export async function POST(request: NextRequest) {
       file: file,
       partition: partition || "",
       mode: "hi_res",
+      metadata,
     });
     return Response.json(res);
   } catch (error) {

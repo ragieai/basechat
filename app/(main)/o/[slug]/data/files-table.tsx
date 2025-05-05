@@ -1,13 +1,15 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import Dropzone from "react-dropzone";
 import { toast } from "sonner";
 
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import CONNECTOR_MAP from "@/lib/connector-map";
 import { MAX_FILE_SIZE, getDropzoneAcceptConfig, uploadFile, validateFile } from "@/lib/file-utils";
@@ -22,9 +24,134 @@ interface Props {
   };
   initialFiles: any[];
   nextCursor: string | null;
+  userName: string | null;
 }
 
-export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) {
+interface TableControlsProps {
+  totalFiles: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  onPreviousPage: () => void;
+  onNextPage: () => void;
+}
+
+function TableControls({ totalFiles, currentPage, hasNextPage, onPreviousPage, onNextPage }: TableControlsProps) {
+  return (
+    <div className="flex justify-between items-center mb-4">
+      <div className="flex items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50">
+              Connector <ChevronDown className="h-4 w-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox id="connector-1" />
+                <label htmlFor="connector-1" className="text-sm">
+                  Option 1
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="connector-2" />
+                <label htmlFor="connector-2" className="text-sm">
+                  Option 2
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="connector-3" />
+                <label htmlFor="connector-3" className="text-sm">
+                  Option 3
+                </label>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50">
+              Type <ChevronDown className="h-4 w-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox id="type-1" />
+                <label htmlFor="type-1" className="text-sm">
+                  Option 1
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="type-2" />
+                <label htmlFor="type-2" className="text-sm">
+                  Option 2
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="type-3" />
+                <label htmlFor="type-3" className="text-sm">
+                  Option 3
+                </label>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50">
+              Status <ChevronDown className="h-4 w-4" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox id="status-1" />
+                <label htmlFor="status-1" className="text-sm">
+                  Option 1
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="status-2" />
+                <label htmlFor="status-2" className="text-sm">
+                  Option 2
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="status-3" />
+                <label htmlFor="status-3" className="text-sm">
+                  Option 3
+                </label>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onPreviousPage}
+          disabled={currentPage === 1}
+          className={`p-1 rounded-md ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:bg-gray-100"}`}
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button
+          onClick={onNextPage}
+          disabled={!hasNextPage}
+          className={`p-1 rounded-md ${
+            !hasNextPage ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function FilesTable({ tenant, initialFiles, nextCursor, userName }: Props) {
   const router = useRouter();
   const [allFiles, setAllFiles] = useState(initialFiles);
   const [currentNextCursor, setCurrentNextCursor] = useState<string | null>(nextCursor);
@@ -147,7 +274,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
           const toastId = toast.loading(`Uploading ${file.name}...`);
 
           try {
-            await uploadFile(file, tenant.slug);
+            await uploadFile(file, tenant.slug, userName);
             toast.success(`Successfully uploaded ${file.name}`, {
               id: toastId,
             });
@@ -172,31 +299,14 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
       {({ getRootProps, getInputProps }) => (
         <div className="h-full w-full flex flex-col" {...getRootProps()}>
           <input {...getInputProps()} />
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-[14px] font-[500] text-[#1D1D1F] pl-1">
-              {allFiles.length} {allFiles.length === 1 ? "file" : "files"}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={goToPreviousPage}
-                disabled={currentPage === 1}
-                className={`p-1 rounded-md ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:bg-gray-100"}`}
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                onClick={goToNextPage}
-                disabled={!currentNextCursor && currentPage * ITEMS_PER_PAGE >= allFiles.length}
-                className={`p-1 rounded-md ${
-                  !currentNextCursor && currentPage * ITEMS_PER_PAGE >= allFiles.length
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
+          <hr className="my-4" />
+          <TableControls
+            totalFiles={allFiles.length}
+            currentPage={currentPage}
+            hasNextPage={!!currentNextCursor || currentPage * ITEMS_PER_PAGE < allFiles.length}
+            onPreviousPage={goToPreviousPage}
+            onNextPage={goToNextPage}
+          />
           <div
             className={`flex-1 overflow-y-auto relative ${isDragActive ? "after:content-[''] after:absolute after:inset-0 after:bg-[#F0F7FF] after:border-2 after:border-[#007AFF] after:border-dashed after:rounded-lg after:pointer-events-none" : ""}`}
           >
@@ -210,6 +320,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
                   <TableRow>
                     <TableHead className="w-[600px]">Name</TableHead>
                     <TableHead className="w-[200px]">Connection</TableHead>
+                    <TableHead className="w-[200px]">Added by</TableHead>
                     <TableHead className="w-[200px]">Date added</TableHead>
                     <TableHead className="w-[200px]">Date modified</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
@@ -222,7 +333,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
                         <div>{file.name}</div>
                       </TableCell>
                       <TableCell>
-                        {file.metadata.source_type ? (
+                        {file.metadata?.source_type && file.metadata.source_type !== "manual" ? (
                           <div className="flex items-center gap-2">
                             <Image
                               src={CONNECTOR_MAP[file.metadata.source_type][1]}
@@ -235,6 +346,21 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
                           "-"
                         )}
                       </TableCell>
+                      <TableCell>
+                        {file.metadata?.source_type && file.metadata.source_type !== "manual" ? (
+                          <div className="flex items-center gap-2">
+                            <Image
+                              src={CONNECTOR_MAP[file.metadata.source_type][1]}
+                              alt={CONNECTOR_MAP[file.metadata.source_type][0]}
+                              className="mr-1"
+                            />
+                            {CONNECTOR_MAP[file.metadata.source_type][0]}
+                          </div>
+                        ) : (
+                          file.metadata.added_by || "-"
+                        )}
+                      </TableCell>
+                      {/* TODO: get added by from metadata */}
                       <TableCell>{formatDistanceToNow(new Date(file.createdAt), { addSuffix: true })}</TableCell>
                       <TableCell>{formatDistanceToNow(new Date(file.updatedAt), { addSuffix: true })}</TableCell>
                       <TableCell>
@@ -249,7 +375,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
                         <ManageFileMenu
                           id={file.id}
                           tenant={tenant}
-                          isConnectorFile={!!file.metadata?.source_type}
+                          isConnectorFile={file.metadata?.source_type && file.metadata.source_type !== "manual"}
                           onFileRemoved={handleFileRemoved}
                         />
                       </TableCell>

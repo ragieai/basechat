@@ -20,7 +20,7 @@ interface Props {
 
 export default async function DataIndexPage({ params }: Props) {
   const p = await params;
-  const { tenant } = await adminOrRedirect(p.slug);
+  const { tenant, session } = await adminOrRedirect(p.slug);
   const connections = await db.select().from(schema.connections).where(eq(schema.connections.tenantId, tenant.id));
 
   let files: any[] = [];
@@ -42,7 +42,7 @@ export default async function DataIndexPage({ params }: Props) {
       <div className="flex w-full justify-between items-center pt-2">
         <h1 className="font-bold text-[32px] text-[#343A40]">Chatbot data</h1>
         <div className="flex gap-2">
-          <UploadFileButton tenant={tenant} />
+          <UploadFileButton tenant={tenant} userName={session.user.name} />
           <AddConnectionMenu tenant={tenant} />
         </div>
       </div>
@@ -63,16 +63,16 @@ export default async function DataIndexPage({ params }: Props) {
         </TabsList>
         <TabsContent value="files" className="flex-1 overflow-hidden">
           {files.length > 0 ? (
-            <FilesTable tenant={tenant} initialFiles={files} nextCursor={nextCursor} />
+            <FilesTable tenant={tenant} initialFiles={files} nextCursor={nextCursor} userName={session.user.name} />
           ) : (
             <div className="flex-grow w-full flex flex-col items-center justify-center h-[calc(100vh-400px)]">
-              <FileDropzone tenant={tenant} />
+              <FileDropzone tenant={tenant} userName={session.user.name} />
             </div>
           )}
         </TabsContent>
         <TabsContent value="connections" className="flex-1 overflow-hidden">
           {connections.length > 0 ? (
-            <ConnectionsTable tenant={tenant} connections={connections} />
+            <ConnectionsTable tenant={tenant} connections={connections} userName={session.user.name} />
           ) : (
             <div className="flex-grow w-full flex flex-col items-center justify-center h-[calc(100vh-400px)]">
               <Image alt="Manage data" src={ManageDataPreviewIcons} />
