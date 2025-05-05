@@ -162,6 +162,21 @@ export async function getRetrievalSystemPrompt(
 
   console.log(`ragie response includes ${response.scoredChunks.length} chunk(s)`);
 
+  if (response.scoredChunks.length === 0 && rerankEnabled) {
+    console.log("No chunks found, trying again with rerank disabled");
+
+    response = await client.retrievals.retrieve({
+      partition,
+      query,
+      topK: isBreadth ? 100 : 6,
+      rerank: false,
+      recencyBias: prioritizeRecent,
+      ...(isBreadth ? { maxChunksPerDocument: 4 } : {}),
+    });
+
+    console.log(`ragie response (rereank fallback) includes ${response.scoredChunks.length} chunk(s)`);
+  }
+
   const chunks = JSON.stringify(response);
 
   const sources = response.scoredChunks.map((chunk) => ({
