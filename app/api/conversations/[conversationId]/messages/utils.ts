@@ -149,11 +149,12 @@ export async function getRetrievalSystemPrompt(
   prioritizeRecent: boolean,
 ) {
   const { client, partition } = await getRagieClientAndPartition(tenant.id);
+  const topK = isBreadth || rerankEnabled ? 100 : 6;
 
-  const response = await client.retrievals.retrieve({
+  let response = await client.retrievals.retrieve({
     partition,
     query,
-    topK: isBreadth ? 32 : 6,
+    topK,
     rerank: rerankEnabled,
     recencyBias: prioritizeRecent,
     ...(isBreadth ? { maxChunksPerDocument: 4 } : {}),
