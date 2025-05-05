@@ -11,6 +11,16 @@ import { SourceMetadata } from "./types";
 
 const MAX_CITATION_LENGTH = 30;
 
+function format(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.floor(totalSeconds % 60);
+
+  const pad = (n: number): string => n.toString().padStart(2, "0");
+
+  return hours > 0 ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}` : `${pad(minutes)}:${pad(seconds)}`;
+}
+
 const Citation = ({ source, onClick = () => {} }: { source: SourceMetadata; onClick?: () => void }) => {
   const connector = CONNECTOR_MAP[source.source_type];
 
@@ -23,6 +33,11 @@ const Citation = ({ source, onClick = () => {} }: { source: SourceMetadata; onCl
     <button className="rounded-[20px] flex items-center border px-3 py-1.5 mr-3 mb-3" onClick={onClick}>
       {connector && <Image src={connector[1]} alt={connector[0]} className="mr-1" />}
       {formatSourceName(source.documentName)}
+      {source.startTime && source.endTime && (
+        <span className="pl-2 text-xs text-muted-foreground">
+          ({format(source.startTime)} - {format(source.endTime)})
+        </span>
+      )}
     </button>
   );
 };

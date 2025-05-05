@@ -169,6 +169,8 @@ export async function getRetrievalSystemPrompt(
     documentName: chunk.documentName,
     streamUrl: chunk.links.self_audio_stream?.href,
     downloadUrl: chunk.links.self_audio_download?.href,
+    startTime: chunk.metadata?.start_time,
+    endTime: chunk.metadata?.end_time,
   }));
 
   const company = { name: tenant.name };

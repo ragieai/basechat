@@ -6,4 +6,6 @@ export type SourceMetadata = {
   documentName: string;
   streamUrl?: string;
   downloadUrl?: string;
+  startTime?: number;
+  endTime?: number;
 };
