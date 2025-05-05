@@ -6,20 +6,18 @@ import Markdown from "react-markdown";
 import { SourceMetadata } from "@/components/chatbot/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import CONNECTOR_MAP from "@/lib/connector-map";
+import { getRagieStreamPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
 import CloseIcon from "@/public/icons/close.svg";
 import ExternalLinkIcon from "@/public/icons/external-link.svg";
 
 import { DocumentResponse } from "./types";
-
 interface Props {
   className?: string;
   source: SourceMetadata;
   slug: string;
   onCloseClick: () => void;
 }
-
-//if document.name ends with .mp3, we need audio player
 
 export default function Summary({ className, source, slug, onCloseClick = () => {} }: Props) {
   const [document, setDocument] = useState<DocumentResponse | null>(null);
@@ -69,20 +67,26 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
           <div className="wrap text-[24px] font-bold mb-4 break-all">{document.name}</div>
           <div className="flex justify-between mb-6">
             <div className="text-[#74747A]">Updated {format(document.updatedAt, "MM/dd/yyyy")}</div>
-            <a href={document.metadata.source_url} target="_blank" className="text-[#7749F8] flex">
-              {/* TODO: change this to the audio download url? */}
-              View in source
-              <Image src={ExternalLinkIcon} alt="Open in new window" />
-            </a>
+            {!source.streamUrl && (
+              <a href={document.metadata.source_url} target="_blank" className="text-[#7749F8] flex">
+                View in source
+                <Image src={ExternalLinkIcon} alt="Open in new window" />
+              </a>
+            )}
           </div>
           <hr className="mb-6" />
           {source.streamUrl && (
             <div className="mb-6">
-              <audio controls className="w-full" src={source.streamUrl}>
+              <audio controls className="w-full" src={getRagieStreamPath(slug, source.streamUrl)}>
                 Your browser does not support the audio element.
               </audio>
               {source.downloadUrl && (
-                <a href={source.downloadUrl} target="_blank" className="text-[#7749F8] flex items-center mt-2">
+                <a
+                  href={getRagieStreamPath(slug, source.downloadUrl)}
+                  download
+                  target="_blank"
+                  className="text-[#7749F8] flex items-center mt-2"
+                >
                   Download audio
                   <Image src={ExternalLinkIcon} alt="Download" className="ml-1" />
                 </a>

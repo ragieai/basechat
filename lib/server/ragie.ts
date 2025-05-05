@@ -41,6 +41,11 @@ export async function getRagieSettingsByTenantId(tenantId: string) {
   return tenant;
 }
 
+export async function getRagieApiKey(tenant: typeof tenants.$inferSelect) {
+  const { ragieApiKey } = await getRagieSettingsByTenantId(tenant.id);
+  return ragieApiKey ? decrypt(ragieApiKey) : settings.RAGIE_API_KEY;
+}
+
 export async function getRagieClientAndPartition(tenantId: string) {
   const { ragieApiKey, ragiePartition } = await getRagieSettingsByTenantId(tenantId);
 
