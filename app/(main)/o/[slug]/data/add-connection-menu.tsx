@@ -62,7 +62,7 @@ export default function AddConnectionMenu({ tenant }: Props) {
             className="w-[190px] h-[35px] flex items-center mb-2 px-2 cursor-pointer"
             onSelect={() => onSelect(sourceType)}
           >
-            <Image src={icon} alt={name} className="mr-3" />
+            <Image src={icon} alt={name} width={24} height={24} className="mr-3" />
             <div className={inter.className}>{name}</div>
           </DropdownMenuItem>
         ))}

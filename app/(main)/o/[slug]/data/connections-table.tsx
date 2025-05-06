@@ -34,6 +34,7 @@ export default function ConnectionsTable({ tenant, connections }: Props) {
 
   return (
     <div className="h-full w-full flex flex-col">
+      <hr className="my-4" />
       <div className="flex justify-between items-center mb-4">
         <div className="text-[14px] font-[500] text-[#1D1D1F] pl-1">
           {connections.length} {connections.length === 1 ? "connection" : "connections"}
