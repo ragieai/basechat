@@ -32,6 +32,7 @@ interface Props {
       addedBy: string | null;
     }
   >;
+  searchQuery?: string;
 }
 
 interface TableControlsProps {
@@ -127,7 +128,14 @@ function TableControls({
   );
 }
 
-export default function FilesTable({ tenant, initialFiles, nextCursor, userName, connectionMap }: Props) {
+export default function FilesTable({
+  tenant,
+  initialFiles,
+  nextCursor,
+  userName,
+  connectionMap,
+  searchQuery = "",
+}: Props) {
   const router = useRouter();
   const [allFiles, setAllFiles] = useState(initialFiles);
   const [currentNextCursor, setCurrentNextCursor] = useState<string | null>(nextCursor);
@@ -197,13 +205,13 @@ export default function FilesTable({ tenant, initialFiles, nextCursor, userName,
     }
   };
 
-  // Filter files based on selected statuses
+  // Filter files based on selected statuses and search query
   const filteredFiles = allFiles.filter((file) => {
-    if (selectedStatuses.length === 0) return true;
-
-    const fileStatus = file.status === "ready" || file.status === "failed" ? file.status : "syncing";
-
-    return selectedStatuses.includes(fileStatus);
+    const matchesStatus =
+      selectedStatuses.length === 0 ||
+      selectedStatuses.includes(file.status === "ready" || file.status === "failed" ? file.status : "syncing");
+    const matchesSearch = searchQuery === "" || file.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
   });
 
   // Calculate the current page's files
