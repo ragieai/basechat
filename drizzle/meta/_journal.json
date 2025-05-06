@@ -253,6 +253,13 @@
       "when": 1744909035532,
       "tag": "0035_chilly_warpath",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1746549542526,
+      "tag": "0036_aspiring_mauler",
+      "breakpoints": true
     }
   ]
 }

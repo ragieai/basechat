@@ -79,7 +79,6 @@ export default function ConnectionsTable({ tenant, connections }: Props) {
                 </TableCell>
                 {/**TODO: add document count TableCell here */}
                 <TableCell>{connection.addedBy || "-"}</TableCell>
-                {/**TODO: get added by from real data source here */}
                 <TableCell>{formatDistanceToNow(connection.createdAt, { addSuffix: true })}</TableCell>
                 <TableCell>
                   {connection.lastSyncedAt ? formatDistanceToNow(connection.lastSyncedAt, { addSuffix: true }) : "-"}

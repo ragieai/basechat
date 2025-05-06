@@ -25,6 +25,13 @@ interface Props {
   initialFiles: any[];
   nextCursor: string | null;
   userName: string | null;
+  connectionMap: Record<
+    string,
+    {
+      sourceType: string;
+      addedBy: string | null;
+    }
+  >;
 }
 
 interface TableControlsProps {
@@ -151,7 +158,7 @@ function TableControls({ totalFiles, currentPage, hasNextPage, onPreviousPage, o
   );
 }
 
-export default function FilesTable({ tenant, initialFiles, nextCursor, userName }: Props) {
+export default function FilesTable({ tenant, initialFiles, nextCursor, userName, connectionMap }: Props) {
   const router = useRouter();
   const [allFiles, setAllFiles] = useState(initialFiles);
   const [currentNextCursor, setCurrentNextCursor] = useState<string | null>(nextCursor);
@@ -348,14 +355,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor, userName 
                       </TableCell>
                       <TableCell>
                         {file.metadata?.source_type && file.metadata.source_type !== "manual" ? (
-                          <div className="flex items-center gap-2">
-                            <Image
-                              src={CONNECTOR_MAP[file.metadata.source_type][1]}
-                              alt={CONNECTOR_MAP[file.metadata.source_type][0]}
-                              className="mr-1"
-                            />
-                            {CONNECTOR_MAP[file.metadata.source_type][0]}
-                          </div>
+                          <div>{connectionMap[file.metadata.source_type]?.addedBy || "-"}</div>
                         ) : (
                           file.metadata.added_by || "-"
                         )}
