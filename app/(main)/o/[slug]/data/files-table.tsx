@@ -40,96 +40,65 @@ interface TableControlsProps {
   hasNextPage: boolean;
   onPreviousPage: () => void;
   onNextPage: () => void;
+  selectedStatuses: string[];
+  onStatusChange: (status: string) => void;
 }
 
-function TableControls({ totalFiles, currentPage, hasNextPage, onPreviousPage, onNextPage }: TableControlsProps) {
+function TableControls({
+  totalFiles,
+  currentPage,
+  hasNextPage,
+  onPreviousPage,
+  onNextPage,
+  selectedStatuses,
+  onStatusChange,
+}: TableControlsProps) {
   return (
     <div className="flex justify-between items-center mb-4">
       <div className="flex items-center gap-2">
         <Popover>
           <PopoverTrigger asChild>
-            <button className="flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50">
-              Connector <ChevronDown className="h-4 w-4" />
+            <button
+              className={`flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50 ${
+                selectedStatuses.length > 0 ? "bg-[#7749F80D] border-[#C1ABFF]" : "border-gray-200"
+              }`}
+            >
+              Status <ChevronDown className="h-4 w-4 text-gray-500" />
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-48">
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
-                <Checkbox id="connector-1" />
-                <label htmlFor="connector-1" className="text-sm">
-                  Option 1
+                <Checkbox
+                  id="status-ready"
+                  checked={selectedStatuses.includes("ready")}
+                  onCheckedChange={() => onStatusChange("ready")}
+                  className="data-[state=checked]:bg-[#7749F8] data-[state=checked]:border-[#7749F8]"
+                />
+                <label htmlFor="status-ready" className="text-sm">
+                  Ready
                 </label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="connector-2" />
-                <label htmlFor="connector-2" className="text-sm">
-                  Option 2
+                <Checkbox
+                  id="status-failed"
+                  checked={selectedStatuses.includes("failed")}
+                  onCheckedChange={() => onStatusChange("failed")}
+                  className="data-[state=checked]:bg-[#7749F8] data-[state=checked]:border-[#7749F8]"
+                />
+                <label htmlFor="status-failed" className="text-sm">
+                  Failed
                 </label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="connector-3" />
-                <label htmlFor="connector-3" className="text-sm">
-                  Option 3
-                </label>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50">
-              Type <ChevronDown className="h-4 w-4" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-48">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="type-1" />
-                <label htmlFor="type-1" className="text-sm">
-                  Option 1
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="type-2" />
-                <label htmlFor="type-2" className="text-sm">
-                  Option 2
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="type-3" />
-                <label htmlFor="type-3" className="text-sm">
-                  Option 3
-                </label>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50">
-              Status <ChevronDown className="h-4 w-4" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-48">
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="status-1" />
-                <label htmlFor="status-1" className="text-sm">
-                  Option 1
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="status-2" />
-                <label htmlFor="status-2" className="text-sm">
-                  Option 2
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="status-3" />
-                <label htmlFor="status-3" className="text-sm">
-                  Option 3
+                <Checkbox
+                  id="status-syncing"
+                  checked={selectedStatuses.includes("syncing")}
+                  onCheckedChange={() => onStatusChange("syncing")}
+                  className="data-[state=checked]:bg-[#7749F8] data-[state=checked]:border-[#7749F8]"
+                />
+                <label htmlFor="status-syncing" className="text-sm">
+                  Syncing
                 </label>
               </div>
             </div>
@@ -167,6 +136,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor, userName,
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const ITEMS_PER_PAGE = 12;
   const [isDragActive, setIsDragActive] = useState(false);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 
   // update the table if a file has been deleted
   const handleFileRemoved = (fileId: string) => {
@@ -177,6 +147,17 @@ export default function FilesTable({ tenant, initialFiles, nextCursor, userName,
       newFiles.splice(index, 1);
       return newFiles;
     });
+  };
+
+  const handleStatusChange = (status: string) => {
+    setSelectedStatuses((prev) => {
+      if (prev.includes(status)) {
+        return prev.filter((s) => s !== status);
+      } else {
+        return [...prev, status];
+      }
+    });
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const loadNextPage = async () => {
@@ -216,10 +197,19 @@ export default function FilesTable({ tenant, initialFiles, nextCursor, userName,
     }
   };
 
+  // Filter files based on selected statuses
+  const filteredFiles = allFiles.filter((file) => {
+    if (selectedStatuses.length === 0) return true;
+
+    const fileStatus = file.status === "ready" || file.status === "failed" ? file.status : "syncing";
+
+    return selectedStatuses.includes(fileStatus);
+  });
+
   // Calculate the current page's files
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentFiles = allFiles.slice(startIndex, endIndex);
+  const currentFiles = filteredFiles.slice(startIndex, endIndex);
 
   useEffect(() => {
     const checkFilesStatus = async () => {
@@ -308,11 +298,13 @@ export default function FilesTable({ tenant, initialFiles, nextCursor, userName,
           <input {...getInputProps()} />
           <hr className="my-4" />
           <TableControls
-            totalFiles={allFiles.length}
+            totalFiles={filteredFiles.length}
             currentPage={currentPage}
-            hasNextPage={!!currentNextCursor || currentPage * ITEMS_PER_PAGE < allFiles.length}
+            hasNextPage={!!currentNextCursor || currentPage * ITEMS_PER_PAGE < filteredFiles.length}
             onPreviousPage={goToPreviousPage}
             onNextPage={goToNextPage}
+            selectedStatuses={selectedStatuses}
+            onStatusChange={handleStatusChange}
           />
           <div
             className={`flex-1 overflow-y-auto relative ${isDragActive ? "after:content-[''] after:absolute after:inset-0 after:bg-[#F0F7FF] after:border-2 after:border-[#007AFF] after:border-dashed after:rounded-lg after:pointer-events-none" : ""}`}
