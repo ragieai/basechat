@@ -360,7 +360,6 @@ export default function FilesTable({
                           file.metadata.added_by || "-"
                         )}
                       </TableCell>
-                      {/* TODO: get added by from metadata */}
                       <TableCell>{formatDistanceToNow(new Date(file.createdAt), { addSuffix: true })}</TableCell>
                       <TableCell>{formatDistanceToNow(new Date(file.updatedAt), { addSuffix: true })}</TableCell>
                       <TableCell>
