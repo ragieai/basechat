@@ -1,13 +1,15 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import Dropzone from "react-dropzone";
 import { toast } from "sonner";
 
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import CONNECTOR_MAP from "@/lib/connector-map";
 import { MAX_FILE_SIZE, getDropzoneAcceptConfig, uploadFile, validateFile } from "@/lib/file-utils";
@@ -22,9 +24,118 @@ interface Props {
   };
   initialFiles: any[];
   nextCursor: string | null;
+  userName: string | null;
+  connectionMap: Record<
+    string,
+    {
+      sourceType: string;
+      addedBy: string | null;
+    }
+  >;
+  searchQuery?: string;
 }
 
-export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) {
+interface TableControlsProps {
+  totalFiles: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  onPreviousPage: () => void;
+  onNextPage: () => void;
+  selectedStatuses: string[];
+  onStatusChange: (status: string) => void;
+}
+
+function TableControls({
+  totalFiles,
+  currentPage,
+  hasNextPage,
+  onPreviousPage,
+  onNextPage,
+  selectedStatuses,
+  onStatusChange,
+}: TableControlsProps) {
+  return (
+    <div className="flex justify-between items-center mb-4">
+      <div className="flex items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className={`flex items-center gap-1 px-3 py-1.5 text-sm border rounded-md hover:bg-gray-50 ${
+                selectedStatuses.length > 0 ? "bg-[#7749F80D] border-[#C1ABFF]" : "border-gray-200"
+              }`}
+            >
+              Status <ChevronDown className="h-4 w-4 text-gray-500" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="status-ready"
+                  checked={selectedStatuses.includes("ready")}
+                  onCheckedChange={() => onStatusChange("ready")}
+                  className="data-[state=checked]:bg-[#7749F8] data-[state=checked]:border-[#7749F8]"
+                />
+                <label htmlFor="status-ready" className="text-sm">
+                  Ready
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="status-failed"
+                  checked={selectedStatuses.includes("failed")}
+                  onCheckedChange={() => onStatusChange("failed")}
+                  className="data-[state=checked]:bg-[#7749F8] data-[state=checked]:border-[#7749F8]"
+                />
+                <label htmlFor="status-failed" className="text-sm">
+                  Failed
+                </label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="status-syncing"
+                  checked={selectedStatuses.includes("syncing")}
+                  onCheckedChange={() => onStatusChange("syncing")}
+                  className="data-[state=checked]:bg-[#7749F8] data-[state=checked]:border-[#7749F8]"
+                />
+                <label htmlFor="status-syncing" className="text-sm">
+                  Syncing
+                </label>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onPreviousPage}
+          disabled={currentPage === 1}
+          className={`p-1 rounded-md ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:bg-gray-100"}`}
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button
+          onClick={onNextPage}
+          disabled={!hasNextPage}
+          className={`p-1 rounded-md ${
+            !hasNextPage ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:bg-gray-100"
+          }`}
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function FilesTable({
+  tenant,
+  initialFiles,
+  nextCursor,
+  userName,
+  connectionMap,
+  searchQuery = "",
+}: Props) {
   const router = useRouter();
   const [allFiles, setAllFiles] = useState(initialFiles);
   const [currentNextCursor, setCurrentNextCursor] = useState<string | null>(nextCursor);
@@ -33,6 +144,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const ITEMS_PER_PAGE = 12;
   const [isDragActive, setIsDragActive] = useState(false);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 
   // update the table if a file has been deleted
   const handleFileRemoved = (fileId: string) => {
@@ -43,6 +155,17 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
       newFiles.splice(index, 1);
       return newFiles;
     });
+  };
+
+  const handleStatusChange = (status: string) => {
+    setSelectedStatuses((prev) => {
+      if (prev.includes(status)) {
+        return prev.filter((s) => s !== status);
+      } else {
+        return [...prev, status];
+      }
+    });
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const loadNextPage = async () => {
@@ -82,10 +205,19 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
     }
   };
 
+  // Filter files based on selected statuses and search query
+  const filteredFiles = allFiles.filter((file) => {
+    const matchesStatus =
+      selectedStatuses.length === 0 ||
+      selectedStatuses.includes(file.status === "ready" || file.status === "failed" ? file.status : "syncing");
+    const matchesSearch = searchQuery === "" || file.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
   // Calculate the current page's files
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentFiles = allFiles.slice(startIndex, endIndex);
+  const currentFiles = filteredFiles.slice(startIndex, endIndex);
 
   useEffect(() => {
     const checkFilesStatus = async () => {
@@ -147,7 +279,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
           const toastId = toast.loading(`Uploading ${file.name}...`);
 
           try {
-            await uploadFile(file, tenant.slug);
+            await uploadFile(file, tenant.slug, userName);
             toast.success(`Successfully uploaded ${file.name}`, {
               id: toastId,
             });
@@ -172,31 +304,16 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
       {({ getRootProps, getInputProps }) => (
         <div className="h-full w-full flex flex-col" {...getRootProps()}>
           <input {...getInputProps()} />
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-[14px] font-[500] text-[#1D1D1F] pl-1">
-              {allFiles.length} {allFiles.length === 1 ? "file" : "files"}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={goToPreviousPage}
-                disabled={currentPage === 1}
-                className={`p-1 rounded-md ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-gray-600 hover:bg-gray-100"}`}
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <button
-                onClick={goToNextPage}
-                disabled={!currentNextCursor && currentPage * ITEMS_PER_PAGE >= allFiles.length}
-                className={`p-1 rounded-md ${
-                  !currentNextCursor && currentPage * ITEMS_PER_PAGE >= allFiles.length
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
+          <hr className="my-4" />
+          <TableControls
+            totalFiles={filteredFiles.length}
+            currentPage={currentPage}
+            hasNextPage={!!currentNextCursor || currentPage * ITEMS_PER_PAGE < filteredFiles.length}
+            onPreviousPage={goToPreviousPage}
+            onNextPage={goToNextPage}
+            selectedStatuses={selectedStatuses}
+            onStatusChange={handleStatusChange}
+          />
           <div
             className={`flex-1 overflow-y-auto relative ${isDragActive ? "after:content-[''] after:absolute after:inset-0 after:bg-[#F0F7FF] after:border-2 after:border-[#007AFF] after:border-dashed after:rounded-lg after:pointer-events-none" : ""}`}
           >
@@ -210,6 +327,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
                   <TableRow>
                     <TableHead className="w-[600px]">Name</TableHead>
                     <TableHead className="w-[200px]">Connection</TableHead>
+                    <TableHead className="w-[200px]">Added by</TableHead>
                     <TableHead className="w-[200px]">Date added</TableHead>
                     <TableHead className="w-[200px]">Date modified</TableHead>
                     <TableHead className="w-[100px]">Status</TableHead>
@@ -222,7 +340,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
                         <div>{file.name}</div>
                       </TableCell>
                       <TableCell>
-                        {file.metadata.source_type ? (
+                        {file.metadata?.source_type && file.metadata.source_type !== "manual" ? (
                           <div className="flex items-center gap-2">
                             <Image
                               src={CONNECTOR_MAP[file.metadata.source_type][1]}
@@ -233,6 +351,13 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
                           </div>
                         ) : (
                           "-"
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {file.metadata?.source_type && file.metadata.source_type !== "manual" ? (
+                          <div>{connectionMap[file.metadata.source_type]?.addedBy || "-"}</div>
+                        ) : (
+                          file.metadata.added_by || "-"
                         )}
                       </TableCell>
                       <TableCell>{formatDistanceToNow(new Date(file.createdAt), { addSuffix: true })}</TableCell>
@@ -249,7 +374,7 @@ export default function FilesTable({ tenant, initialFiles, nextCursor }: Props) 
                         <ManageFileMenu
                           id={file.id}
                           tenant={tenant}
-                          isConnectorFile={!!file.metadata?.source_type}
+                          isConnectorFile={file.metadata?.source_type && file.metadata.source_type !== "manual"}
                           onFileRemoved={handleFileRemoved}
                         />
                       </TableCell>

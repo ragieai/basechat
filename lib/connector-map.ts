@@ -26,6 +26,9 @@ export const CONNECTOR_MAP: Record<string, string[]> = {
   onedrive: ["OneDrive", OnedriveIconSVG],
   salesforce: ["Salesforce", SalesforceIconSVG],
   slack: ["Slack", SlackIconSVG],
+  backblaze: ["Backblaze", "https://secure.ragie.ai/images/connectors/backblaze.svg"],
+  sharepoint: ["SharePoint", "https://secure.ragie.ai/images/connectors/sharepoint.svg"],
+  zendesk: ["Zendesk", "https://secure.ragie.ai/images/connectors/zendesk.svg"],
 };
 
 export default CONNECTOR_MAP;

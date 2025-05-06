@@ -106,7 +106,7 @@ export async function deleteConnection(tenantId: string, id: string) {
   });
 }
 
-export async function saveConnection(tenantId: string, ragieConnectionId: string, status: string) {
+export async function saveConnection(tenantId: string, ragieConnectionId: string, status: string, addedBy?: string) {
   const qs = await db
     .select()
     .from(schema.connections)
@@ -126,6 +126,7 @@ export async function saveConnection(tenantId: string, ragieConnectionId: string
       status,
       sourceType: ragieConnection.type,
       lastSyncedAt,
+      addedBy: addedBy || null,
     });
   } else {
     await db

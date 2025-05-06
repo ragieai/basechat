@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     connection_id: request.nextUrl.searchParams.get("connection_id"),
   });
 
-  const { tenant } = await requireAdminContext(params.tenant);
-  await saveConnection(tenant.id, params.connection_id, "syncing");
+  const { tenant, session } = await requireAdminContext(params.tenant);
+  await saveConnection(tenant.id, params.connection_id, "syncing", session.user.name);
   return Response.redirect(new URL(getDataPath(tenant.slug), settings.BASE_URL));
 }

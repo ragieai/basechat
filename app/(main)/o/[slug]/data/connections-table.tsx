@@ -34,6 +34,7 @@ export default function ConnectionsTable({ tenant, connections }: Props) {
 
   return (
     <div className="h-full w-full flex flex-col">
+      <hr className="my-4" />
       <div className="flex justify-between items-center mb-4">
         <div className="text-[14px] font-[500] text-[#1D1D1F] pl-1">
           {connections.length} {connections.length === 1 ? "connection" : "connections"}
@@ -60,6 +61,7 @@ export default function ConnectionsTable({ tenant, connections }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[600px]">Name</TableHead>
+              <TableHead className="w-[200px]">Added by</TableHead>
               <TableHead className="w-[200px]">Date added</TableHead>
               <TableHead className="w-[200px]">Last synced</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
@@ -76,7 +78,8 @@ export default function ConnectionsTable({ tenant, connections }: Props) {
                   />
                   <div>{connection.name}</div>
                 </TableCell>
-                {/**TODO: add document count and added by TableCell s here */}
+                {/**TODO: add document count TableCell here */}
+                <TableCell>{connection.addedBy || "-"}</TableCell>
                 <TableCell>{formatDistanceToNow(connection.createdAt, { addSuffix: true })}</TableCell>
                 <TableCell>
                   {connection.lastSyncedAt ? formatDistanceToNow(connection.lastSyncedAt, { addSuffix: true }) : "-"}

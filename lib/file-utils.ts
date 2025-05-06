@@ -70,9 +70,10 @@ export function validateFile(file: File): FileValidationResult {
   return { isValid: true };
 }
 
-export async function uploadFile(file: File, tenantSlug: string): Promise<void> {
+export async function uploadFile(file: File, tenantSlug: string, userName: string | null): Promise<void> {
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("metadata", JSON.stringify({ added_by: userName, source_type: "manual" }));
 
   const response = await fetch("/api/ragie/upload", {
     method: "POST",

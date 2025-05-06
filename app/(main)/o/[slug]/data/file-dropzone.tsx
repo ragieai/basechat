@@ -10,9 +10,10 @@ interface FileDropzoneProps {
   tenant: {
     slug: string;
   };
+  userName: string | null;
 }
 
-export default function FileDropzone({ tenant }: FileDropzoneProps) {
+export default function FileDropzone({ tenant, userName }: FileDropzoneProps) {
   const router = useRouter();
 
   return (
@@ -28,7 +29,7 @@ export default function FileDropzone({ tenant }: FileDropzoneProps) {
           const toastId = toast.loading(`Uploading ${file.name}...`);
 
           try {
-            await uploadFile(file, tenant.slug);
+            await uploadFile(file, tenant.slug, userName);
             toast.success(`Successfully uploaded ${file.name}`, {
               id: toastId,
             });

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 import { VALID_FILE_TYPES, uploadFile, validateFile } from "@/lib/file-utils";
 
-export default function UploadFileButton({ tenant }: { tenant: { slug: string } }) {
+export default function UploadFileButton({ tenant, userName }: { tenant: { slug: string }; userName: string | null }) {
   const router = useRouter();
   const handleUpload = () => {
     const input = document.createElement("input");
@@ -29,7 +29,7 @@ export default function UploadFileButton({ tenant }: { tenant: { slug: string } 
         const toastId = toast.loading(`Uploading ${file.name}...`);
 
         try {
-          await uploadFile(file, tenant.slug);
+          await uploadFile(file, tenant.slug, userName);
           toast.success(`Successfully uploaded ${file.name}`, {
             id: toastId,
           });
