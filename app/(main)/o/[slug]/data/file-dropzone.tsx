@@ -33,7 +33,6 @@ export default function FileDropzone({ tenant, userName }: FileDropzoneProps) {
             toast.success(`Successfully uploaded ${file.name}`, {
               id: toastId,
             });
-            await onUploadComplete();
             // Refresh the page to update the server component
             router.refresh();
           } catch (err) {
