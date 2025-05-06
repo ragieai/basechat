@@ -72,7 +72,7 @@ export default async function DataIndexPage({ params }: Props) {
         </TabsContent>
         <TabsContent value="connections" className="flex-1 overflow-hidden">
           {connections.length > 0 ? (
-            <ConnectionsTable tenant={tenant} connections={connections} userName={session.user.name} />
+            <ConnectionsTable tenant={tenant} connections={connections} />
           ) : (
             <div className="flex-grow w-full flex flex-col items-center justify-center h-[calc(100vh-400px)]">
               <Image alt="Manage data" src={ManageDataPreviewIcons} />
