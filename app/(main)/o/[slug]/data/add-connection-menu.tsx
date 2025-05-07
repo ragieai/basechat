@@ -55,7 +55,10 @@ export default function AddConnectionMenu({ tenant }: Props) {
           </svg>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-[#F5F5F7] border border-[#D7D7D7] py-4 px-2.5 rounded-[24px] mt-4">
+      <DropdownMenuContent
+        align="end"
+        className="bg-[#F5F5F7] border border-[#D7D7D7] py-4 px-2.5 rounded-[24px] mt-4 max-h-[calc(100vh-155px)] overflow-y-auto overflow-x-visible pr-1 scrollbar-thin"
+      >
         {Object.entries(CONNECTOR_MAP).map(([sourceType, [name, icon]]) => (
           <DropdownMenuItem
             key={sourceType}
