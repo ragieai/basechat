@@ -77,9 +77,28 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
           <hr className="mb-6" />
           {source.streamUrl && (
             <div className="mb-6">
-              <audio controls className="w-full" src={getRagieStreamPath(slug, source.streamUrl)}>
-                Your browser does not support the audio element.
-              </audio>
+              {(() => {
+                const isAudio = source.documentName?.toLowerCase().endsWith(".mp3");
+                const isVideo = source.documentName?.toLowerCase().endsWith(".mp4");
+
+                if (isAudio) {
+                  return (
+                    <audio controls className="w-full" src={getRagieStreamPath(slug, source.streamUrl)}>
+                      Your browser does not support the audio element.
+                    </audio>
+                  );
+                }
+
+                if (isVideo) {
+                  return (
+                    <video controls className="w-full" src={getRagieStreamPath(slug, source.streamUrl)}>
+                      Your browser does not support the video element.
+                    </video>
+                  );
+                }
+
+                return null;
+              })()}
               {source.downloadUrl && (
                 <a
                   href={getRagieStreamPath(slug, source.downloadUrl)}
@@ -87,7 +106,7 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
                   target="_blank"
                   className="text-[#7749F8] flex items-center mt-2"
                 >
-                  Download audio
+                  Download {source.documentName?.toLowerCase().endsWith(".mp4") ? "video" : "audio"}
                   <Image src={ExternalLinkIcon} alt="Download" className="ml-1" />
                 </a>
               )}
