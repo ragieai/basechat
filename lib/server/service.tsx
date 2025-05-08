@@ -138,31 +138,49 @@ export async function saveConnection(tenantId: string, ragieConnectionId: string
   }
 }
 
-export async function getMembersByTenantId(tenantId: string): Promise<Member[]> {
-  return union(
+export async function getMembersByTenantId(
+  tenantId: string,
+  page: number = 1,
+  pageSize: number = 10,
+): Promise<{ members: Member[]; total: number }> {
+  const offset = (page - 1) * pageSize;
+
+  const [members, total] = await Promise.all([
+    union(
+      db
+        .select({
+          id: schema.profiles.id,
+          email: schema.users.email,
+          name: schema.users.name,
+          type: sql<MemberType>`'profile'`.as("type"),
+          role: schema.profiles.role,
+        })
+        .from(schema.profiles)
+        .innerJoin(schema.users, eq(schema.profiles.userId, schema.users.id))
+        .innerJoin(schema.tenants, eq(schema.tenants.id, tenantId))
+        .where(and(eq(schema.profiles.tenantId, tenantId), ne(schema.profiles.role, "guest")))
+        .limit(pageSize)
+        .offset(offset),
+      db
+        .select({
+          id: schema.invites.id,
+          email: schema.invites.email,
+          name: schema.invites.email,
+          type: sql<MemberType>`'invite'`.as("type"),
+          role: schema.invites.role,
+        })
+        .from(schema.invites)
+        .where(eq(schema.invites.tenantId, tenantId))
+        .limit(pageSize)
+        .offset(offset),
+    ).orderBy(sql`type desc`, sql`name`),
     db
-      .select({
-        id: schema.profiles.id,
-        email: schema.users.email,
-        name: schema.users.name,
-        type: sql<MemberType>`'profile'`.as("type"),
-        role: schema.profiles.role,
-      })
+      .select({ count: sql<number>`count(*)` })
       .from(schema.profiles)
-      .innerJoin(schema.users, eq(schema.profiles.userId, schema.users.id))
-      .innerJoin(schema.tenants, eq(schema.tenants.id, tenantId))
       .where(and(eq(schema.profiles.tenantId, tenantId), ne(schema.profiles.role, "guest"))),
-    db
-      .select({
-        id: schema.invites.id,
-        email: schema.invites.email,
-        name: schema.invites.email,
-        type: sql<MemberType>`'invite'`.as("type"),
-        role: schema.invites.role,
-      })
-      .from(schema.invites)
-      .where(eq(schema.invites.tenantId, tenantId)),
-  ).orderBy(sql`type desc`, sql`name`);
+  ]);
+
+  return { members, total: total[0].count };
 }
 
 export async function getFirstTenantByUserId(id: string) {
