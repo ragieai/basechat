@@ -39,6 +39,11 @@ export const VALID_FILE_TYPES = {
   ".ogg": "audio/ogg",
   ".oga": "audio/ogg",
   ".opus": "audio/opus",
+
+  // Video
+  ".mp4": "video/mp4",
+  ".webm": "video/webm",
+  ".mov": "video/quicktime",
 } as const;
 
 export const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB

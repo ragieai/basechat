@@ -38,10 +38,23 @@ export async function GET(request: NextRequest) {
     }
 
     // Stream the upstream response directly back to the client preserving status, headers, etc...
+    const url = new URL(params.url);
+    const mediaType = url.searchParams.get("media_type");
+    let contentType = upstreamResponse.headers.get("Content-Type") ?? "application/octet-stream";
+
+    // Override content type based on file extension if not already set correctly
+    if (!mediaType) {
+      if (url.pathname.toLowerCase().endsWith(".mp4")) {
+        contentType = "video/mp4";
+      } else if (url.pathname.toLowerCase().endsWith(".mp3")) {
+        contentType = "audio/mpeg";
+      }
+    }
+
     return new Response(upstreamResponse.body, {
       status: upstreamResponse.status,
       headers: {
-        "Content-Type": upstreamResponse.headers.get("Content-Type") ?? "application/octet-stream",
+        "Content-Type": contentType,
       },
     });
   } catch (error) {

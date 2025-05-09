@@ -179,15 +179,25 @@ export async function getRetrievalSystemPrompt(
 
   const chunks = JSON.stringify(response);
 
-  const sources = response.scoredChunks.map((chunk) => ({
-    ...chunk.documentMetadata,
-    documentId: chunk.documentId,
-    documentName: chunk.documentName,
-    streamUrl: chunk.links.self_audio_stream?.href,
-    downloadUrl: chunk.links.self_audio_download?.href,
-    startTime: chunk.metadata?.start_time,
-    endTime: chunk.metadata?.end_time,
-  }));
+  const sources = response.scoredChunks.map((chunk) => {
+    const documentName = chunk.documentName;
+    const isVideo = documentName?.toLowerCase().endsWith(".mp4");
+
+    // Use video links for video files, audio links for audio files
+    const streamUrl = isVideo ? chunk.links.self_video_stream?.href : chunk.links.self_audio_stream?.href;
+
+    const downloadUrl = isVideo ? chunk.links.self_video_download?.href : chunk.links.self_audio_download?.href;
+
+    return {
+      ...chunk.documentMetadata,
+      documentId: chunk.documentId,
+      documentName: documentName,
+      streamUrl,
+      downloadUrl,
+      startTime: chunk.metadata?.start_time,
+      endTime: chunk.metadata?.end_time,
+    };
+  });
 
   const company = { name: tenant.name };
   return {

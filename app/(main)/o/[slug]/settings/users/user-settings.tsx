@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import assertNever from "assert-never";
 import { Loader2, MoreHorizontal, Trash } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -23,7 +23,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Member, MemberRole, MemberType } from "@/lib/api";
 
 interface Props {
-  members: Member[];
+  initialMembers: Member[];
+  initialTotal: number;
+  pageSize: number;
   tenant: {
     slug: string;
   };
@@ -52,10 +54,13 @@ const RoleSelectItem = ({ item }: { item: { name: string; value: MemberRole; des
   </>
 );
 
-export default function UserSettings({ members: initialMembers, tenant }: Props) {
+export default function UserSettings({ initialMembers, initialTotal, pageSize, tenant }: Props) {
   const [members, setMembers] = useState(initialMembers);
+  const [total, setTotal] = useState(initialTotal);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [isLoading, setLoading] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -75,8 +80,55 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
     form.setValue("emails", emails);
   };
 
+  const fetchMembers = async (page: number) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/tenants/current/members?page=${page}&pageSize=${pageSize}`, {
+        headers: { tenant: tenant.slug },
+      });
+      const data = await res.json();
+      if (page === 1) {
+        setMembers(data.members);
+      } else {
+        setMembers((prev) => [...prev, ...data.members]);
+      }
+      setTotal(data.total);
+      setCurrentPage(page);
+    } catch (error) {
+      toast.error("Failed to fetch members");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadMore = useCallback(() => {
+    if (isLoading || members.length >= total) return;
+    fetchMembers(currentPage + 1);
+  }, [currentPage, isLoading, members.length, total]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current);
+      }
+    };
+  }, [loadMore]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setLoading(true);
+    setIsLoading(true);
 
     const res = await fetch("/api/invites", {
       method: "POST",
@@ -85,12 +137,12 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
     });
     if (res.status !== 200) {
       toast.error("Invite failed.  Try again later.");
-      setLoading(false);
+      setIsLoading(false);
       return;
     }
 
     setDialogOpen(false);
-    setLoading(false);
+    setIsLoading(false);
     toast.success("Invites sent");
     resetForm();
 
@@ -270,7 +322,7 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
             </div>
           )}
         </div>
-        <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+        <div className="max-h-[calc(100vh-365px)] overflow-y-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -328,6 +380,13 @@ export default function UserSettings({ members: initialMembers, tenant }: Props)
               ))}
             </TableBody>
           </Table>
+          <div ref={loadMoreRef} className="h-4 w-full mb-8">
+            {isLoading && (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
