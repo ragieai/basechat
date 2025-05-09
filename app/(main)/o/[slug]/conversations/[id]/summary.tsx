@@ -20,10 +20,8 @@ import VolumeUpIcon from "@/public/icons/volume_up.svg";
 import { DocumentResponse } from "./types";
 
 interface PlayerControlsProps {
-  videoRef: React.RefObject<HTMLVideoElement | null>;
   isPlaying: boolean;
   isMuted: boolean;
-  isFullscreen: boolean;
   currentTime: number;
   duration: number;
   onProgressClick: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -35,10 +33,8 @@ interface PlayerControlsProps {
 }
 
 function PlayerControls({
-  videoRef,
   isPlaying,
   isMuted,
-  isFullscreen,
   currentTime,
   duration,
   onProgressClick,
@@ -92,12 +88,7 @@ function PlayerControls({
           </button>
         </div>
         <button onClick={onFullscreen} className="p-2 hover:bg-gray-200 rounded-lg transition-colors duration-200">
-          <Image
-            src={FullScreenIcon}
-            alt={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-            width={32}
-            height={32}
-          />
+          <Image src={FullScreenIcon} alt={"Toggle fullscreen"} width={32} height={32} />
         </button>
       </div>
     </div>
@@ -117,7 +108,6 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isMediaLoaded, setIsMediaLoaded] = useState(false);
@@ -189,17 +179,12 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
       }
     };
 
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
     // Add event listeners
     media.addEventListener("loadedmetadata", handleLoadedMetadata);
     media.addEventListener("loadeddata", handleLoadedData);
     media.addEventListener("timeupdate", handleTimeUpdate);
     media.addEventListener("ended", handleEnded);
     media.addEventListener("durationchange", handleDurationChange);
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
 
     // If media is already loaded, set duration
     if (media.readyState >= 2 && isFinite(media.duration)) {
@@ -214,16 +199,8 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
       media.removeEventListener("timeupdate", handleTimeUpdate);
       media.removeEventListener("ended", handleEnded);
       media.removeEventListener("durationchange", handleDurationChange);
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, []);
-
-  const formatTime = (time: number) => {
-    if (isNaN(time) || !isFinite(time)) return "0:00";
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const media = videoRef.current || audioRef.current;
@@ -237,7 +214,6 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
     }
   };
 
-  //TODO: support icons for more file types
   const icon =
     documentData?.metadata.source_type && CONNECTOR_MAP[documentData.metadata.source_type]
       ? CONNECTOR_MAP[documentData.metadata.source_type][1]
@@ -314,10 +290,8 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
                     />
                     {isMediaLoaded && (
                       <PlayerControls
-                        videoRef={audioRef as any}
                         isPlaying={isPlaying}
                         isMuted={isMuted}
-                        isFullscreen={false}
                         currentTime={currentTime}
                         duration={duration}
                         onProgressClick={handleProgressClick}
@@ -390,10 +364,8 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
                     />
                     {isMediaLoaded && duration > 0 && (
                       <PlayerControls
-                        videoRef={videoRef}
                         isPlaying={isPlaying}
                         isMuted={isMuted}
-                        isFullscreen={isFullscreen}
                         currentTime={currentTime}
                         duration={duration}
                         onProgressClick={handleProgressClick}
@@ -432,10 +404,8 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
                           if (videoRef.current) {
                             if (document.fullscreenElement) {
                               document.exitFullscreen();
-                              setIsFullscreen(false);
                             } else {
                               videoRef.current.requestFullscreen();
-                              setIsFullscreen(true);
                             }
                           }
                         }}
