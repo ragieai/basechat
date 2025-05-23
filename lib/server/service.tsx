@@ -66,6 +66,14 @@ export async function createTenant(userId: string, name: string) {
 
   const profile = await createProfile(tenantId, userId, "admin");
 
+  const { client, partition } = await getRagieClientAndPartition(tenantId);
+
+  const result = await client.partitions.create({
+    //TODO: test, what limits do we want to set?
+    name: partition,
+    pagesHostedLimitMax: 100000,
+  });
+
   return { tenant: tenants[0], profile };
 }
 
