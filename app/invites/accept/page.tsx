@@ -16,7 +16,6 @@ export default async function AcceptInvitePage({ searchParams }: Props) {
   assert(params.invite, "Bad request");
 
   const invite = await findInviteById(params.invite);
-
   if (!invite) {
     return (
       <div className="h-full w-full flex flex-col justify-center items-center bg-white">
@@ -30,7 +29,13 @@ export default async function AcceptInvitePage({ searchParams }: Props) {
     await setCurrentProfileId(session.user.id, profile.id);
     redirect("/");
   } catch (e) {
-    console.error(e);
+    // NEXT_REDIRECT is thrown by redirect("/") and should be rethrown
+    if (e instanceof Error && e.message === "NEXT_REDIRECT") {
+      throw e;
+    } else {
+      // some other error occurred
+      console.error(e);
+    }
   }
 
   return (
