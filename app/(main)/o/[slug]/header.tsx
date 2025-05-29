@@ -157,12 +157,12 @@ export default function Header({
           )}
           {tenant.paidStatus === "expired" && role === "admin" && (
             <Banner>
-              Your Base Chat trial has expired. You can{" "}
-              <BannerLink href="https://www.ragie.ai/basechat">view pricing</BannerLink> or{" "}
+              Your Base Chat trial has expired.{" "}
+              <BannerLink href="https://www.ragie.ai/basechat">Upgrade to a paid plan</BannerLink> or{" "}
               <BannerLink href="https://calendly.com/d/crhj-b4f-d4v/ragie-basechat-discussion">
                 contact sales
               </BannerLink>{" "}
-              to upgrade.
+              for questions.
             </Banner>
           )}
           {tenant.paidStatus === "expired" && role !== "admin" && (
