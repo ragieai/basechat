@@ -57,9 +57,6 @@ export default function BillingSettings({ tenant, partitionInfo, defaultPartitio
         <ProcessingInformation partitionInfo={partitionInfo} />
       </div>
       <div className="h-16" />
-      <div className="h-16" />
-      <div className="h-16" />
-      <div className="h-16" />
     </div>
   );
 }
