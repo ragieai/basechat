@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 
+import { PaymentRequiredDialog } from "@/components/payment-required-dialog";
 import RagieLogo from "@/components/ragie-logo";
 import { getUserById } from "@/lib/server/service";
 import { BILLING_ENABLED } from "@/lib/server/settings";
@@ -46,6 +47,7 @@ export default async function MainLayout({ children, params }: Props) {
           </div>
         </div>
       )}
+      <PaymentRequiredDialog tenant={tenant} />
     </div>
   );
 }
