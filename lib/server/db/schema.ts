@@ -3,6 +3,7 @@ import {
   boolean,
   integer,
   json,
+  jsonb,
   pgEnum,
   pgTable,
   primaryKey,
@@ -89,6 +90,10 @@ export const tenants = pgTable(
     overridePrioritizeRecent: boolean("override_prioritize_recent").default(true),
     ragieApiKey: text("ragie_api_key"),
     ragiePartition: text("ragie_partition"),
+    metadata: jsonb("metadata").default({}).$type<{
+      orbCustomerId?: string;
+      stripeCustomerId?: string;
+    }>(),
     trialExpiresAt: timestamp("trial_expires_at", { withTimezone: true, mode: "date" }).notNull(),
     paidStatus: paidStatusEnum("paid_status").default("trial").notNull(),
     partitionLimitExceededAt: timestamp("partition_limit_exceeded_at", { withTimezone: true, mode: "date" }),
