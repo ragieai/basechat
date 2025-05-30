@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ADD COLUMN "metadata" jsonb DEFAULT '{}'::jsonb;

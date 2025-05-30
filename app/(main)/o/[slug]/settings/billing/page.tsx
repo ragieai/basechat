@@ -22,7 +22,12 @@ export default async function BillingSettingsPage({ params }: Props) {
       <div className="max-w-[1140px] w-full p-4 flex-grow flex">
         <SettingsNav tenant={tenant} billingEnabled={BILLING_ENABLED} />
         <BillingSettings
-          tenant={tenant}
+          tenant={{
+            slug: tenant.slug,
+            partitionLimitExceededAt: tenant.partitionLimitExceededAt,
+            paidStatus: tenant.paidStatus,
+            metadata: tenant.metadata ?? {},
+          }}
           partitionInfo={partitionInfo}
           defaultPartitionLimit={DEFAULT_PARTITION_LIMIT}
         />

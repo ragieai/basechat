@@ -281,6 +281,13 @@
       "when": 1748447472284,
       "tag": "0039_worthless_wendigo",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1748559407786,
+      "tag": "0040_colossal_ezekiel",
+      "breakpoints": true
     }
   ]
 }
