@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,26 +15,30 @@ interface PaymentRequiredDialogProps {
 
 export function PaymentRequiredDialog({ tenant }: PaymentRequiredDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Check if the current path should be allowed for expired tenants
+  const isAllowedPath = pathname?.includes("/settings") || pathname?.includes("/pricing");
 
   useEffect(() => {
-    if (tenant.paidStatus === "expired") {
+    if (tenant.paidStatus === "expired" && !isAllowedPath) {
       setIsOpen(true);
     }
-  }, [tenant.paidStatus]);
+  }, [tenant.paidStatus, isAllowedPath]);
 
   return (
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        // Only allow closing if the tenant is not expired
-        if (tenant.paidStatus !== "expired") {
+        // Only allow closing if the tenant is not expired or if it's an allowed path
+        if (tenant.paidStatus !== "expired" || isAllowedPath) {
           setIsOpen(open);
         }
       }}
     >
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          {tenant.paidStatus !== "expired" && (
+          {(tenant.paidStatus !== "expired" || isAllowedPath) && (
             <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
