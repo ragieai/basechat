@@ -31,3 +31,5 @@ export const getRagieStreamPath = (slug: string, streamUrl: string) => {
 
   return `/api/ragie/stream?${params.toString()}`;
 };
+
+export const getPricingPath = (slug: string) => `/pricing/${slug}`;

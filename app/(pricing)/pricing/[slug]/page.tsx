@@ -10,5 +10,13 @@ export default async function PricingPage({ params }: Props) {
   const { slug } = await params;
   const { tenant } = await requireAdminContext(slug);
 
-  return <PricingPageClient tenant={tenant} />;
+  return (
+    <PricingPageClient
+      tenant={{
+        slug: tenant.slug,
+        paidStatus: tenant.paidStatus,
+        metadata: tenant.metadata ?? {},
+      }}
+    />
+  );
 }

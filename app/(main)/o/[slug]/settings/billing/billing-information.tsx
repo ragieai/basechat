@@ -5,11 +5,16 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getPricingPath } from "@/lib/paths";
 
 interface BillingInformationProps {
   tenant: {
+    slug: string;
     paidStatus: string;
-    stripeCustomerId?: string;
+    metadata: {
+      stripeCustomerId?: string;
+      orbCustomerId?: string;
+    };
   };
   seats?: {
     total: number;
@@ -31,11 +36,7 @@ export default function BillingInformation({ tenant, seats }: BillingInformation
             <p className="text-sm text-[#74747A] mb-2">Current Plan</p>
             <p className="text-base font-medium text-[#343A40] mb-4">Pro Plan</p>
           </div>
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-center gap-2"
-            onClick={() => (window.location.href = "/billing/history")}
-          >
+          <Button variant="outline" className="w-full flex items-center justify-center gap-2">
             <History className="h-4 w-4" />
             View payment history
           </Button>
@@ -55,11 +56,8 @@ export default function BillingInformation({ tenant, seats }: BillingInformation
             <p className="text-sm text-[#74747A] mb-2">Open Seats</p>
             <p className="text-base font-medium text-[#343A40] mb-2">{seats ? seats.total - seats.used : 0}</p>
           </div>
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-center gap-2"
-            onClick={() => (window.location.href = "/billing/seats")}
-          >
+          <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+            {/** TODO: button opens seat config dialog */}
             <Settings className="h-4 w-4" />
             Manage seats
           </Button>
@@ -74,19 +72,13 @@ export default function BillingInformation({ tenant, seats }: BillingInformation
             <h3 className="font-medium text-base text-[#343A40]">Account</h3>
           </div>
           <div className="flex-grow space-y-4">
-            <Button
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={() => (window.location.href = "/billing/plans")}
-            >
-              <Settings className="h-4 w-4" />
-              Manage plan
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={() => (window.location.href = "/billing/payment-method")}
-            >
+            <Link href={getPricingPath(tenant.slug)}>
+              <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                <Settings className="h-4 w-4" />
+                Manage plan
+              </Button>
+            </Link>
+            <Button variant="outline" className="w-full flex items-center justify-center gap-2">
               <CreditCard className="h-4 w-4" />
               Manage payment method
             </Button>

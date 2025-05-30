@@ -1,5 +1,3 @@
-// TODO: move to lib?
-
 export enum Tier {
   DEVELOPER = "developer",
   STARTER = "starter",

@@ -91,8 +91,16 @@ export const tenants = pgTable(
     ragieApiKey: text("ragie_api_key"),
     ragiePartition: text("ragie_partition"),
     metadata: jsonb("metadata").default({}).$type<{
+      orbSubscriptionId?: string;
       orbCustomerId?: string;
       stripeCustomerId?: string;
+      plans?: Array<{
+        id: string;
+        endedAt: Date | null;
+        startedAt: Date;
+        tier: string;
+        seats: number;
+      }>;
     }>(),
     trialExpiresAt: timestamp("trial_expires_at", { withTimezone: true, mode: "date" }).notNull(),
     paidStatus: paidStatusEnum("paid_status").default("trial").notNull(),

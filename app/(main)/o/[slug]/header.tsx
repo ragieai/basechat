@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { tenantListResponseSchema, updateCurrentProfileSchema } from "@/lib/api";
 import { signOut } from "@/lib/auth-client";
-import { getSignInPath, getSignUpPath, getTenantPath } from "@/lib/paths";
+import { getPricingPath, getSignInPath, getSignUpPath, getTenantPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
 import AnonProfileIcon from "@/public/icons/anonymous-profile.svg";
 import CheckIcon from "@/public/icons/check.svg";
@@ -139,7 +139,7 @@ export default function Header({
           {tenant.paidStatus === "trial" && role === "admin" && (
             <Banner bubble>
               You have {daysRemaining} {daysRemaining === 1 ? "day" : "days"} left of your free trial.{" "}
-              <BannerLink href="https://www.ragie.ai/basechat">View pricing</BannerLink> or{" "}
+              <BannerLink href={getPricingPath(tenant.slug)}>View pricing</BannerLink> or{" "}
               <BannerLink href="https://calendly.com/d/crhj-b4f-d4v/ragie-basechat-discussion">
                 contact sales
               </BannerLink>{" "}
@@ -149,7 +149,7 @@ export default function Header({
           {tenant.paidStatus === "legacy" && role === "admin" && (
             <Banner>
               We hope you enjoyed Base Chat Early Access!{" "}
-              <BannerLink href="https://www.ragie.ai/basechat">New pricing</BannerLink> starts June 5. To upgrade,{" "}
+              <BannerLink href={getPricingPath(tenant.slug)}>New pricing</BannerLink> starts June 5. To upgrade,{" "}
               <BannerLink href="https://calendly.com/d/crhj-b4f-d4v/ragie-basechat-discussion">
                 contact sales.
               </BannerLink>
@@ -158,7 +158,7 @@ export default function Header({
           {tenant.paidStatus === "expired" && role === "admin" && (
             <Banner>
               Your Base Chat trial has expired.{" "}
-              <BannerLink href="https://www.ragie.ai/basechat">Upgrade to a paid plan</BannerLink> or{" "}
+              <BannerLink href={getPricingPath(tenant.slug)}>Upgrade to a paid plan</BannerLink> or{" "}
               <BannerLink href="https://calendly.com/d/crhj-b4f-d4v/ragie-basechat-discussion">
                 contact sales
               </BannerLink>{" "}

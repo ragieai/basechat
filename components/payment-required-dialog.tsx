@@ -1,15 +1,18 @@
 "use client";
 
 import { X } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getPricingPath } from "@/lib/paths";
 
 interface PaymentRequiredDialogProps {
   tenant: {
     paidStatus: string;
+    slug: string;
   };
 }
 
@@ -51,12 +54,9 @@ export function PaymentRequiredDialog({ tenant }: PaymentRequiredDialogProps) {
             Your trial has ended, but exploring your knowledge base doesn&apos;t have to. Upgrade to a paid plan to
             continue using Base Chat. It&apos;s just $18 per user/month, plus a data plan.
           </p>
-          <Button
-            className="bg-[#D946EF] text-white hover:bg-[#D946EF]/90 w-fit"
-            onClick={() => (window.location.href = "/pricing")}
-          >
-            View plans
-          </Button>
+          <Link href={getPricingPath(tenant.slug)}>
+            <Button className="bg-[#D946EF] text-white hover:bg-[#D946EF]/90 w-fit">View plans</Button>
+          </Link>
         </div>
       </DialogContent>
     </Dialog>

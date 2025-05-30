@@ -26,9 +26,13 @@ type PartitionInfo = {
 
 type Props = {
   tenant: {
+    slug: string;
     partitionLimitExceededAt: Date | null;
     paidStatus: string;
-    stripeCustomerId?: string;
+    metadata: {
+      stripeCustomerId?: string;
+      orbCustomerId?: string;
+    };
   };
   partitionInfo: PartitionInfo;
   defaultPartitionLimit: number;
