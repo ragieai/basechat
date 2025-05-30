@@ -14,15 +14,22 @@ interface BillingInformationProps {
     metadata: {
       stripeCustomerId?: string;
       orbCustomerId?: string;
+      plans?: Array<{
+        id: string;
+        endedAt: Date | null;
+        startedAt: Date;
+        tier: string;
+        seats: number;
+      }>;
     };
-  };
-  seats?: {
-    total: number;
-    used: number;
   };
 }
 
-export default function BillingInformation({ tenant, seats }: BillingInformationProps) {
+export default function BillingInformation({ tenant }: BillingInformationProps) {
+  const currentPlan = tenant.metadata.plans?.find((plan) => !plan.endedAt);
+  const totalSeats = currentPlan?.seats ?? 0;
+  const usedSeats = 0; // TODO: Get this from the number of active users
+
   return (
     <div className="flex flex-col gap-6">
       {/* Data Plan Card */}
@@ -52,9 +59,9 @@ export default function BillingInformation({ tenant, seats }: BillingInformation
           </div>
           <div className="flex-grow">
             <p className="text-sm text-[#74747A] mb-2">Total Seats</p>
-            <p className="text-base font-medium text-[#343A40] mb-2">{seats?.total ?? 0}</p>
+            <p className="text-base font-medium text-[#343A40] mb-2">{totalSeats}</p>
             <p className="text-sm text-[#74747A] mb-2">Open Seats</p>
-            <p className="text-base font-medium text-[#343A40] mb-2">{seats ? seats.total - seats.used : 0}</p>
+            <p className="text-base font-medium text-[#343A40] mb-2">{totalSeats - usedSeats}</p>
           </div>
           <Button variant="outline" className="w-full flex items-center justify-center gap-2">
             {/** TODO: button opens seat config dialog */}

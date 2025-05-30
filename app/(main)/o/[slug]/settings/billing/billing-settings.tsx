@@ -32,17 +32,20 @@ type Props = {
     metadata: {
       stripeCustomerId?: string;
       orbCustomerId?: string;
+      plans?: Array<{
+        id: string;
+        endedAt: Date | null;
+        startedAt: Date;
+        tier: string;
+        seats: number;
+      }>;
     };
   };
   partitionInfo: PartitionInfo;
   defaultPartitionLimit: number;
-  seats?: {
-    total: number;
-    used: number;
-  };
 };
 
-export default function BillingSettings({ tenant, partitionInfo, defaultPartitionLimit, seats }: Props) {
+export default function BillingSettings({ tenant, partitionInfo, defaultPartitionLimit }: Props) {
   return (
     <div className="w-full p-4 flex-grow flex flex-col relative">
       <div className="flex w-full justify-between items-center mb-8">
@@ -57,7 +60,7 @@ export default function BillingSettings({ tenant, partitionInfo, defaultPartitio
       )}
 
       <div className="space-y-8">
-        <BillingInformation tenant={tenant} seats={seats} />
+        <BillingInformation tenant={tenant} />
         <ProcessingInformation partitionInfo={partitionInfo} />
       </div>
       <div className="h-16" />
