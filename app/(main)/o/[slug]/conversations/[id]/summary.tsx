@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useEffect, useState, useRef, useCallback, useReducer } from "react";
 import Markdown from "react-markdown";
 
-import { SourceMetadata } from "@/components/chatbot/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import CONNECTOR_MAP from "@/lib/connector-map";
 import { getRagieStreamPath } from "@/lib/paths";
@@ -20,6 +19,8 @@ import Replay10Icon from "@/public/icons/replay_10.svg";
 import VolumeUpIcon from "@/public/icons/volume_up.svg";
 
 import { DocumentResponse } from "./types";
+
+import { SourceMetadata } from "@/lib/types";
 interface PlayerControlsProps {
   isPlaying: boolean;
   isMuted: boolean;

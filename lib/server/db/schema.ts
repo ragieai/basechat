@@ -54,6 +54,8 @@ export const conversations = pgTable(
       .references(() => profiles.id, { onDelete: "cascade" })
       .notNull(),
     title: text().notNull(),
+    slackThreadId: text("slack_thread_id"),
+    slackEvent: json("slack_event"),
   },
   (t) => ({
     profileIdx: index("conversations_profile_idx").on(t.profileId),
@@ -89,6 +91,12 @@ export const tenants = pgTable(
     overridePrioritizeRecent: boolean("override_prioritize_recent").default(true),
     ragieApiKey: text("ragie_api_key"),
     ragiePartition: text("ragie_partition"),
+    slackEnabled: boolean("slack_enabled").default(false),
+    slackChannels: text("slack_channels").array().default([]),
+    slackBotToken: text("slack_bot_token"),
+    slackTeamId: text("slack_team_id").unique(),
+    slackTeamName: text("slack_team_name"),
+    slackResponseMode: text("slack_response_mode").default("mentions").$type<"mentions" | "all">(),
     trialExpiresAt: timestamp("trial_expires_at", { withTimezone: true, mode: "date" }).notNull(),
     paidStatus: paidStatusEnum("paid_status").default("trial").notNull(),
     partitionLimitExceededAt: timestamp("partition_limit_exceeded_at", { withTimezone: true, mode: "date" }),
@@ -142,6 +150,7 @@ export const messages = pgTable(
     content: text("content"),
     role: messageRolesEnum("role").notNull(),
     sources: json("sources").notNull(),
+    slackEvent: json("slack_event"),
     model: text("model").notNull().default(DEFAULT_MODEL).$type<z.infer<typeof modelSchema>>(),
     isBreadth: boolean("is_breadth").notNull().default(false),
     rerankEnabled: boolean("rerank_enabled").notNull().default(false),
@@ -161,6 +170,8 @@ export const users = pgTable("users", {
   email: text("email").unique(),
   isAnonymous: boolean("is_anonymous").notNull().default(false),
   emailVerified: boolean("email_verified").notNull().default(false),
+  slackUserId: text("slack_user_id").unique(),
+  slackUser: json("slack_user"),
   image: text("image"),
   currentProfileId: uuid("current_profile_id").references((): AnyPgColumn => profiles.id, { onDelete: "set null" }),
 });

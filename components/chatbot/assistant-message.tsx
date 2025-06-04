@@ -7,9 +7,8 @@ import CONNECTOR_MAP from "@/lib/connector-map";
 import { IMAGE_FILE_TYPES, VIDEO_FILE_TYPES, AUDIO_FILE_TYPES } from "@/lib/file-utils";
 import { LLM_DISPLAY_NAMES, LLMModel } from "@/lib/llm/types";
 
+import { SourceMetadata } from "../../lib/types";
 import Logo from "../tenant/logo/logo";
-
-import { SourceMetadata } from "./types";
 
 const MAX_CITATION_LENGTH = 30;
 

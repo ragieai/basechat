@@ -68,6 +68,12 @@ export const updateTenantSchema = z.object({
   overrideBreadth: z.boolean().optional(),
   overrideRerank: z.boolean().optional(),
   overridePrioritizeRecent: z.boolean().optional(),
+  slackEnabled: z.boolean().optional(),
+  slackChannels: z.array(z.string()).optional(),
+  slackBotToken: z.string().nullable().optional(),
+  slackTeamId: z.string().nullable().optional(),
+  slackTeamName: z.string().nullable().optional(),
+  slackResponseMode: z.enum(["mentions", "all"]).optional(),
 });
 
 export type MemberType = "profile" | "invite";

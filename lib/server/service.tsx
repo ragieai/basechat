@@ -1,6 +1,7 @@
 import assert from "assert";
 
 import { render } from "@react-email/components";
+import { User as SlackUser } from "@slack/web-api/dist/types/response/UsersInfoResponse";
 import { asc, and, eq, ne, sql, inArray } from "drizzle-orm";
 import { union } from "drizzle-orm/pg-core";
 import nodemailer from "nodemailer";
@@ -84,10 +85,7 @@ export async function createTenant(userId: string, name: string) {
 }
 
 export async function createProfile(tenantId: string, userId: string, role: Role) {
-  const profiles = await db
-    .insert(schema.profiles)
-    .values({ tenantId, userId, role })
-    .returning({ id: schema.profiles.id });
+  const profiles = await db.insert(schema.profiles).values({ tenantId, userId, role }).returning();
   assert(profiles.length === 1);
   return profiles[0];
 }
@@ -306,6 +304,12 @@ export async function acceptInvite(userId: string, inviteId: string) {
   return profile;
 }
 
+export async function getTenantBySlackTeamId(teamId: string) {
+  const rs = await db.select().from(schema.tenants).where(eq(schema.tenants.slackTeamId, teamId));
+  assert(rs.length === 1, "expected single record");
+  return rs[0];
+}
+
 export async function getTenantsByUserId(userId: string) {
   const profileInfo = await db
     .select({
@@ -410,6 +414,12 @@ export async function findUserByEmail(email: string) {
   return rs.length ? rs[0] : null;
 }
 
+export async function findUserBySlackUserId(slackUserId: string) {
+  const rs = await db.select().from(schema.users).where(eq(schema.users.slackUserId, slackUserId));
+  assert(rs.length === 1 || rs.length === 0, "unexpected result");
+  return rs.length ? rs[0] : null;
+}
+
 export async function findUserById(id: string) {
   const rs = await db.select().from(schema.users).where(eq(schema.users.id, id));
   assert(rs.length === 1 || rs.length === 0, "unexpected result");
@@ -482,15 +492,15 @@ export async function changeRole(tenantId: string, profileId: string, newRole: R
 }
 
 export async function deleteProfile(
+  principalProfile: { id: string; role: string },
   tenantId: string,
   targetProfileId: string,
-  currentProfile: { id: string; role: string },
 ) {
   const lastAdmin = await isLastAdmin(tenantId, targetProfileId);
   if (lastAdmin) {
     throw new ServiceError("Cannot delete the last admin");
   }
-  const isDeleteAllowed = isProfileDeleteAllowed(currentProfile, targetProfileId);
+  const isDeleteAllowed = isProfileDeleteAllowed(principalProfile, targetProfileId);
   if (!isDeleteAllowed) {
     throw new ServiceError("Cannot delete profile");
   }
@@ -648,4 +658,10 @@ export function linkUsers(fromUserId: string, toUserId: string) {
 
 export async function updateTenantPaidStatus(tenantId: string, paidStatus: "trial" | "active" | "expired") {
   await db.update(schema.tenants).set({ paidStatus }).where(eq(schema.tenants.id, tenantId));
+}
+
+export async function createSlackUser(slackUserId: string, slackUser: SlackUser) {
+  const rs = await db.insert(schema.users).values({ slackUserId, slackUser: slackUser }).returning();
+  assert(rs.length === 1, "expect single record");
+  return rs[0];
 }

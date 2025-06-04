@@ -12,6 +12,8 @@ export const getModelSettingsPath = (slug: string) => `${getSettingsPath(slug)}/
 
 export const getPromptSettingsPath = (slug: string) => `${getSettingsPath(slug)}/prompts`;
 
+export const getSlackSettingsPath = (slug: string) => `${getSettingsPath(slug)}/slack`;
+
 export const getBillingSettingsPath = (slug: string) => `${getSettingsPath(slug)}/billing`;
 
 export const getCheckPath = (slug: string) => `/check/${slug}`;

@@ -5,11 +5,12 @@ import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 
 import {
+  getBillingSettingsPath,
   getModelSettingsPath,
   getPromptSettingsPath,
   getSettingsPath,
+  getSlackSettingsPath,
   getUserSettingsPath,
-  getBillingSettingsPath,
 } from "@/lib/paths";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,9 @@ function getAppLocation(path: string, slug: string, billingEnabled: boolean): Ap
   }
   if (path.startsWith(getPromptSettingsPath(slug))) {
     return AppLocation.SETTINGS_PROMPTS;
+  }
+  if (path.startsWith(getSlackSettingsPath(slug))) {
+    return AppLocation.SETTINGS_SLACK;
   }
   if (billingEnabled && path.startsWith(getBillingSettingsPath(slug))) {
     return AppLocation.SETTINGS_BILLING;
@@ -57,6 +61,9 @@ export default function SettingsNav({ tenant, billingEnabled }: Props) {
       </Link>
       <Link href={getPromptSettingsPath(tenant.slug)}>
         <NavItem selected={appLocation === AppLocation.SETTINGS_PROMPTS}>Prompts</NavItem>
+      </Link>
+      <Link href={getSlackSettingsPath(tenant.slug)}>
+        <NavItem selected={appLocation === AppLocation.SETTINGS_SLACK}>Slack</NavItem>
       </Link>
       {billingEnabled && (
         <Link href={getBillingSettingsPath(tenant.slug)}>

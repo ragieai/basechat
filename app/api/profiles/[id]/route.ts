@@ -1,8 +1,7 @@
-import { unauthorized } from "next/navigation";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { changeRole, deleteProfile, isProfileDeleteAllowed, ServiceError } from "@/lib/server/service";
+import { changeRole, deleteProfile, ServiceError } from "@/lib/server/service";
 import { requireAdminContextFromRequest, requireAuthContextFromRequest } from "@/lib/server/utils";
 
 type Params = Promise<{ id: string }>;
@@ -23,7 +22,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
   const { id } = await params;
 
   try {
-    await deleteProfile(tenant.id, id, profile);
+    await deleteProfile(profile, tenant.id, id);
   } catch (e) {
     return renderError(e);
   }

@@ -12,9 +12,10 @@ import {
 } from "@/lib/api";
 import { DEFAULT_MODEL, getEnabledModels, getProviderForModel, LLMModel, modelSchema } from "@/lib/llm/types";
 
+import { SourceMetadata } from "../../lib/types";
+
 import AssistantMessage from "./assistant-message";
 import ChatInput from "./chat-input";
-import { SourceMetadata } from "./types";
 
 type AiMessage = { content: string; role: "assistant"; id?: string; sources: SourceMetadata[]; model?: LLMModel };
 type UserMessage = { content: string; role: "user" };
