@@ -3,7 +3,13 @@ import assert from "assert";
 import { CloudTasksClient } from "@google-cloud/tasks";
 import { SlackEvent } from "@slack/types";
 
-import { BASE_URL, GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_TASKS_LOCATION, GOOGLE_CLOUD_TASKS_QUEUE } from "./settings";
+import {
+  BASE_URL,
+  GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT,
+  GOOGLE_CLOUD_PROJECT_ID,
+  GOOGLE_CLOUD_TASKS_LOCATION,
+  GOOGLE_CLOUD_TASKS_QUEUE,
+} from "./settings";
 
 // Initialize Cloud Tasks client
 const cloudTasksClient = new CloudTasksClient();
@@ -32,14 +38,18 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
     eventType: taskData.event?.type,
   });
 
+  assert(GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT, "GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT environment variable is required");
+
   const [response] = await cloudTasksClient.createTask({
     parent: queuePath,
     task: {
       httpRequest: {
-        httpMethod: "POST",
+        httpMethod: "POST" as const,
         url,
         headers: { "Content-Type": "application/json" },
         body: Buffer.from(payload).toString("base64"),
+        oauthToken: null,
+        oidcToken: { serviceAccountEmail: GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT },
       },
     },
   });
