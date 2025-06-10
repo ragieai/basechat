@@ -75,6 +75,30 @@ async function isQuestion(text: string) {
   return object.isQuestion;
 }
 
+const IS_ANSWERED_PROMPT =
+  Handlebars.compile(`Is the reply to the prompt an insightful answer?  Only answer yes if the reply gives better than general information.
+
+<prompt>{{prompt}}</prompt>
+<reply>{{reply}}</reply>
+
+Answer in the form of a json object.  If the text is an insightful answer to the prompt, answer with:
+{"isAnswered": true}
+
+If the text is NOT an insightful answer to the prompt, answer with:
+{"isAnswered": false}`);
+
+const isAnsweredSchema = z.object({ isAnswered: z.boolean() });
+
+export async function isAnswered(message: string, reply: string) {
+  const prompt = IS_ANSWERED_PROMPT({ prompt: message, reply });
+  const { object } = await generateObject({
+    model: openai("gpt-4.1-nano-2025-04-14"),
+    prompt,
+    schema: isAnsweredSchema,
+  });
+  return object.isAnswered;
+}
+
 export function formatMessageWithSources(object: ConversationMessageResponse, replyContext: ReplyContext): string {
   let messageText = object.message;
 

@@ -23,7 +23,7 @@ import {
 import { SLACK_ALLOW_UNVERIFIED_WEBHOOKS, SLACK_SIGNING_SECRET } from "@/lib/server/settings";
 import { verifySlackSignature } from "@/lib/server/slack";
 
-import { formatMessageWithSources, shouldReplyToMessage, slackSignIn } from "./utils";
+import { formatMessageWithSources, isAnswered, shouldReplyToMessage, slackSignIn } from "./utils";
 
 // Webhook payload wrapper types (these are specific to webhook delivery, not individual events)
 interface SlackWebhookPayload {
@@ -114,7 +114,8 @@ async function _handleMessage(event: AppMentionEvent | GenericMessageEvent) {
     return;
   }
 
-  const shouldReply = await shouldReplyToMessage(event.text);
+  const userMessage = event.text;
+  const shouldReply = await shouldReplyToMessage(userMessage);
   if (!shouldReply) {
     console.log(`Skipping message that did not meet the criteria for a reply`);
     return;
@@ -138,13 +139,22 @@ async function _handleMessage(event: AppMentionEvent | GenericMessageEvent) {
   const generator = new ReplyGenerator(new MessageDAO(tenant.id), generatorFactory("gpt-4o"));
   const object = await generator.generateObject(replyContext);
 
-  const text = formatMessageWithSources(object, replyContext);
+  if (object.usedSourceIndexes.length > 0) {
+    const answered = await isAnswered(userMessage ?? "", object.message);
+    if (answered) {
+      const text = formatMessageWithSources(object, replyContext);
 
-  await slack.chat.postMessage({
-    channel: event.channel,
-    thread_ts: event.ts,
-    text,
-  });
+      await slack.chat.postMessage({
+        channel: event.channel,
+        thread_ts: event.ts,
+        text,
+      });
+    } else {
+      console.log(`Reply was not an adequate response because it did not give an insightful answer, skipping`);
+    }
+  } else {
+    console.log(`Reply was not an adequate response because it did not use any sources, skipping`);
+  }
 
   await slack.reactions.remove({
     channel: event.channel,
