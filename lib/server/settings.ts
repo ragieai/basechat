@@ -67,3 +67,8 @@ export const SLACK_ALLOW_UNVERIFIED_WEBHOOKS = process.env.SLACK_ALLOW_UNVERIFIE
 export const ORB_DEVELOPER_PLAN_ID = process.env.ORB_DEVELOPER_PLAN_ID!;
 export const ORB_STARTER_PLAN_ID = process.env.ORB_STARTER_PLAN_ID!;
 export const ORB_PRO_PLAN_ID = process.env.ORB_PRO_PLAN_ID!;
+
+// Google Cloud Tasks - Optional
+export const GOOGLE_CLOUD_PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID;
+export const GOOGLE_CLOUD_TASKS_LOCATION = process.env.GOOGLE_CLOUD_TASKS_LOCATION;
+export const GOOGLE_CLOUD_TASKS_QUEUE = process.env.GOOGLE_CLOUD_TASKS_QUEUE;

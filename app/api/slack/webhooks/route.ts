@@ -1,30 +1,9 @@
-import assert from "assert";
-
-import {
-  AllMessageEvents,
-  AppMentionEvent,
-  GenericMessageEvent,
-  MemberJoinedChannelEvent,
-  MemberLeftChannelEvent,
-  ReactionAddedEvent,
-  ReactionRemovedEvent,
-  SlackEvent,
-} from "@slack/types";
-import { WebClient } from "@slack/web-api";
+import { SlackEvent } from "@slack/types";
 import { NextRequest, NextResponse } from "next/server";
 
-import { DEFAULT_MODEL } from "@/lib/llm/types";
-import {
-  ConversationContext,
-  MessageDAO,
-  ReplyGenerator,
-  Retriever,
-  generatorFactory,
-} from "@/lib/server/conversation-context";
+import { enqueueSlackEventTask } from "@/lib/server/cloud-tasks";
 import { SLACK_ALLOW_UNVERIFIED_WEBHOOKS, SLACK_SIGNING_SECRET } from "@/lib/server/settings";
 import { verifySlackSignature } from "@/lib/server/slack";
-
-import { formatMessageWithSources, isAnswered, shouldReplyToMessage, slackSignIn } from "./utils";
 
 // Webhook payload wrapper types (these are specific to webhook delivery, not individual events)
 interface SlackWebhookPayload {
@@ -44,170 +23,9 @@ interface SlackUrlVerification {
   token: string;
 }
 
-// Handle different types of Slack events
-async function handleSlackEvent(event: SlackEvent | undefined): Promise<void> {
-  if (!event) return;
-
-  console.log(`Handling Slack event: ${event.type}`);
-
-  switch (event.type) {
-    case "message":
-      await handleMessage(event as AllMessageEvents);
-      break;
-
-    case "app_mention":
-      await handleAppMention(event);
-      break;
-
-    case "member_joined_channel":
-      await handleMemberJoinedChannel(event);
-      break;
-
-    case "member_left_channel":
-      await handleMemberLeftChannel(event);
-      break;
-
-    case "reaction_added":
-      await handleReactionAdded(event);
-      break;
-
-    case "reaction_removed":
-      await handleReactionRemoved(event);
-      break;
-
-    default:
-      console.log(`Unhandled event type: ${event.type}`);
-  }
-}
-
-async function handleMessage(event: AllMessageEvents): Promise<void> {
-  if (event.subtype && event.subtype !== undefined) {
-    console.log(`Skipping message with subtype: ${event.subtype}`);
-    return;
-  }
-  return _handleMessage(event);
-}
-
-async function handleAppMention(event: AppMentionEvent): Promise<void> {
-  return _handleMessage(event);
-}
-
-async function _handleMessage(event: AppMentionEvent | GenericMessageEvent) {
-  if (!event.team) {
-    throw new Error("No team ID found in app mention event");
-  }
-
-  if (!event.user) {
-    throw new Error("No user ID found in app mention event");
-  }
-
-  if (event.bot_id) {
-    console.log(`Skipping message from bot: ${event.bot_id}`);
-    return;
-  }
-
-  const { tenant, profile } = await slackSignIn(event.team, event.user);
-
-  assert(tenant.slackBotToken, "expected slack bot token");
-
-  if (tenant.slackResponseMode === "mentions" && event.type !== "app_mention") {
-    console.log(`Skipping message - mentions only mode`);
-    return;
-  }
-
-  const userMessage = event.text;
-  const shouldReply = await shouldReplyToMessage(userMessage);
-  if (!shouldReply) {
-    console.log(`Skipping message that did not meet the criteria for a reply`);
-    return;
-  }
-
-  const slack = new WebClient(tenant.slackBotToken);
-
-  await slack.reactions.add({
-    channel: event.channel,
-    timestamp: event.ts,
-    name: "thinking_face",
-  });
-
-  const retriever = new Retriever(tenant, {
-    isBreadth: tenant.isBreadth ?? false,
-    rerankEnabled: tenant.rerankEnabled ?? true,
-    prioritizeRecent: tenant.prioritizeRecent ?? false,
-  });
-
-  const context = await ConversationContext.fromMessageEvent(tenant, profile, event, retriever);
-  const replyContext = await context.promptSlackMessage(profile, event);
-  const generator = new ReplyGenerator(
-    new MessageDAO(tenant.id),
-    generatorFactory(tenant.defaultModel ?? DEFAULT_MODEL),
-  );
-  const object = await generator.generateObject(replyContext);
-
-  if (object.usedSourceIndexes.length > 0) {
-    const answered = await isAnswered(userMessage ?? "", object.message);
-    if (answered) {
-      const text = formatMessageWithSources(object, replyContext);
-
-      await slack.chat.postMessage({
-        channel: event.channel,
-        thread_ts: event.ts,
-        text,
-      });
-    } else {
-      console.log(`Reply was not an adequate response because it did not give an insightful answer, skipping`);
-    }
-  } else {
-    console.log(`Reply was not an adequate response because it did not use any sources, skipping`);
-  }
-
-  await slack.reactions.remove({
-    channel: event.channel,
-    timestamp: event.ts,
-    name: "thinking_face",
-  });
-}
-
-async function handleMemberJoinedChannel(event: MemberJoinedChannelEvent): Promise<void> {
-  console.log("Member joined channel:", {
-    channel: event.channel,
-    user: event.user,
-  });
-
-  // Add your member joined logic here
-  // For example: send welcome message, notify admins, etc.
-}
-
-async function handleMemberLeftChannel(event: MemberLeftChannelEvent): Promise<void> {
-  console.log("Member left channel:", {
-    channel: event.channel,
-    user: event.user,
-  });
-
-  // Add your member left logic here
-}
-
-async function handleReactionAdded(event: ReactionAddedEvent): Promise<void> {
-  console.log("Reaction added:", {
-    user: event.user,
-    reaction: event.reaction,
-    item: event.item,
-  });
-
-  // Add your reaction added logic here
-}
-
-async function handleReactionRemoved(event: ReactionRemovedEvent): Promise<void> {
-  console.log("Reaction removed:", {
-    user: event.user,
-    reaction: event.reaction,
-    item: event.item,
-  });
-
-  // Add your reaction removed logic here
-}
-
 export async function POST(request: NextRequest) {
+  console.log("Received Slack webhook");
+
   try {
     const body = await request.text();
     const timestamp = request.headers.get("x-slack-request-timestamp");
@@ -243,10 +61,13 @@ export async function POST(request: NextRequest) {
     if (slackEvent.type === "event_callback") {
       console.log("Received event callback:", slackEvent.event?.type);
 
-      // Intentional setTimeout so we can respond quickly to the webhook request
-      setTimeout(async () => {
-        await handleSlackEvent(slackEvent.event);
-      }, 0);
+      // Enqueue task to Google Cloud Tasks for async processing
+      if (slackEvent.event) {
+        await enqueueSlackEventTask({ event: slackEvent.event });
+        console.log("Successfully enqueued Slack event task");
+      } else {
+        console.warn("No event in Slack event callback");
+      }
 
       // Always respond quickly to avoid retries
       return NextResponse.json({ ok: true });
