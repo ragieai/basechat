@@ -23,7 +23,7 @@ import {
 } from "@/lib/server/conversation-context";
 import { BASE_URL, GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT } from "@/lib/server/settings";
 
-import { formatMessageWithSources, isAnswered, shouldReplyToMessage, slackSignIn } from "../../webhooks/utils";
+import { formatMessageWithSources, isAnswered, shouldReplyToMessage, slackSignIn } from "../webhooks/utils";
 
 // Verify that the request comes from Google Cloud Tasks with OIDC token verification
 async function verifyCloudTasksRequest(request: NextRequest): Promise<boolean> {

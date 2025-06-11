@@ -29,7 +29,7 @@ export async function enqueueSlackEventTask(taskData: SlackEventTask): Promise<v
     GOOGLE_CLOUD_TASKS_QUEUE,
   );
 
-  const url = `${BASE_URL}/api/slack/tasks/process-event`;
+  const url = `${BASE_URL}/api/slack/tasks`;
   const payload = JSON.stringify(taskData);
 
   console.log("Enqueuing Cloud Tasks task:", {
