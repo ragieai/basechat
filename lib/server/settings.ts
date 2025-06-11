@@ -69,7 +69,7 @@ export const ORB_STARTER_PLAN_ID = process.env.ORB_STARTER_PLAN_ID!;
 export const ORB_PRO_PLAN_ID = process.env.ORB_PRO_PLAN_ID!;
 
 // Google Cloud Tasks - Optional
-export const GOOGLE_CLOUD_PROJECT_ID = process.env.GOOGLE_CLOUD_PROJECT_ID;
-export const GOOGLE_CLOUD_TASKS_LOCATION = process.env.GOOGLE_CLOUD_TASKS_LOCATION;
-export const GOOGLE_CLOUD_TASKS_QUEUE = process.env.GOOGLE_CLOUD_TASKS_QUEUE;
-export const GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT = process.env.GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT;
+export const GOOGLE_PROJECT_ID = process.env.GOOGLE_PROJECT_ID;
+export const GOOGLE_TASKS_LOCATION = process.env.GOOGLE_TASKS_LOCATION;
+export const GOOGLE_TASKS_QUEUE = process.env.GOOGLE_TASKS_QUEUE;
+export const GOOGLE_TASKS_SERVICE_ACCOUNT = process.env.GOOGLE_TASKS_SERVICE_ACCOUNT;

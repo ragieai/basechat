@@ -2,7 +2,7 @@ import { SlackEvent } from "@slack/types";
 import { NextRequest, NextResponse } from "next/server";
 
 import { enqueueSlackEventTask } from "@/lib/server/cloud-tasks";
-import { GOOGLE_CLOUD_TASKS_QUEUE, SLACK_ALLOW_UNVERIFIED_WEBHOOKS, SLACK_SIGNING_SECRET } from "@/lib/server/settings";
+import { GOOGLE_TASKS_QUEUE, SLACK_ALLOW_UNVERIFIED_WEBHOOKS, SLACK_SIGNING_SECRET } from "@/lib/server/settings";
 import { verifySlackSignature } from "@/lib/server/slack";
 
 import { handleSlackEvent } from "../handlers";
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
       // Enqueue task to Google Cloud Tasks for async processing
       if (slackEvent.event) {
-        if (GOOGLE_CLOUD_TASKS_QUEUE) {
+        if (GOOGLE_TASKS_QUEUE) {
           await enqueueSlackEventTask({ event: slackEvent.event });
           console.log("Successfully enqueued Slack event task");
         } else {

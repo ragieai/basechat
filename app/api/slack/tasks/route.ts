@@ -1,7 +1,7 @@
 import { OAuth2Client } from "google-auth-library";
 import { NextRequest, NextResponse } from "next/server";
 
-import { BASE_URL, GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT } from "@/lib/server/settings";
+import { BASE_URL, GOOGLE_TASKS_SERVICE_ACCOUNT } from "@/lib/server/settings";
 
 import { handleSlackEvent } from "../handlers";
 
@@ -46,8 +46,8 @@ async function verifyCloudTasksRequest(request: NextRequest): Promise<boolean> {
     }
 
     // Verify the service account email if specified
-    if (GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT && payload.email !== GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT) {
-      console.log(`Invalid service account. Expected: ${GOOGLE_CLOUD_TASKS_SERVICE_ACCOUNT}, Got: ${payload.email}`);
+    if (GOOGLE_TASKS_SERVICE_ACCOUNT && payload.email !== GOOGLE_TASKS_SERVICE_ACCOUNT) {
+      console.log(`Invalid service account. Expected: ${GOOGLE_TASKS_SERVICE_ACCOUNT}, Got: ${payload.email}`);
       return false;
     }
     return true;
