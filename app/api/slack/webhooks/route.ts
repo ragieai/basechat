@@ -2,8 +2,10 @@ import { SlackEvent } from "@slack/types";
 import { NextRequest, NextResponse } from "next/server";
 
 import { enqueueSlackEventTask } from "@/lib/server/cloud-tasks";
-import { SLACK_ALLOW_UNVERIFIED_WEBHOOKS, SLACK_SIGNING_SECRET } from "@/lib/server/settings";
+import { GOOGLE_CLOUD_TASKS_QUEUE, SLACK_ALLOW_UNVERIFIED_WEBHOOKS, SLACK_SIGNING_SECRET } from "@/lib/server/settings";
 import { verifySlackSignature } from "@/lib/server/slack";
+
+import { handleSlackEvent } from "../handlers";
 
 // Webhook payload wrapper types (these are specific to webhook delivery, not individual events)
 interface SlackWebhookPayload {
@@ -63,8 +65,15 @@ export async function POST(request: NextRequest) {
 
       // Enqueue task to Google Cloud Tasks for async processing
       if (slackEvent.event) {
-        await enqueueSlackEventTask({ event: slackEvent.event });
-        console.log("Successfully enqueued Slack event task");
+        if (GOOGLE_CLOUD_TASKS_QUEUE) {
+          await enqueueSlackEventTask({ event: slackEvent.event });
+          console.log("Successfully enqueued Slack event task");
+        } else {
+          setTimeout(async () => {
+            console.warn("Processing Slack event handler inside setTimeout. This is not recommended for production.");
+            await handleSlackEvent(slackEvent.event);
+          }, 0);
+        }
       } else {
         console.warn("No event in Slack event callback");
       }
