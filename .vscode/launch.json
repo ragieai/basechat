@@ -1,0 +1,9 @@
+{
+  "version": "0.2.0",
+  "configurations": [{
+      "name": "Basechat: debug server-side",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev"
+    }]
+  }
