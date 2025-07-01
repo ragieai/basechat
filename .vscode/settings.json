@@ -6,5 +6,11 @@
   },
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "path": "/bin/zsh",
+      "args": ["-l"]  // <- this makes it a login shell
+    }
   }
 }
