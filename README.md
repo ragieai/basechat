@@ -30,8 +30,8 @@ Base Chat is built with [Next.js](https://nextjs.org/) and uses [Auth.js](https:
 1. **Clone and install dependencies**
 
    ```bash
-   git clone https://github.com/ragie/base-chat.git
-   cd base-chat
+   git clone https://github.com/ragieai/basechat.git
+   cd basechat
    npm install
    ```
 
@@ -55,6 +55,7 @@ Base Chat is built with [Next.js](https://nextjs.org/) and uses [Auth.js](https:
    # - At least one LLM provider API key (OPENAI_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, etc.)
    # - AUTH_GOOGLE_ID and AUTH_GOOGLE_SECRET
    # - ENCRYPTION_KEY (generate with: openssl rand -hex 32)
+   # - DEFAULT_PARTITION_LIMIT
    ```
 
 4. **Set up database schema**
