@@ -6,10 +6,19 @@ export function Title({ children, className }: { children: ReactNode; className?
   return <div className={cn("self-start text-[24px] font-bold", className)}>{children}</div>;
 }
 
-export function Button({ children, className }: { children: ReactNode; className?: string }) {
+export function Button({
+  children,
+  className,
+  disabled,
+}: {
+  children: ReactNode;
+  className?: string;
+  disabled?: boolean;
+}) {
   return (
     <button
       className={cn("text-md text-white text-[16px] font-semibold bg-[#D946EF] rounded-[54px] py-2 w-full", className)}
+      disabled={disabled}
     >
       {children}
     </button>

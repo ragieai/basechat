@@ -29,7 +29,9 @@ export default function ChangePassword({ token }: Props) {
           className="w-full border rounded-[6px] text-[16px] placeholder-[#74747A] px-4 py-2 mb-6"
         />
         <input type="hidden" name="token" value={token} />
-        <Button className="mt-6">Submit</Button>
+        <Button className="mt-6" disabled={pending}>
+          {pending ? "Updating..." : "Submit"}
+        </Button>
       </form>
     </>
   );

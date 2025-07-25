@@ -32,7 +32,7 @@ export async function handleResetPassword(prevState: ResetFormState, formData: F
     await auth.api.forgetPassword({
       body: {
         email,
-        callbackURL: getChangePasswordPath(),
+        redirectTo: getChangePasswordPath(),
       },
     });
     return { email };
