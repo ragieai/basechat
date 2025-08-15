@@ -13,6 +13,8 @@ import {
 import { DEFAULT_MODEL, getEnabledModels, getProviderForModel, LLMModel, modelSchema } from "@/lib/llm/types";
 
 import { SourceMetadata } from "../../lib/types";
+import AgenticResponse from "../agentic-retriever/agentic-response";
+import useAgenticRetriever from "../agentic-retriever/use-agentic-retriever";
 
 import AssistantMessage from "./assistant-message";
 import ChatInput from "./chat-input";
@@ -58,16 +60,24 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
 
   const enabledModels = useMemo(() => getEnabledModels(tenant.enabledModels), [tenant.enabledModels]);
 
+  const agenticRetriever = useAgenticRetriever();
+
   // Get initial settings from localStorage if they exist
-  const [isBreadth, setIsBreadth] = useState(() => {
+  const [retrievalMode, setRetrievalMode] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("initialSettings");
       if (saved && tenant.overrideBreadth) {
         const settings = JSON.parse(saved);
-        return settings.isBreadth;
+        if (settings.retrievalMode) {
+          return settings.retrievalMode;
+        }
+        return settings.isBreadth ? "breadth" : "depth";
       }
     }
-    return tenant.isBreadth ?? false;
+    if (tenant.retrievalMode) {
+      return tenant.retrievalMode;
+    }
+    return tenant.isBreadth ? "breadth" : "depth";
   });
 
   const [rerankEnabled, setRerankEnabled] = useState(() => {
@@ -121,7 +131,12 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
         const settings = JSON.parse(saved);
         // Apply user settings only if overrides are allowed
         if (!tenant.isBreadth || tenant.overrideBreadth) {
-          setIsBreadth(settings.isBreadth ?? false);
+          if (settings.retrievalMode) {
+            setRetrievalMode(settings.retrievalMode);
+          } else {
+            // TODO: Migrate local storage value
+            setRetrievalMode(settings.isBreadth ? "breadth" : "depth");
+          }
         }
         if (!tenant.rerankEnabled || tenant.overrideRerank) {
           setRerankEnabled(settings.rerankEnabled ?? false);
@@ -155,13 +170,14 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
     // Only save settings that can be overridden
     const settingsToSave = {
       selectedModel,
-      ...(tenant?.overrideBreadth ? { isBreadth } : {}),
+      ...(tenant?.overrideBreadth ? { isBreadth: retrievalMode === "breadth" } : {}),
+      ...(tenant?.overrideRetrievalMode ? { retrievalMode } : {}),
       ...(tenant?.overrideRerank ? { rerankEnabled } : {}),
       ...(tenant?.overridePrioritizeRecent ? { prioritizeRecent } : {}),
     };
 
     localStorage.setItem("chatSettings", JSON.stringify(settingsToSave));
-  }, [isBreadth, rerankEnabled, prioritizeRecent, selectedModel, tenant]);
+  }, [retrievalMode, rerankEnabled, prioritizeRecent, selectedModel, tenant]);
 
   const { isLoading, object, submit } = useObject({
     api: `/api/conversations/${conversationId}/messages`,
@@ -190,6 +206,7 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
   });
 
   const handleSubmit = (content: string, model: LLMModel) => {
+    console.log("Submitting message:", content, "with model:", model);
     const provider = getProviderForModel(model);
     if (!provider) {
       return;
@@ -199,12 +216,20 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       conversationId,
       content,
       model,
-      isBreadth,
+      isBreadth: retrievalMode === "breadth",
       rerankEnabled,
       prioritizeRecent,
     };
     setMessages([...messages, { content, role: "user" }]);
-    submit(payload);
+    if (retrievalMode !== "agentic") {
+      submit(payload);
+    } else {
+      console.log("Submitting to agentic retrieval mode:", content);
+      // TODO: Implement agentic mode submission
+      agenticRetriever.submit({
+        query: content,
+      });
+    }
   };
 
   useEffect(() => {
@@ -303,6 +328,8 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
               tenantId={tenant.id}
             />
           )}
+          {agenticRetriever.status}
+          {agenticRetriever.status !== "idle" && <AgenticResponse agenticRetriever={agenticRetriever} />}
         </div>
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
@@ -311,8 +338,8 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
             handleSubmit={handleSubmit}
             selectedModel={selectedModel}
             onModelChange={setSelectedModel}
-            isBreadth={isBreadth}
-            onBreadthChange={setIsBreadth}
+            retrievalMode={retrievalMode}
+            onRetrievalModeChange={setRetrievalMode}
             rerankEnabled={rerankEnabled}
             onRerankChange={setRerankEnabled}
             prioritizeRecent={prioritizeRecent}

@@ -18,8 +18,9 @@ interface ChatInputProps {
   handleSubmit?: (text: string, model: LLMModel) => void;
   selectedModel: LLMModel;
   onModelChange: (model: LLMModel) => void;
-  isBreadth: boolean;
-  onBreadthChange: (isBreadth: boolean) => void;
+  retrievalMode: "breadth" | "depth" | "agentic";
+  // isBreadth: boolean;
+  onRetrievalModeChange: (mode: "breadth" | "depth" | "agentic") => void;
   rerankEnabled?: boolean;
   onRerankChange?: (enabled: boolean) => void;
   prioritizeRecent?: boolean;
@@ -176,10 +177,9 @@ export default function ChatInput(props: ChatInputProps) {
               <div className="flex flex-col gap-2">
                 {props.canSetIsBreadth && (
                   <RadioGroup
-                    value={isBreadth ? "breadth" : "depth"}
+                    value={props.retrievalMode}
                     onValueChange={(value) => {
-                      const newIsBreadth = value === "breadth";
-                      props.onBreadthChange(newIsBreadth);
+                      props.onRetrievalModeChange(value);
                     }}
                   >
                     <div className="flex flex-col space-y-1">
@@ -210,6 +210,22 @@ export default function ChatInput(props: ChatInputProps) {
                       </div>
                       <span className="text-xs text-muted-foreground ml-6">
                         Retrieves results from a smaller range of documents for more depth (faster)
+                      </span>
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="agentic"
+                          id="agentic"
+                          className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
+                        />
+                        <label htmlFor="agentic" className="text-sm">
+                          Research
+                        </label>
+                      </div>
+                      <span className="text-xs text-muted-foreground ml-6">
+                        Uses a more advanced retrieval method that can handle complex questions, perform multiple
+                        searches, and provide more accurate results (much slower)
                       </span>
                     </div>
                   </RadioGroup>
