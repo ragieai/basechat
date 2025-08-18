@@ -27,6 +27,7 @@ type AgenticRetrieverState = {
 export type AgenticRetriever = {
   deltas: any[];
   result: any;
+  steps: Array<z.infer<typeof stepResultSchema>>;
   status: AgenticRetrieverState["status"];
   currentStepType: AgenticRetrieverState["currentStepType"];
   query: string;
@@ -120,8 +121,14 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
       };
 
     case "TAKE_RUN_ITEM_STREAM_EVENT":
+      let steps = state.steps;
+      console.log("TAKE_RUN_ITEM_STREAM_EVENT", action.payload);
+      if ("output" in action.payload) {
+        steps = [...steps, stepResultSchema.parse(action.payload.output)];
+      }
       return {
         ...state,
+        steps,
         _runItemStreamEvent: [...state._runItemStreamEvent, action.payload],
         _allEvents: [...state._allEvents, action.payload],
       };
@@ -371,6 +378,7 @@ export default function useAgenticRetriever(): AgenticRetriever {
     query: state.query,
     result: state.result,
     status: state.status,
+    steps: state.steps,
     currentResponse: partialJson,
     currentStepType: state.currentStepType,
     submit,
