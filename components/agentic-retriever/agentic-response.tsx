@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 import { stepResultSchema } from "./types";
@@ -38,98 +39,117 @@ function StepHoverCard({ step, index }: { step: Step; index: number }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <Popover open={isHovered} onOpenChange={setIsHovered}>
-      <PopoverTrigger asChild>
-        <button
-          className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors hover:${stepInfo.bgColor} ${stepInfo.bgColor} ${stepInfo.color}`}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          <Icon className="h-4 w-4" />
-          <span className="text-sm font-medium">{index + 1}</span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" side="bottom" align="start">
-        <div className="p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Icon className={`h-5 w-5 ${stepInfo.color}`} />
-            <h3 className="font-semibold text-lg">
-              {stepInfo.label} Step {index + 1}
-            </h3>
-          </div>
-
-          <div className="space-y-3 text-sm">
-            <div>
-              <h4 className="font-medium text-gray-600 mb-1">Current Question:</h4>
-              <p className="text-gray-900">{step.current_question}</p>
+    <Dialog>
+      <Popover open={isHovered} onOpenChange={setIsHovered}>
+        <PopoverTrigger asChild>
+          <DialogTrigger asChild>
+            <button
+              className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors hover:${stepInfo.bgColor} ${stepInfo.bgColor} ${stepInfo.color} cursor-pointer`}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              onClick={() => setIsHovered(false)} // Close popover when clicked
+            >
+              <Icon className="h-4 w-4" />
+              <span className="text-sm font-medium">{index + 1}</span>
+            </button>
+          </DialogTrigger>
+        </PopoverTrigger>
+        <PopoverContent className="w-96 p-0" side="bottom" align="start">
+          <div className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Icon className={`h-5 w-5 ${stepInfo.color}`} />
+              <h3 className="font-semibold text-lg">
+                {stepInfo.label} Step {index + 1}
+              </h3>
             </div>
 
-            <div>
-              <h4 className="font-medium text-gray-600 mb-1">Thought Process:</h4>
-              <p className="text-gray-700 bg-gray-50 p-2 rounded text-xs max-h-20 overflow-y-auto">{step.think}</p>
+            <div className="space-y-3 text-sm">
+              <div>
+                <h4 className="font-medium text-gray-600 mb-1">Current Question:</h4>
+                <p className="text-gray-900">{step.current_question}</p>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-gray-600 mb-1">Thought Process:</h4>
+                <p className="text-gray-700 bg-gray-50 p-2 rounded text-xs max-h-20 overflow-y-auto">{step.think}</p>
+              </div>
+
+              {/* Type-specific content preview */}
+              {step.type === "answer" && (
+                <div>
+                  <h4 className="font-medium text-gray-600 mb-1">Answer:</h4>
+                  <p className="text-gray-900 text-xs max-h-16 overflow-y-auto">
+                    {step.answer.text.substring(0, 150)}
+                    {step.answer.text.length > 150 ? "..." : ""}
+                  </p>
+                </div>
+              )}
+
+              {step.type === "evaluated_answer" && (
+                <div>
+                  <h4 className="font-medium text-gray-600 mb-1">Evaluation:</h4>
+                  <span
+                    className={`px-2 py-1 rounded text-xs ${
+                      step.eval_passed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {step.eval_passed ? "PASSED" : "FAILED"}
+                  </span>
+                </div>
+              )}
+
+              {step.type === "search" && (
+                <div>
+                  <h4 className="font-medium text-gray-600 mb-1">Search Requests:</h4>
+                  <p className="text-xs text-gray-700">{step.search.search_requests.length} search request(s)</p>
+                </div>
+              )}
+
+              {step.type === "reflect" && (
+                <div>
+                  <h4 className="font-medium text-gray-600 mb-1">Questions to Answer:</h4>
+                  <p className="text-xs text-gray-700">{step.questions_to_answer.length} question(s) to reflect on</p>
+                </div>
+              )}
+
+              {step.type === "code" && (
+                <div>
+                  <h4 className="font-medium text-gray-600 mb-1">Code Issue:</h4>
+                  <p className="text-xs text-red-700 bg-red-50 p-1 rounded">
+                    {step.code_issue.substring(0, 100)}
+                    {step.code_issue.length > 100 ? "..." : ""}
+                  </p>
+                </div>
+              )}
+
+              {step.type === "surrender" && (
+                <div>
+                  <h4 className="font-medium text-gray-600 mb-1">Partial Answer:</h4>
+                  <p className="text-xs text-orange-700 bg-orange-50 p-1 rounded">
+                    {step.partial_answer.text.substring(0, 100)}
+                    {step.partial_answer.text.length > 100 ? "..." : ""}
+                  </p>
+                </div>
+              )}
+
+              <div className="pt-2 border-t">
+                <p className="text-xs text-gray-500 italic">Click for full details</p>
+              </div>
             </div>
-
-            {/* Type-specific content preview */}
-            {step.type === "answer" && (
-              <div>
-                <h4 className="font-medium text-gray-600 mb-1">Answer:</h4>
-                <p className="text-gray-900 text-xs max-h-16 overflow-y-auto">
-                  {step.answer.text.substring(0, 150)}
-                  {step.answer.text.length > 150 ? "..." : ""}
-                </p>
-              </div>
-            )}
-
-            {step.type === "evaluated_answer" && (
-              <div>
-                <h4 className="font-medium text-gray-600 mb-1">Evaluation:</h4>
-                <span
-                  className={`px-2 py-1 rounded text-xs ${
-                    step.eval_passed ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                  }`}
-                >
-                  {step.eval_passed ? "PASSED" : "FAILED"}
-                </span>
-              </div>
-            )}
-
-            {step.type === "search" && (
-              <div>
-                <h4 className="font-medium text-gray-600 mb-1">Search Requests:</h4>
-                <p className="text-xs text-gray-700">{step.search.search_requests.length} search request(s)</p>
-              </div>
-            )}
-
-            {step.type === "reflect" && (
-              <div>
-                <h4 className="font-medium text-gray-600 mb-1">Questions to Answer:</h4>
-                <p className="text-xs text-gray-700">{step.questions_to_answer.length} question(s) to reflect on</p>
-              </div>
-            )}
-
-            {step.type === "code" && (
-              <div>
-                <h4 className="font-medium text-gray-600 mb-1">Code Issue:</h4>
-                <p className="text-xs text-red-700 bg-red-50 p-1 rounded">
-                  {step.code_issue.substring(0, 100)}
-                  {step.code_issue.length > 100 ? "..." : ""}
-                </p>
-              </div>
-            )}
-
-            {step.type === "surrender" && (
-              <div>
-                <h4 className="font-medium text-gray-600 mb-1">Partial Answer:</h4>
-                <p className="text-xs text-orange-700 bg-orange-50 p-1 rounded">
-                  {step.partial_answer.text.substring(0, 100)}
-                  {step.partial_answer.text.length > 100 ? "..." : ""}
-                </p>
-              </div>
-            )}
           </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
+
+      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Icon className={`h-6 w-6 ${stepInfo.color}`} />
+            {stepInfo.label} Step {index + 1} - Full Details
+          </DialogTitle>
+        </DialogHeader>
+        <div className="mt-4">{renderStep(step, index)}</div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
