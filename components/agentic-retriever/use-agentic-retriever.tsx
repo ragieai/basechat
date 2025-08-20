@@ -1,37 +1,42 @@
 import { parse, OBJ, ARR, STR } from "partial-json";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { z } from "zod";
 
-import { evidenceSchema, rawResponseEventSchema, runItemSchema, stepResultSchema } from "./types";
+import {
+  evidenceSchema,
+  orchestratorToolCallSchema,
+  rawResponseEventSchema,
+  resultSchema,
+  runItemSchema,
+  stepResultSchema,
+} from "./types";
 
+// TODO: test surrender step
 type AgenticRetrieverState = {
   query: string;
-  result: null | any;
-  status: "idle" | "loading" | "error";
-  currentStepType: "think" | "search" | "code" | "answer";
+  result: null | z.infer<typeof resultSchema>;
+  status: "idle" | "loading" | "error" | "success";
+  currentStepType: "think" | "search" | "code" | "answer" | "plan" | null;
   accumulatedText: string;
   steps: Array<z.infer<typeof stepResultSchema>>;
-  final: null | any;
-  error: null | any;
+  _streamedResponses: Array<any>;
   _agentUpdatedStreamEvent: Array<z.infer<any>>;
   _runItemStreamEvent: Array<z.infer<typeof runItemSchema>>;
   _rawResponseEvent: Array<z.infer<typeof rawResponseEventSchema>>;
   _inprogressResponse: string;
   _allEvents: Array<any>;
-  _evidence: Array<{
-    stepIndex: number;
-    evidence: z.infer<typeof evidenceSchema>;
-  }>;
+  _evidence: Record<string, z.infer<typeof evidenceSchema>>;
 };
 
+type EvidenceCollection = Record<string, Array<z.infer<typeof evidenceSchema>>>;
 export type AgenticRetriever = {
-  deltas: any[];
-  result: any;
   steps: Array<z.infer<typeof stepResultSchema>>;
   status: AgenticRetrieverState["status"];
   currentStepType: AgenticRetrieverState["currentStepType"];
   query: string;
-  currentResponse: Record<string, any> | null;
+  currentResponse: z.infer<typeof orchestratorToolCallSchema> | null;
+  result: AgenticRetrieverState["result"];
+  evidence: EvidenceCollection;
   submit: (payload: { query: string }) => void;
   reset: () => void;
 };
@@ -54,13 +59,8 @@ type TakeRawResponseEventAction = {
   payload: string; // raw JSON string from the event
 };
 
-type TakeStepAction = {
-  type: "TAKE_STEP";
-  payload: z.infer<typeof stepResultSchema>;
-};
-
-type FinishAction = {
-  type: "FINISH";
+type TakeDoneEvent = {
+  type: "TAKE_DONE_EVENT";
   payload: any;
 };
 
@@ -79,31 +79,13 @@ type SetErrorAction = {
 
 type AgenticRetrieverAction =
   | SetQueryAction
-  | FinishAction
+  | TakeDoneEvent
   | ResetAction
   | RetryAction
   | SetErrorAction
-  | TakeStepAction
   | TakeAgentUpdatedStreamEventAction
   | TakeRunItemStreamEventAction
   | TakeRawResponseEventAction;
-
-// async function* streamText(resp: Response) {
-//   const reader = resp.body!.pipeThrough(new TextDecoderStream()).getReader();
-//   let buf = '';
-//   for (; ;) {
-//     const { value, done } = await reader.read();
-//     if (done) break;
-//     buf += value!;
-//     try {
-//       // allow half-built objects/arrays/strings during streaming
-//       const snapshot = parse(buf, OBJ | ARR | STR);
-//       yield snapshot;               // e.g., render to UI
-//     } catch {
-//       /* ignore until we have a parsable snapshot under the rules */
-//     }
-//   }
-// }
 
 function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRetrieverAction): AgenticRetrieverState {
   switch (action.type) {
@@ -141,6 +123,7 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
       // console.log("Current event:", parse(action.payload, OBJ | ARR | STR));
       // const parsed = rawResponseEventSchema.parse(parse(action.payload, OBJ | ARR | STR));
       const parsed = rawResponseEventSchema.parse(action.payload);
+      let _streamedResponses = state._streamedResponses;
       switch (parsed.type) {
         case "response.created":
           console.log("Response created:", parsed);
@@ -154,8 +137,8 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
           // Check if the item is a function call (which has a name property)
           if (parsed.item.type === "function_call") {
             // Map tool names to step types
-            const toolToStepType: Record<string, "think" | "search" | "code" | "answer"> = {
-              reflect: "think",
+            const toolToStepType: Record<string, "think" | "search" | "code" | "answer" | "plan"> = {
+              plan: "plan",
               search: "search",
               code: "code",
               answer: "answer",
@@ -170,6 +153,13 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
           // TypeScript now knows parsed.delta exists because of discriminated union
           _inprogressResponse += parsed.delta;
           break;
+        case "response.function_call_arguments.done":
+          console.log("Function call arguments done:", parsed);
+          _streamedResponses = [
+            ..._streamedResponses,
+            { type: currentStepType || "think", data: JSON.parse(state._inprogressResponse) },
+          ];
+          break;
         case "response.completed":
           console.log("Response completed:", parsed);
           break;
@@ -182,16 +172,17 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
         currentStepType,
         _rawResponseEvent: [...state._rawResponseEvent, parsed],
         _allEvents: [...state._allEvents, parsed],
-        _inprogressResponse: _inprogressResponse,
+        _inprogressResponse,
+        _streamedResponses,
       };
 
-    case "FINISH": {
+    case "TAKE_DONE_EVENT": {
       if (state.status !== "loading") {
         return state;
       }
       return {
         ...state,
-        status: "idle",
+        status: action.payload.type,
         result: action.payload,
       };
     }
@@ -206,8 +197,6 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
         result: null,
         accumulatedText: "",
         steps: [],
-        final: null,
-        error: null,
       };
     }
     case "RETRY": {
@@ -223,19 +212,18 @@ export default function useAgenticRetriever(): AgenticRetriever {
   const esRef = useRef<EventSource | null>(null);
   const [state, dispatch] = useReducer(agenticRetrieverReducer, {
     query: "",
-    result: null,
     status: "idle",
-    currentStepType: "think",
+    result: null,
+    currentStepType: null,
     accumulatedText: "",
     steps: [],
-    final: null,
-    error: null,
+    _streamedResponses: [],
     _agentUpdatedStreamEvent: [],
     _runItemStreamEvent: [],
     _rawResponseEvent: [],
     _allEvents: [],
     _inprogressResponse: "",
-    _evidence: [], // Probably track by step
+    _evidence: {},
   });
 
   const submit = useCallback((payload: { query: string }) => {
@@ -270,15 +258,6 @@ export default function useAgenticRetriever(): AgenticRetriever {
       console.log("Debug event:", e.data);
     };
 
-    // const handleFinal = (e: MessageEvent) => {
-    //   try {
-    //     const finalAns = JSON.parse(e.data);
-    //     dispatch({ type: "FINISH", payload: finalAns });
-    //   } catch (err) {
-    //     dispatch({ type: "SET_ERROR", payload: "Failed to parse final payload" });
-    //   }
-    // };
-
     const handleError = (e: Event) => {
       // Browsers fire 'error' on transient disconnects too; the stream may auto-retry.
       // You can inspect (e as any).data if your server sends a body with errors.
@@ -290,25 +269,6 @@ export default function useAgenticRetriever(): AgenticRetriever {
       console.log("Stream opened");
       // Note: SET_OPEN is not a valid action type, so we'll just log
     };
-
-    // const handleAgentUpdatedStreamEvent = (e: MessageEvent) => {
-    //   console.log("Agent updated stream event:", e.data);
-    //   dispatch({ type: "TAKE_AGENT_UPDATED_STREAM_EVENT", payload: JSON.parse(e.data) });
-    // };
-
-    // const handleRunItemStreamEvent = (e: MessageEvent) => {
-    //   console.log("Run item stream event:", e.data);
-    //   try {
-    //     dispatch({ type: "TAKE_RUN_ITEM_STREAM_EVENT", payload: runItemSchema.parse(JSON.parse(e.data)) });
-    //   } catch (err) {
-    //     console.error("Failed to parse run item stream event:", err);
-    //     console.warn("Event data:", JSON.parse(e.data));
-    //   }
-    // };
-
-    // const handleRawResponseEvent = (e: MessageEvent) => {
-    //   dispatch({ type: "TAKE_RAW_RESPONSE_EVENT", payload: e.data });
-    // };
 
     const handleEvent = (e: MessageEvent) => {
       console.log("Generic message event:", e.data, e);
@@ -338,20 +298,16 @@ export default function useAgenticRetriever(): AgenticRetriever {
       }
     };
 
-    const handleDone = () => {
+    const handleDone = (e: MessageEvent) => {
       es.close();
       esRef.current = null;
-      console.log("Stream closed");
+      console.log("Stream done event:", e.data);
+      dispatch({ type: "TAKE_DONE_EVENT", payload: resultSchema.parse(JSON.parse(e.data)) });
+      console.log("Stream closed", e.data);
     };
 
-    // es.addEventListener("agent_updated_stream_event", handleAgentUpdatedStreamEvent as EventListener);
-    // es.addEventListener("run_item_stream_event", handleRunItemStreamEvent as EventListener);
-    // es.addEventListener("raw_response_event", handleRawResponseEvent as EventListener);
     es.addEventListener("open", handleOpen);
     es.addEventListener("message", handleEvent as EventListener);
-    // es.addEventListener("answer", (...args) => console.log("Answer event:", args));
-    // es.addEventListener("step", handleStep as EventListener);
-    // es.addEventListener("final", handleFinal as EventListener);
     es.addEventListener("error", handleError as EventListener);
     es.addEventListener("debug", handleDebug as EventListener);
     es.addEventListener("done", handleDone as EventListener);
@@ -371,16 +327,65 @@ export default function useAgenticRetriever(): AgenticRetriever {
     console.log("partial-json", partialJson);
   }
 
+  // TODO: Memoize currentResponse
+  let currentResponse: null | z.infer<typeof orchestratorToolCallSchema> = null;
+  const safeParse = orchestratorToolCallSchema.safeParse({
+    type: state.currentStepType,
+    arguments: partialJson,
+  });
+  if (safeParse.success) {
+    currentResponse = safeParse.data;
+  } else {
+    // If parsing fails, we can still return a partial response
+    console.warn(partialJson);
+    console.warn("Failed to parse orchestrator tool call schema", safeParse.error);
+  }
+  console.warn(
+    {
+      type: state.currentStepType,
+      arguments: partialJson,
+    },
+    currentResponse,
+  );
+
+  const evidence = useMemo(() => {
+    const toolCallOutputs = state._runItemStreamEvent.filter((item) => item.type === "tool_call_output_item");
+    const evidence = toolCallOutputs.reduce<EvidenceCollection>((acc, item, idx) => {
+      if ("output" in item && item.output.type === "search") {
+        // TODO: This is not deduping as expected
+        const searchResultMap = item.output.query_details
+          .flatMap((q) => q.search_results)
+          .reduce<Record<string, z.infer<typeof evidenceSchema>>>((searchAcc, searchItem) => {
+            console.log("searchItem", searchItem.id);
+            searchAcc[searchItem.id] = searchItem;
+            return searchAcc;
+          }, {});
+        if (Object.keys(searchResultMap).length === 0) {
+          return acc;
+        }
+        acc[String(idx)] = Object.entries(searchResultMap).map(([id, searchItem]) => searchItem);
+      }
+      if ("output" in item && item.output.type === "code") {
+        // TODO: Hack. The code step does not have the same shape as evidence.
+        // Maybe this should only get pulled if you used by an answer step?
+        const codeInterpreterEvidence = evidenceSchema.parse({ ...item.output, text: item.output.code_result });
+        acc[String(idx)] = [codeInterpreterEvidence];
+      }
+      return acc;
+    }, {});
+    return evidence;
+  }, [state._runItemStreamEvent]);
+
   console.log("state", state, new Set(state._rawResponseEvent.map((e) => e.type)));
 
   return {
-    deltas: [], // Add missing deltas property
     query: state.query,
     result: state.result,
     status: state.status,
     steps: state.steps,
-    currentResponse: partialJson,
+    currentResponse,
     currentStepType: state.currentStepType,
+    evidence,
     submit,
     reset,
   };

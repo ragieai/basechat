@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const toolNames = z.enum(["reflect", "search", "code", "answer", "transfer_to_citation", "transfer_to_surrender"]);
+const toolNames = z.enum(["plan", "search", "code", "answer", "transfer_to_citation", "transfer_to_surrender"]);
 
 const responseCreatedSchema = z.object({
   type: z.literal("response.created"),
@@ -114,10 +114,15 @@ const baseEvidenceSchema = z.object({
 });
 
 const codeInterpreterEvidenceSchema = baseEvidenceSchema.extend({
-  type: z.literal("code_interpreter"),
+  type: z.literal("code"),
   code: z.string(),
   code_issue: z.string(),
   code_result: z.string(),
+});
+
+const linkSchema = z.object({
+  href: z.string().url(),
+  type: z.string(),
 });
 
 const ragieEvidenceSchema = baseEvidenceSchema.extend({
@@ -126,25 +131,23 @@ const ragieEvidenceSchema = baseEvidenceSchema.extend({
   document_id: z.string(),
   document_name: z.string(),
   metadata: z.record(z.any()).default({}),
+  document_metadata: z.record(z.any()).default({}),
+  links: z.record(z.string(), linkSchema).default({}),
+  index: z.number(),
 });
 
 export const evidenceSchema = z.union([codeInterpreterEvidenceSchema, ragieEvidenceSchema]);
 
-const linkSchema = z.object({
-  href: z.string().url(),
-  type: z.string(),
-});
-
-const searchResultSchema = z.object({
-  text: z.string(),
-  id: z.string(),
-  index: z.number(),
-  document_name: z.string(),
-  document_id: z.string(),
-  document_metadata: z.record(z.any()),
-  links: z.record(linkSchema).default({}),
-  metadata: z.record(z.any()),
-});
+// const searchResultSchema = z.object({
+//   text: z.string(),
+//   id: z.string(),
+//   index: z.number(),
+//   document_name: z.string(),
+//   document_id: z.string(),
+//   document_metadata: z.record(z.any()),
+//   links: z.record(linkSchema).default({}),
+//   metadata: z.record(z.any()),
+// });
 
 const orchestratorDecisionSchema = z.object({
   type: stepTypeSchema,
@@ -184,7 +187,7 @@ const queryDetailsSchema = z.object({
   query: z.string(),
   search_effort: searchEffortSchema,
   metadata_filter: z.record(z.any()),
-  search_results: z.array(searchResultSchema),
+  search_results: z.array(ragieEvidenceSchema).default([]),
 });
 
 const searchStepSchema = stepResultBaseSchema.extend({
@@ -194,8 +197,8 @@ const searchStepSchema = stepResultBaseSchema.extend({
   search_log: z.string().default(""),
 });
 
-const reflectStepSchema = stepResultBaseSchema.extend({
-  type: z.literal("reflect"),
+const planStepSchema = stepResultBaseSchema.extend({
+  type: z.literal("plan"),
   questions_to_answer: z.array(z.string()),
 });
 
@@ -214,7 +217,7 @@ const surrenderStepSchema = stepResultBaseSchema.extend({
 export const stepResultSchema = z.union([
   answerStepSchema,
   searchStepSchema,
-  reflectStepSchema,
+  planStepSchema,
   codingStepSchema,
   surrenderStepSchema,
   evaluatedAnswerStepSchema,
@@ -471,8 +474,48 @@ export const runItemSchema = z.union([
   mcpApprovalResponseItemSchema,
 ]);
 
-// export const modelResponseSchema = z.object({
-//   output: z.array(responseOutputItemSchema),
-//   usage: usageSchema,
-//   response_id: z.string().nullable(),
-// });
+export const orchestratorToolCallSchema = z.union([
+  z.object({
+    type: z.literal("plan"),
+    arguments: z.object({
+      plan: z.string(),
+    }),
+  }),
+  z.object({
+    type: z.literal("search"),
+    arguments: z.object({
+      query: z.string(),
+    }),
+  }),
+  z.object({
+    type: z.literal("code"),
+    arguments: z.object({
+      code_issue: z.string(),
+    }),
+  }),
+  z.object({
+    type: z.literal("answer"),
+    arguments: z.object({
+      answer: z.string(),
+    }),
+  }),
+]);
+
+const successfulResultSchema = z.object({
+  type: z.literal("success"),
+  data: z.object({
+    text: z.string(),
+    evidence: z.array(evidenceSchema).default([]),
+    steps: z.array(stepResultSchema),
+    diary: z.string().default(""),
+  }),
+});
+
+const errorResultSchema = z.object({
+  type: z.literal("error"),
+  data: z.object({
+    message: z.string(),
+  }),
+});
+
+export const resultSchema = z.union([successfulResultSchema, errorResultSchema]);

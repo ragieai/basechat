@@ -1,11 +1,15 @@
-import { Terminal, Search, Code, Brain, MessageSquare, CheckCircle, XCircle } from "lucide-react";
+import { Terminal, Search, Code, Brain, MessageSquare, CheckCircle, XCircle, List } from "lucide-react";
 import { useState } from "react";
+import Markdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import remarkGfm from "remark-gfm";
 import { z } from "zod";
 
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Skeleton } from "../ui/skeleton";
 
 import { stepResultSchema } from "./types";
 import { AgenticRetriever } from "./use-agentic-retriever";
@@ -13,22 +17,66 @@ import { AgenticRetriever } from "./use-agentic-retriever";
 type Step = z.infer<typeof stepResultSchema>;
 
 // Helper function to get step type information
-function getStepTypeInfo(stepType: Step["type"]) {
+function getStepTypeInfo(stepType: Step["type"] | "think") {
   switch (stepType) {
+    case "think":
+      return {
+        icon: Brain,
+        color: "text-yellow-600",
+        bgColor: "bg-yellow-100",
+        label: "Think",
+        activeLabel: "Thinking",
+      };
     case "answer":
-      return { icon: MessageSquare, color: "text-green-600", bgColor: "bg-green-100", label: "Answer" };
+      return {
+        icon: MessageSquare,
+        color: "text-green-600",
+        bgColor: "bg-green-100",
+        label: "Answer",
+        activeLabel: "Answering",
+      };
     case "evaluated_answer":
-      return { icon: CheckCircle, color: "text-green-600", bgColor: "bg-green-100", label: "Evaluated Answer" };
+      return {
+        icon: CheckCircle,
+        color: "text-green-600",
+        bgColor: "bg-green-100",
+        label: "Evaluated Answer",
+        activeLabel: "Evaluating Answer",
+      };
     case "search":
-      return { icon: Search, color: "text-blue-600", bgColor: "bg-blue-100", label: "Search" };
-    case "reflect":
-      return { icon: Brain, color: "text-purple-600", bgColor: "bg-purple-100", label: "Reflect" };
+      return {
+        icon: Search,
+        color: "text-blue-600",
+        bgColor: "bg-blue-100",
+        label: "Search",
+        activeLabel: "Searching",
+      };
+    case "plan":
+      return {
+        icon: Brain,
+        color: "text-purple-600",
+        bgColor: "bg-purple-100",
+        label: "Plan",
+        activeLabel: "Planning",
+      };
     case "code":
-      return { icon: Code, color: "text-green-600", bgColor: "bg-green-100", label: "Code" };
+      return { icon: Code, color: "text-green-600", bgColor: "bg-green-100", label: "Code", activeLabel: "Coding" };
     case "surrender":
-      return { icon: XCircle, color: "text-orange-600", bgColor: "bg-orange-100", label: "Surrender" };
+      return {
+        icon: XCircle,
+        color: "text-orange-600",
+        bgColor: "bg-orange-100",
+        label: "Answer",
+        activeLabel: "Answering",
+      };
     default:
-      return { icon: Terminal, color: "text-gray-600", bgColor: "bg-gray-100", label: "Unknown" };
+      return {
+        icon: Terminal,
+        color: "text-gray-600",
+        bgColor: "bg-gray-100",
+        label: "Unknown",
+        activeLabel: "Unknown",
+      };
   }
 }
 
@@ -105,7 +153,7 @@ function StepHoverCard({ step, index }: { step: Step; index: number }) {
                 </div>
               )}
 
-              {step.type === "reflect" && (
+              {step.type === "plan" && (
                 <div>
                   <h4 className="font-medium text-gray-600 mb-1">Questions to Answer:</h4>
                   <p className="text-xs text-gray-700">{step.questions_to_answer.length} question(s) to reflect on</p>
@@ -153,19 +201,63 @@ function StepHoverCard({ step, index }: { step: Step; index: number }) {
   );
 }
 
+// Render function that switches based on step type
+function renderStep(step: Step, index: number) {
+  const stepNumber = index + 1;
+
+  switch (step.type) {
+    case "answer":
+      return <AnswerStep key={stepNumber} step={step} />;
+    case "evaluated_answer":
+      return <EvaluatedAnswerStep key={stepNumber} step={step} />;
+    case "search":
+      return <SearchStep key={stepNumber} step={step} />;
+    case "plan":
+      return <PlanStep key={stepNumber} step={step} />;
+    case "code":
+      return <CodingStep key={stepNumber} step={step} />;
+    case "surrender":
+      return <SurrenderStep key={stepNumber} step={step} />;
+    default:
+      // Fallback for unknown step types
+      return (
+        <Card key={stepNumber} className="mb-4">
+          <CardHeader>
+            <CardTitle>Unknown Step Type: {(step as any).type}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="text-sm bg-gray-50 p-2 rounded overflow-x-auto">{JSON.stringify(step, null, 2)}</pre>
+          </CardContent>
+        </Card>
+      );
+  }
+}
+
 // Step navigation component
-function StepNavigation({ steps }: { steps: AgenticRetriever["steps"] }) {
+function StepNavigation({
+  steps,
+  currentStepType,
+}: {
+  steps: AgenticRetriever["steps"];
+  currentStepType: AgenticRetriever["currentStepType"];
+}) {
   if (steps.length === 0) return null;
+  const stepInfo = getStepTypeInfo(currentStepType || "think");
 
   return (
     <div className="flex flex-wrap gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
-      <div className="flex items-center gap-2 text-sm text-gray-600 mr-4">
-        <Terminal className="h-4 w-4" />
-        <span className="font-medium">Steps:</span>
-      </div>
-      {steps.map((step, index) => (
-        <StepHoverCard key={index} step={step} index={index} />
-      ))}
+      <>
+        {steps.map((step, index) => (
+          <StepHoverCard key={index} step={step} index={index} />
+        ))}
+      </>
+      <button
+        disabled
+        className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors hover:${stepInfo.bgColor} ${stepInfo.bgColor} ${stepInfo.color} cursor-pointer opacity-50`}
+      >
+        <stepInfo.icon className="h-4 w-4" />
+        <span className="text-sm font-medium">{steps.length + 1}</span>
+      </button>
     </div>
   );
 }
@@ -327,7 +419,7 @@ function SearchStep({ step }: { step: Step & { type: "search" } }) {
         {step.search_log && (
           <div>
             <h4 className="font-medium text-sm text-gray-600 mb-1">Search Log:</h4>
-            <pre className="text-xs bg-gray-50 p-2 rounded overflow-x-auto">{step.search_log}</pre>
+            <pre className="text-xs bg-gray-50 p-2 rounded overflow-x-auto whitespace-pre-line">{step.search_log}</pre>
           </div>
         )}
       </CardContent>
@@ -335,13 +427,13 @@ function SearchStep({ step }: { step: Step & { type: "search" } }) {
   );
 }
 
-function ReflectStep({ step }: { step: Step & { type: "reflect" } }) {
+function PlanStep({ step }: { step: Step & { type: "plan" } }) {
   return (
     <Card className="mb-4">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
           <Brain className="h-5 w-5 text-purple-600" />
-          Reflect Step
+          Plan Step
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -448,65 +540,139 @@ function SurrenderStep({ step }: { step: Step & { type: "surrender" } }) {
   );
 }
 
-// Render function that switches based on step type
-function renderStep(step: Step, index: number) {
-  const stepNumber = index + 1;
-
-  switch (step.type) {
-    case "answer":
-      return <AnswerStep key={stepNumber} step={step} />;
-    case "evaluated_answer":
-      return <EvaluatedAnswerStep key={stepNumber} step={step} />;
+function StreamingResponse({ toolCall }: { toolCall: AgenticRetriever["currentResponse"] }) {
+  if (!toolCall) return null;
+  let response = null;
+  switch (toolCall.type) {
+    case "plan":
+      response = toolCall.arguments.plan;
+      break;
     case "search":
-      return <SearchStep key={stepNumber} step={step} />;
-    case "reflect":
-      return <ReflectStep key={stepNumber} step={step} />;
+      response = toolCall.arguments.query;
+      break;
     case "code":
-      return <CodingStep key={stepNumber} step={step} />;
-    case "surrender":
-      return <SurrenderStep key={stepNumber} step={step} />;
+      response = toolCall.arguments.code_issue;
+      break;
+    case "answer":
+      response = toolCall.arguments.answer;
+      break;
     default:
-      // Fallback for unknown step types
-      return (
-        <Card key={stepNumber} className="mb-4">
-          <CardHeader>
-            <CardTitle>Unknown Step Type: {(step as any).type}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="text-sm bg-gray-50 p-2 rounded overflow-x-auto">{JSON.stringify(step, null, 2)}</pre>
-          </CardContent>
-        </Card>
-      );
+      console.warn("Unknown tool call type:", (toolCall as any).type);
   }
-}
-export default function AgenticResponse({ agenticRetriever }: { agenticRetriever: AgenticRetriever }) {
+  console.log("Streaming Response", response, toolCall);
   return (
-    <Alert variant="default">
-      <Terminal />
-      <AlertTitle>
-        <StepNavigation steps={agenticRetriever.steps} />
-        <div className="flex items-center gap-2 mt-2">
-          <span className="text-lg font-semibold">{agenticRetriever.currentStepType}ing</span>
-          {agenticRetriever.steps.length > 0 && (
-            <span className="text-sm text-gray-500">
-              ({agenticRetriever.steps.length} step{agenticRetriever.steps.length !== 1 ? "s" : ""} completed)
+    <div>
+      {response ? (
+        <Markdown className="markdown" rehypePlugins={[rehypeHighlight, remarkGfm]}>
+          {response}
+        </Markdown>
+      ) : (
+        <>
+          <Skeleton className="h-6 w-full" />
+          SKELTON
+        </>
+      )}
+    </div>
+  );
+}
+
+function EvidenceList({ evidence }: { evidence: AgenticRetriever["evidence"] }) {
+  console.log("Evidence List", evidence);
+  if (Object.keys(evidence).length === 0) return null;
+
+  const truncateText = (text: string, maxLength: number = 20) => {
+    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  };
+
+  return (
+    <div className="mt-4">
+      <div className="flex flex-wrap gap-2">
+        {Object.entries(evidence).map(([stepCount, e]) => (
+          <div key={stepCount}>
+            <h5 className="font-medium text-sm text-gray-600 mb-1">Step {Number(stepCount) + 1}:</h5>
+            {e.map((evidence, itemIdx) => {
+              const displayText = evidence.type === "ragie" ? evidence.document_name : evidence.type;
+              return (
+                <Popover key={itemIdx}>
+                  <PopoverTrigger asChild>
+                    <button className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer">
+                      {truncateText(displayText)}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto max-w-xs p-2" side="top">
+                    <div className="text-xs">
+                      <p className="font-medium mb-1">Evidence:</p>
+                      <Markdown
+                        className="markdown mt-[10px]"
+                        rehypePlugins={[rehypeHighlight, remarkGfm]}
+                        // components={{
+                        //   pre: CodeBlock,
+                        // }}
+                      >
+                        {evidence.text}
+                      </Markdown>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SuccessfulResponse({ result }: { result: AgenticRetriever["result"] }) {
+  if (!result) return null;
+  if (result.type === "error") {
+    return (
+      <div className="text-red-600">
+        <XCircle className="inline h-5 w-5 mr-2" />
+        <span>Error: {result.data.message}</span>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <Markdown className="markdown mt-[10px]" rehypePlugins={[rehypeHighlight, remarkGfm]}>
+        {result.data.text}
+      </Markdown>
+      <EvidenceList evidence={{ "0": result.data.evidence }} />
+    </div>
+  );
+}
+
+export default function AgenticResponse({ agenticRetriever }: { agenticRetriever: AgenticRetriever }) {
+  const stepInfo = getStepTypeInfo(agenticRetriever.currentStepType || "think");
+  if (agenticRetriever.status === "success") {
+    return <SuccessfulResponse result={agenticRetriever.result} />;
+  }
+
+  return (
+    <div>
+      <StepNavigation steps={agenticRetriever.steps} currentStepType={agenticRetriever.currentStepType} />
+      <Alert variant="default">
+        {stepInfo.icon && <stepInfo.icon className={`h-5 w-5 ${stepInfo.color}`} />}
+        <AlertTitle>
+          <div className="flex items-center gap-2">
+            <span
+              className="inline-block font-semibold text-lg
+         bg-[linear-gradient(100deg,theme(colors.slate.700)_10%,white_35%,theme(colors.slate.700)_60%)]
+         bg-clip-text text-transparent [background-size:200%_100%] [-webkit-background-clip:text]
+         motion-safe:animate-shimmer"
+            >
+              {stepInfo.activeLabel}
             </span>
-          )}
-        </div>
-      </AlertTitle>
-      <AlertDescription>
-        <div className="mt-4">
-          <details className="group">
-            <summary className="cursor-pointer text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-              <span>Current Response Data</span>
-              <span className="group-open:rotate-90 transition-transform">▶</span>
-            </summary>
-            <pre className="mt-2 text-xs bg-gray-50 p-2 rounded overflow-x-auto">
-              {JSON.stringify(agenticRetriever.currentResponse, null, 2)}
-            </pre>
-          </details>
-        </div>
-      </AlertDescription>
-    </Alert>
+          </div>
+        </AlertTitle>
+        <AlertDescription>
+          <div className="mt-4">
+            <StreamingResponse toolCall={agenticRetriever.currentResponse} />
+          </div>
+          <EvidenceList evidence={agenticRetriever.evidence} />
+        </AlertDescription>
+      </Alert>
+    </div>
   );
 }

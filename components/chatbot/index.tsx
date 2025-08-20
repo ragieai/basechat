@@ -328,8 +328,9 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
               tenantId={tenant.id}
             />
           )}
-          {agenticRetriever.status}
-          {agenticRetriever.status !== "idle" && <AgenticResponse agenticRetriever={agenticRetriever} />}
+          {(agenticRetriever.status !== "idle" || agenticRetriever.result) && (
+            <AgenticResponse agenticRetriever={agenticRetriever} />
+          )}
         </div>
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
