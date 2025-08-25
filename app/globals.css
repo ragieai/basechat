@@ -167,37 +167,49 @@ body {
 
 /* ---- Line Lead layout helpers ---- */
 /* Full-width blue canvas just for the hero page */
+/* Full-width blue canvas */
 .ll-hero-page {
   background: var(--bg-app);
-  /* make the blue area the viewport minus header + bottom nav */
-  min-height: calc(100vh - var(--header-h) - var(--bottom-nav-h));
+  /* Use dynamic viewport height so mobile chrome address bar changes don't break it */
+  min-height: 100dvh;
   width: 100%;
+  /* Ensure content isn't hidden behind the fixed bottom nav */
+  padding-bottom: var(--bottom-nav-h);
+  display: flex; /* so child can center vertically */
 }
 
-/* Center the hero column vertically inside the blue area */
+/* The inner max-width column that should fill the blue area */
 .ll-hero-container {
-  max-width: 717px;
-  margin: 0 auto;
-  padding: 0 1rem; /* px-4 */
-  height: 100%;
+  flex: 1; /* take all available height from parent flex */
+  min-height: inherit; /* = 100dvh from .ll-hero-page */
   display: flex;
   align-items: center; /* vertical center */
+  max-width: 717px;
+  margin: 0 auto; /* center horizontally */
+  padding: 0 1rem; /* px-4 */
+  box-sizing: border-box;
 }
 
-/* Left-aligned column with equal gaps */
+/* Left-aligned vertical stack with equal spacing */
 .ll-hero-stack {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* left align */
+  align-items: flex-start;
   width: 100%;
-  row-gap: 24px; /* equal spacing: logo↔H1, H1↔input */
+  row-gap: 24px; /* equal gap: logo ↔ H1 ↔ input */
 }
 
 /* White composer shell */
+/* White chat composer shell */
 .ll-composer {
   background: #fff;
   border: 1px solid #d7d7d7;
   border-radius: 16px;
+}
+
+/* Temporary debugging - remove after verification */
+.ll-hero-container {
+  outline: 1px dashed rgba(220, 23, 20, 0.4);
 }
 
 .menu-panel {
