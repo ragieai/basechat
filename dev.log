@@ -11,3 +11,83 @@
 
  ✓ Starting...
  ✓ Ready in 1305ms
+ ✓ Compiled /middleware in 146ms (165 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 1539ms (1710 modules)
+ GET / 307 in 2478ms
+ ○ Compiling /start ...
+ ✓ Compiled /start in 1961ms (2154 modules)
+ ✓ Compiled in 698ms (375 modules)
+ GET /start 307 in 3160ms
+ ○ Compiling /o/[slug] ...
+ ✓ Compiled /o/[slug] in 1472ms (2789 modules)
+ GET /o/line-lead-dev 200 in 3121ms
+ ○ Compiling /api/tenants ...
+ ✓ Compiled /api/tenants in 502ms (2792 modules)
+ GET /api/tenants 200 in 1136ms
+ ○ Compiling /o/[slug]/data ...
+ ✓ Compiled /o/[slug]/data in 847ms (2988 modules)
+ GET /o/line-lead-dev/data 200 in 2864ms
+ ○ Compiling /api/tenants/current/documents ...
+ ✓ Compiled /api/tenants/current/documents in 662ms (3002 modules)
+ GET /api/tenants/current/documents?cursor= 200 in 1390ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 895ms (3006 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 1001ms
+ GET /o/line-lead-dev 200 in 724ms
+ ○ Compiling /api/conversations ...
+ ✓ Compiled /api/conversations in 710ms (3028 modules)
+ POST /api/conversations 200 in 2035ms
+ ○ Compiling /o/[slug]/conversations/[id] ...
+ ✓ Compiled /o/[slug]/conversations/[id] in 1420ms (3987 modules)
+ GET /o/line-lead-dev/conversations/3621cf69-531f-4467-959c-fde5a1b4959c 200 in 2779ms
+ ○ Compiling /api/conversations/[conversationId]/messages ...
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+ GET /o/line-lead-dev/conversations/3621cf69-531f-4467-959c-fde5a1b4959c 200 in 479ms
+ragie response includes 4 chunk(s)
+Using provider: openai for model: gpt-4o
