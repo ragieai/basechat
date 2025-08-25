@@ -207,11 +207,6 @@ body {
   border-radius: 16px;
 }
 
-/* Temporary debugging - remove after verification */
-.ll-hero-container {
-  outline: 1px dashed rgba(220, 23, 20, 0.4);
-}
-
 .menu-panel {
   background: var(--menu-bg);
   border: 1px solid var(--menu-border);

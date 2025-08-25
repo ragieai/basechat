@@ -134,16 +134,14 @@ export default function AssistantMessage({
             {content}
           </Markdown>
         ) : (
-          <div className="dot-pulse mt-[14px]" />
+          <div className="dot-pulse mt-[14px] ml-3" aria-label="Assistant is typing" aria-live="polite" />
         )}
         <div className="flex flex-wrap mt-4">
           {sources.map((source, i) => (
             <Citation key={i} source={source} onClick={() => onSelectedSource(source)} />
           ))}
         </div>
-        <div className="text-xs text-muted-foreground">
-          {isGenerating ? `Generating with ${LLM_DISPLAY_NAMES[model]}` : `Generated with ${LLM_DISPLAY_NAMES[model]}`}
-        </div>
+        {/* status label removed per spec */}
       </div>
     </div>
   );
