@@ -66,7 +66,7 @@ const SettingsPopoverContent = ({ children }: { children: React.ReactNode }) => 
   <PopoverContent
     align="start"
     sideOffset={4}
-    className={cn("bg-[#F5F5F7] w-[300px] border border-[#D7D7D7] shadow-none rounded-[6px] p-6")}
+    className={cn("bg-white w-[300px] border border-[#D7D7D7] shadow-none rounded-[6px] p-6")}
   >
     {children}
   </PopoverContent>
@@ -86,7 +86,7 @@ const ModelPopoverContent = ({
       align={isStandalone ? "start" : "end"}
       alignOffset={isStandalone ? 4 : -24}
       {...(isDesktop && !isStandalone ? { side: "right", sideOffset: 30 } : {})}
-      className={cn("bg-[#F5F5F7] w-[258px] border border-[#D7D7D7] shadow-none rounded-[8px] p-6")}
+      className={cn("bg-white w-[258px] border border-[#D7D7D7] shadow-none rounded-[8px] p-6")}
     >
       {children}
     </PopoverContent>

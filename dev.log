@@ -2,13 +2,12 @@
 > chatbot-example@0.1.0 dev
 > next dev
 
- ⚠ Port 3000 is in use, using available port 3001 instead.
    ▲ Next.js 15.3.0
-   - Local:        http://localhost:3001
-   - Network:      http://192.168.1.231:3001
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.231:3000
    - Environments: .env
    - Experiments (use with caution):
      ✓ authInterrupts
 
  ✓ Starting...
- ✓ Ready in 1501ms
+ ✓ Ready in 1960ms

@@ -19,7 +19,10 @@ export default function Radio({ checked, className }: Props) {
       style={{ width: 16, height: 16 }}
     >
       {checked && (
-        <div className="bg-[#D946EF] rounded-full relative" style={{ width: 10, height: 10, top: 2, left: 2 }}></div>
+        <div
+          className="bg-[color:var(--brand)] rounded-full relative"
+          style={{ width: 10, height: 10, top: 2, left: 2 }}
+        ></div>
       )}
     </div>
   );

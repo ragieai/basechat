@@ -2,6 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { Inter } from "next/font/google";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import { z } from "zod";
@@ -157,14 +158,17 @@ export default function Welcome({ tenant, className, profile }: Props) {
         {isMounted ? (
           <>
             <div className={`h-full flex flex-col justify-center ${inter.className}`}>
-              <Logo
-                name={tenant.name}
-                url={tenant.logoUrl}
-                width={100}
-                height={100}
-                className="mb-8"
-                tenantId={tenant.id}
-              />
+              <div className="flex justify-center mb-8">
+                {/* Replace tenant/organization logo ONLY on this page */}
+                <Image
+                  src="/agent-linelead.png"
+                  alt="Line Lead"
+                  width={96}
+                  height={96}
+                  className="rounded-md"
+                  priority
+                />
+              </div>
               <h1 className="mb-12 text-3xl lg:text-[40px] font-bold leading-[50px] text-[#343A40]">
                 {(tenant.welcomeMessage || DEFAULT_WELCOME_MESSAGE).replace("{{company.name}}", tenant.name)}
               </h1>

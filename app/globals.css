@@ -9,7 +9,7 @@ body {
 
 @layer base {
   :root {
-    --brand: #dc1714; /* active state & primary buttons */
+    --brand: #dc1714; /* primary red */
     --bg-app: #f0f9ff; /* chat page background */
     --text-primary: #111827; /* slate-900 */
     --background: 240, 5%, 96%;

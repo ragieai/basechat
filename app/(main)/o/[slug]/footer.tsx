@@ -35,16 +35,13 @@ export function NavButton({
   className?: string;
   isActive?: boolean;
 }) {
+  const iconClass = isActive ? "text-[color:var(--brand)]" : "text-slate-500";
+  const labelClass = isActive ? "text-[color:var(--text-primary)]" : "text-slate-500";
+
   return (
-    <div
-      className={cn(
-        "flex flex-col w-20 items-center",
-        className,
-        isActive ? "text-[color:var(--brand)]" : "text-slate-500",
-      )}
-    >
-      <Image alt={alt} src={src} className="mb-2.5" />
-      <div className="text-[14px]">{alt}</div>
+    <div className={cn("flex flex-col w-20 items-center", className)}>
+      <Image alt={alt} src={src} className={cn("mb-2.5", iconClass)} />
+      <div className={cn("text-[14px]", labelClass)}>{alt}</div>
     </div>
   );
 }
