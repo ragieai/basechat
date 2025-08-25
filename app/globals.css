@@ -9,9 +9,11 @@ body {
 
 @layer base {
   :root {
-    --brand: #dc1714; /* primary red */
-    --bg-app: #f0f9ff; /* chat page background */
-    --text-primary: #111827; /* slate-900 */
+    --brand: #dc1714;
+    --bg-app: #f0f9ff;
+    --text-primary: #111827;
+    --header-h: 64px; /* adjust if your header is taller */
+    --bottom-nav-h: 80px; /* actual bottom bar height */
     --menu-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.12), 0 4px 12px -6px rgba(0, 0, 0, 0.08);
     --menu-border: #e4e4e7;
     --menu-bg: #ffffff;
@@ -164,29 +166,35 @@ body {
 }
 
 /* ---- Line Lead layout helpers ---- */
+/* Full-width blue canvas just for the hero page */
 .ll-hero-page {
-  /* full-width blue page background */
-  background: var(--bg-app, #f0f9ff);
-  min-height: calc(100vh - 64px);
+  background: var(--bg-app);
+  /* make the blue area the viewport minus header + bottom nav */
+  min-height: calc(100vh - var(--header-h) - var(--bottom-nav-h));
   width: 100%;
 }
+
+/* Center the hero column vertically inside the blue area */
 .ll-hero-container {
   max-width: 717px;
   margin: 0 auto;
   padding: 0 1rem; /* px-4 */
   height: 100%;
-  display: flex; /* allows vertical centering */
+  display: flex;
+  align-items: center; /* vertical center */
 }
+
+/* Left-aligned column with equal gaps */
 .ll-hero-stack {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* left-aligned content */
-  justify-content: center; /* vertical center in blue area */
-  row-gap: 24px; /* 👈 equal spacing between blocks */
+  align-items: flex-start; /* left align */
   width: 100%;
+  row-gap: 24px; /* equal spacing: logo↔H1, H1↔input */
 }
+
+/* White composer shell */
 .ll-composer {
-  /* white composer shell */
   background: #fff;
   border: 1px solid #d7d7d7;
   border-radius: 16px;
