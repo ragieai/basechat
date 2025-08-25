@@ -169,7 +169,7 @@ export default function Welcome({ tenant, className, profile }: Props) {
                   priority
                 />
               </div>
-              <h1 className="mb-12 text-3xl lg:text-[40px] font-bold leading-[50px] text-[#343A40]">
+              <h1 className="text-3xl lg:text-[40px] font-bold leading-[50px] text-[#343A40]">
                 {(tenant.welcomeMessage || DEFAULT_WELCOME_MESSAGE).replace("{{company.name}}", tenant.name)}
               </h1>
               {questions.length > 0 && (
@@ -188,7 +188,7 @@ export default function Welcome({ tenant, className, profile }: Props) {
                 </div>
               )}
             </div>
-            <div className="ll-composer w-full flex flex-col items-center p-2 pl-4">
+            <div className="ll-composer w-full flex flex-col items-center p-2 pl-4 bg-white">
               <ChatInput
                 handleSubmit={handleSubmit}
                 selectedModel={selectedModel}

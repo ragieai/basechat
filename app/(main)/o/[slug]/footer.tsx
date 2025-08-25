@@ -4,14 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { getDataPath, getSettingsPath, getTenantPath } from "@/lib/paths";
+import { getDataPath, getTenantPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
 import ChatIconOff from "@/public/icons/chat-off.svg";
 import ChatIconOn from "@/public/icons/chat-on-red.svg";
 import DataIconOff from "@/public/icons/data-off.svg";
 import DataIconOn from "@/public/icons/data-on-red.svg";
-import SettingsIconOff from "@/public/icons/settings-off.svg";
-import SettingsIconOn from "@/public/icons/settings-on-red.svg";
 
 export enum AppLocation {
   CHAT,
@@ -56,8 +54,6 @@ export default function Footer({ className, tenant }: Props) {
   let appLocation = AppLocation.CHAT;
   if (pathname.startsWith(getDataPath(tenant.slug))) {
     appLocation = AppLocation.DATA;
-  } else if (pathname.startsWith(getSettingsPath(tenant.slug))) {
-    appLocation = AppLocation.SETTINGS;
   }
 
   const chatIcon = appLocation === AppLocation.CHAT ? ChatIconOn : ChatIconOff;
@@ -65,9 +61,6 @@ export default function Footer({ className, tenant }: Props) {
 
   const dataIcon = appLocation === AppLocation.DATA ? DataIconOn : DataIconOff;
   const dataIsActive = appLocation === AppLocation.DATA;
-
-  const settingsIcon = appLocation === AppLocation.SETTINGS ? SettingsIconOn : SettingsIconOff;
-  const settingsIsActive = appLocation === AppLocation.SETTINGS;
 
   return (
     <div className={className}>
@@ -78,9 +71,7 @@ export default function Footer({ className, tenant }: Props) {
         <Link href={getDataPath(tenant.slug)}>
           <NavButton alt="Library" src={dataIcon} className="mr-5" isActive={dataIsActive} />
         </Link>
-        <Link href={getSettingsPath(tenant.slug)}>
-          <NavButton alt="Settings" src={settingsIcon} className="mr-5" isActive={settingsIsActive} />
-        </Link>
+        {/* Settings removed from main nav per spec */}
       </div>
     </div>
   );
