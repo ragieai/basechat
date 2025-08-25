@@ -21,6 +21,7 @@ import HamburgerIcon from "@/public/icons/hamburger.svg";
 import LogOutIcon from "@/public/icons/log-out.svg";
 import NewChatIcon from "@/public/icons/new-chat.svg";
 import PlusIcon from "@/public/icons/plus.svg";
+import SettingsIcon from "@/public/icons/settings-off.svg";
 
 import { Banner, BannerLink } from "./banner";
 import ConversationHistory from "./conversation-history";
@@ -323,9 +324,9 @@ export default function Header({
             <div className="mt-auto">
               <hr className="mb-4 bg-black border-none h-[1px] opacity-10" />
 
-              <Link className="flex cursor-pointer mb-4" href="/setup">
-                <Image src={PlusIcon} alt="New Chatbot" className="mr-3" />
-                New Chatbot
+              <Link className="flex cursor-pointer mb-4" href={`/o/${tenant.slug}/settings`}>
+                <Image src={SettingsIcon} alt="Settings" className="mr-3" width={16} height={16} />
+                Settings
               </Link>
 
               <hr className="mb-4 bg-black border-none h-[1px] opacity-10" />

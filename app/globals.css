@@ -163,6 +163,36 @@ body {
   }
 }
 
+/* ---- Line Lead layout helpers ---- */
+.ll-hero-page {
+  /* full-width blue page background */
+  background: var(--bg-app, #f0f9ff);
+  min-height: calc(100vh - 64px);
+  width: 100%;
+}
+.ll-hero-container {
+  /* keep the fixed max-width center container */
+  max-width: 717px;
+  margin: 0 auto;
+  padding: 0 1rem; /* px-4 */
+  height: 100%;
+}
+.ll-hero-stack {
+  /* left-aligned hero content */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* left align */
+  justify-content: flex-start;
+  gap: 2rem; /* space between logo/headline/composer */
+  padding: 2.5rem 0; /* py-10 */
+}
+.ll-composer {
+  /* white composer shell */
+  background: #fff;
+  border: 1px solid #d7d7d7;
+  border-radius: 16px;
+}
+
 .menu-panel {
   background: var(--menu-bg);
   border: 1px solid var(--menu-border);

@@ -10,4 +10,6 @@
      ✓ authInterrupts
 
  ✓ Starting...
- ✓ Ready in 1349ms
+ ✓ Ready in 1333ms
+ ✓ Compiled /middleware in 142ms (165 modules)
+ ○ Compiling /o/[slug] ...
