@@ -18,10 +18,9 @@ export default function Logo({ name, url, width, height, className, initialCount
   const avatarClass = tenantId ? `avatar-${getAvatarNumber(tenantId)}` : "";
 
   if (!url) {
-     
     return (
       <img
-        src="/agent-linelead.svg"
+        src="/agent-linelead.png"
         alt={formattedName || "Line Lead Agent"}
         className={cn("rounded", className)}
         height={height}
