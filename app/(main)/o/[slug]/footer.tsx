@@ -7,11 +7,11 @@ import { usePathname } from "next/navigation";
 import { getDataPath, getSettingsPath, getTenantPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
 import ChatIconOff from "@/public/icons/chat-off.svg";
-import ChatIconOn from "@/public/icons/chat-on.svg";
+import ChatIconOn from "@/public/icons/chat-on-red.svg";
 import DataIconOff from "@/public/icons/data-off.svg";
-import DataIconOn from "@/public/icons/data-on.svg";
+import DataIconOn from "@/public/icons/data-on-red.svg";
 import SettingsIconOff from "@/public/icons/settings-off.svg";
-import SettingsIconOn from "@/public/icons/settings-on.svg";
+import SettingsIconOn from "@/public/icons/settings-on-red.svg";
 
 export enum AppLocation {
   CHAT,
@@ -35,12 +35,11 @@ export function NavButton({
   className?: string;
   isActive?: boolean;
 }) {
-  const iconClass = isActive ? "text-[color:var(--brand)]" : "text-slate-500";
   const labelClass = isActive ? "text-[color:var(--text-primary)]" : "text-slate-500";
 
   return (
     <div className={cn("flex flex-col w-20 items-center", className)}>
-      <Image alt={alt} src={src} className={cn("mb-2.5", iconClass)} />
+      <Image alt={alt} src={src} className="mb-2.5" />
       <div className={cn("text-[14px]", labelClass)}>{alt}</div>
     </div>
   );

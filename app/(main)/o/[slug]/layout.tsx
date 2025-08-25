@@ -32,11 +32,7 @@ export default async function MainLayout({ children, params }: Props) {
         role={profile.role}
         billingEnabled={BILLING_ENABLED}
       />
-      <main className="flex-1 w-full overflow-y-auto">
-        <div className="w-full max-w-[717px] lg:max-w-full px-4 mx-auto h-full flex flex-col items-center justify-center">
-          {children}
-        </div>
-      </main>
+      <main className="flex-1 w-full overflow-y-auto">{children}</main>
       {profile.role == "admin" && (
         <Footer
           tenant={tenant}

@@ -157,8 +157,8 @@ export default function Welcome({ tenant, className, profile }: Props) {
       <div className={className}>
         {isMounted ? (
           <>
-            <div className={`h-full flex flex-col justify-center ${inter.className}`}>
-              <div className="flex justify-center mb-8">
+            <div className={`flex flex-col ${inter.className}`}>
+              <div className="mb-8">
                 {/* Replace tenant/organization logo ONLY on this page */}
                 <Image
                   src="/agent-linelead.png"
@@ -188,7 +188,7 @@ export default function Welcome({ tenant, className, profile }: Props) {
                 </div>
               )}
             </div>
-            <div className="w-full flex flex-col items-center p-2 pl-4 rounded-[16px] border border-[#D7D7D7] mt-auto">
+            <div className="w-full flex flex-col items-center p-2 pl-4 rounded-[16px] border border-[#D7D7D7] bg-white mt-auto">
               <ChatInput
                 handleSubmit={handleSubmit}
                 selectedModel={selectedModel}
