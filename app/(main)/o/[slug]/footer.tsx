@@ -40,7 +40,7 @@ export function NavButton({
       className={cn(
         "flex flex-col w-20 items-center",
         className,
-        isActive ? "text-[color:var(--brand)]" : "text-white",
+        isActive ? "text-[color:var(--brand)]" : "text-slate-500",
       )}
     >
       <Image alt={alt} src={src} className="mb-2.5" />
@@ -80,7 +80,7 @@ export default function Footer({ className, tenant }: Props) {
           <NavButton alt="Chat" src={chatIcon} className="mr-5" isActive={chatIsActive} />
         </Link>
         <Link href={getDataPath(tenant.slug)}>
-          <NavButton alt="Data" src={dataIcon} className="mr-5" isActive={dataIsActive} />
+          <NavButton alt="Library" src={dataIcon} className="mr-5" isActive={dataIsActive} />
         </Link>
         <Link href={getSettingsPath(tenant.slug)}>
           <NavButton alt="Settings" src={settingsIcon} className="mr-5" isActive={settingsIsActive} />
