@@ -12,12 +12,16 @@ body {
     --brand: #dc1714; /* primary red */
     --bg-app: #f0f9ff; /* chat page background */
     --text-primary: #111827; /* slate-900 */
+    --menu-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.12), 0 4px 12px -6px rgba(0, 0, 0, 0.08);
+    --menu-border: #e4e4e7;
+    --menu-bg: #ffffff;
     --background: 240, 5%, 96%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover: var(--menu-bg);
+    --popover-foreground: #111827; /* slate-900 */
+    --border: var(--menu-border);
     --primary: 240 5.9% 10%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 4.8% 95.9%;
@@ -157,6 +161,13 @@ body {
   .markdown td {
     @apply p-2 border-b border-gray-200 dark:border-gray-700;
   }
+}
+
+.menu-panel {
+  background: var(--menu-bg);
+  border: 1px solid var(--menu-border);
+  border-radius: 16px;
+  box-shadow: var(--menu-shadow);
 }
 
 /* avatar-1 is primary logo */

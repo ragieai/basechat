@@ -58,7 +58,10 @@ const HeaderPopoverContent = ({
 }) => (
   <PopoverContent
     align={align}
-    className={cn("bg-[#F5F5F7] w-[258px] border-none shadow-none rounded-[24px] py-6 px-2", className)}
+    className={cn(
+      "bg-white w-80 border border-[#E4E4E7] rounded-2xl py-6 px-2 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-6px_rgba(0,0,0,0.08)]",
+      className,
+    )}
   >
     {children}
   </PopoverContent>
@@ -70,7 +73,9 @@ const TenantPopoverContent = ({ children }: { children: React.ReactNode }) => (
     alignOffset={-60}
     side="right"
     sideOffset={-20}
-    className={cn("bg-[#F5F5F7] w-[120px] border border-[#D7D7D7] shadow-none rounded-[6px] mt-2 p-3")}
+    className={cn(
+      "bg-white w-[120px] border border-[#E4E4E7] rounded-2xl mt-2 p-3 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-6px_rgba(0,0,0,0.08)]",
+    )}
   >
     {children}
   </PopoverContent>
@@ -130,9 +135,12 @@ export default function Header({
             <ConversationHistory tenant={tenant} />
           </HeaderPopoverContent>
         </Popover>
-        <Link href={getTenantPath(tenant.slug)} className="mr-4">
-          <Image src={NewChatIcon} alt="New chat" />
-        </Link>
+        {/* New Chat icon hidden per brand spec; keep hamburger item */}
+        {false && (
+          <Link href={getTenantPath(tenant.slug)} className="mr-4">
+            <Image src={NewChatIcon} alt="New chat" />
+          </Link>
+        )}
         <Link href={getTenantPath(tenant.slug)}>
           <Image src="/logo-linelead.svg" alt="Line Lead" width={128} height={28} />
         </Link>
