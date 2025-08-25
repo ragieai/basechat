@@ -76,7 +76,7 @@ export default function Conversation({ id, tenant, profile }: Props) {
 
   return (
     <ProfileProvider profile={profile}>
-      <div className="relative lg:flex h-full w-full">
+      <div className="relative lg:flex h-full w-full" style={{ background: "#F0F9FF" }}>
         {isMounted ? (
           <>
             <Chatbot

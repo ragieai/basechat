@@ -120,8 +120,8 @@ export default function Header({
   };
 
   return (
-    <header className="w-full shrink-0 flex justify-between p-4 items-center">
-      <div className="flex">
+    <header className="w-full shrink-0 flex justify-between p-4 items-center bg-white border-b">
+      <div className="flex items-center">
         <Popover>
           <PopoverTrigger asChild>
             <Image src={HamburgerIcon} alt="Expand chats" className="mr-2.5 cursor-pointer" onClick={onNavClick} />
@@ -130,8 +130,11 @@ export default function Header({
             <ConversationHistory tenant={tenant} />
           </HeaderPopoverContent>
         </Popover>
-        <Link href={getTenantPath(tenant.slug)}>
+        <Link href={getTenantPath(tenant.slug)} className="mr-4">
           <Image src={NewChatIcon} alt="New chat" />
+        </Link>
+        <Link href={getTenantPath(tenant.slug)}>
+          <Image src="/logo-linelead.svg" alt="Line Lead" width={128} height={28} />
         </Link>
       </div>
       {billingEnabled && (
@@ -174,7 +177,7 @@ export default function Header({
       {isAnonymous ? (
         <div className="flex">
           <Link
-            className="rounded-lg bg-[#D946EF] text-white px-4 py-2.5 mr-6 flex items-center"
+            className="rounded-lg bg-[#DB1011] text-white px-4 py-2.5 mr-6 flex items-center"
             href={getSignUpPath()}
           >
             Create my own chatbot

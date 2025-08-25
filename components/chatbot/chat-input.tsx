@@ -187,7 +187,7 @@ export default function ChatInput(props: ChatInputProps) {
                         <RadioGroupItem
                           value="breadth"
                           id="breadth"
-                          className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
+                          className="text-[#DB1011] border-[#D7D7D7] data-[state=checked]:bg-[#DB1011]"
                         />
                         <label htmlFor="breadth" className="text-sm">
                           Breadth
@@ -202,7 +202,7 @@ export default function ChatInput(props: ChatInputProps) {
                         <RadioGroupItem
                           value="depth"
                           id="depth"
-                          className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
+                          className="text-[#DB1011] border-[#D7D7D7] data-[state=checked]:bg-[#DB1011]"
                         />
                         <label htmlFor="depth" className="text-sm">
                           Depth
@@ -226,7 +226,7 @@ export default function ChatInput(props: ChatInputProps) {
                       onCheckedChange={(checked: boolean) => {
                         props.onRerankChange?.(checked);
                       }}
-                      className="data-[state=checked]:bg-[#D946EF]"
+                      className="data-[state=checked]:bg-[#DB1011]"
                     />
                   </div>
                 )}
@@ -241,7 +241,7 @@ export default function ChatInput(props: ChatInputProps) {
                         onCheckedChange={(checked: boolean) => {
                           props.onPrioritizeRecentChange?.(checked);
                         }}
-                        className="data-[state=checked]:bg-[#D946EF]"
+                        className="data-[state=checked]:bg-[#DB1011]"
                       />
                     </>
                   </div>

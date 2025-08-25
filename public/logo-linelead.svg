@@ -1,0 +1,11 @@
+<svg width="128" height="28" viewBox="0 0 128 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Line Lead Logo with Brand Red -->
+  <rect x="0" y="8" width="4" height="16" fill="#DB1011"/>
+  <rect x="8" y="4" width="4" height="20" fill="#DB1011"/>
+  <rect x="16" y="0" width="4" height="28" fill="#DB1011"/>
+  <rect x="24" y="12" width="4" height="12" fill="#DB1011"/>
+  
+  <text x="36" y="20" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#1F2937">
+    Line Lead
+  </text>
+</svg>

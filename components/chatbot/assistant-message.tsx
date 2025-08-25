@@ -129,7 +129,7 @@ export default function AssistantMessage({
           tenantId={tenantId}
         />
       </div>
-      <div className="self-start mb-6 rounded-md ml-7 max-w-[calc(100%-60px)]">
+      <div className="self-start mb-6 rounded-md ml-7 max-w-[calc(100%-60px)] bg-white p-4 border border-[#E5E7EB]">
         {content?.length ? (
           <Markdown
             className="markdown mt-[10px]"

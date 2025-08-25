@@ -29,7 +29,7 @@ type SystemMessage = { content: string; role: "system" };
 type Message = AiMessage | UserMessage | SystemMessage;
 
 const UserMessage = ({ content }: { content: string }) => (
-  <div className="mb-6 rounded-md px-4 py-2 self-end bg-[#F5F5F7] max-w-[70%]">{content}</div>
+  <div className="mb-6 rounded-md px-4 py-2 self-end bg-[#F8FAFC] max-w-[70%]">{content}</div>
 );
 
 interface Props {
@@ -312,7 +312,7 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
         </div>
       </div>
       <div className="p-4 w-full flex justify-center max-w-[717px]">
-        <div className="flex flex-col w-full p-2 pl-4 rounded-[16px] border border-[#D7D7D7]">
+        <div className="flex flex-col w-full p-2 pl-4 rounded-[16px] border border-[#D7D7D7] bg-white">
           <ChatInput
             handleSubmit={handleSubmit}
             selectedModel={selectedModel}

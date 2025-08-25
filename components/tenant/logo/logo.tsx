@@ -18,17 +18,15 @@ export default function Logo({ name, url, width, height, className, initialCount
   const avatarClass = tenantId ? `avatar-${getAvatarNumber(tenantId)}` : "";
 
   if (!url) {
+     
     return (
-      <div
-        className={cn(
-          "rounded-full text-white flex items-center justify-center font-bold text-[32px]",
-          avatarClass,
-          className,
-        )}
-        style={{ height, width }}
-      >
-        {formattedName}
-      </div>
+      <img
+        src="/agent-linelead.svg"
+        alt={formattedName || "Line Lead Agent"}
+        className={cn("rounded", className)}
+        height={height}
+        width={width}
+      />
     );
   }
 
