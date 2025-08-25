@@ -177,7 +177,7 @@ export default function Header({
       {isAnonymous ? (
         <div className="flex">
           <Link
-            className="rounded-lg bg-[#DB1011] text-white px-4 py-2.5 mr-6 flex items-center"
+            className="rounded-lg bg-[color:var(--brand)] text-white px-4 py-2.5 mr-6 flex items-center"
             href={getSignUpPath()}
           >
             Create my own chatbot

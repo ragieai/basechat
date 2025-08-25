@@ -19,13 +19,16 @@ export default function Logo({ name, url, width, height, className, initialCount
 
   if (!url) {
     return (
-      <img
-        src="/agent-linelead.png"
-        alt={formattedName || "Line Lead Agent"}
-        className={cn("rounded", className)}
-        height={height}
-        width={width}
-      />
+      <div
+        className={cn(
+          "rounded-full text-white flex items-center justify-center font-bold text-[32px]",
+          avatarClass,
+          className,
+        )}
+        style={{ height, width }}
+      >
+        {formattedName}
+      </div>
     );
   }
 

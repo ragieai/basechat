@@ -120,14 +120,7 @@ export default function AssistantMessage({
   return (
     <div className="flex">
       <div className="mb-8 shrink-0">
-        <Logo
-          name={name}
-          url={logoUrl}
-          width={40}
-          height={40}
-          className="text-[13px] h-[40px] w-[40px]"
-          tenantId={tenantId}
-        />
+        <img src="/agent-linelead.png" alt="Lina" width={40} height={40} className="rounded" />
       </div>
       <div className="self-start mb-6 rounded-md ml-7 max-w-[calc(100%-60px)] bg-white p-4 border border-[#E5E7EB]">
         {content?.length ? (

@@ -24,9 +24,25 @@ export enum AppLocation {
   SETTINGS_BILLING,
 }
 
-export function NavButton({ alt, src, className }: { alt: string; src: any; className?: string }) {
+export function NavButton({
+  alt,
+  src,
+  className,
+  isActive,
+}: {
+  alt: string;
+  src: any;
+  className?: string;
+  isActive?: boolean;
+}) {
   return (
-    <div className={cn("flex flex-col w-20 text-white items-center", className)}>
+    <div
+      className={cn(
+        "flex flex-col w-20 items-center",
+        className,
+        isActive ? "text-[color:var(--brand)]" : "text-white",
+      )}
+    >
       <Image alt={alt} src={src} className="mb-2.5" />
       <div className="text-[14px]">{alt}</div>
     </div>
@@ -49,25 +65,25 @@ export default function Footer({ className, tenant }: Props) {
   }
 
   const chatIcon = appLocation === AppLocation.CHAT ? ChatIconOn : ChatIconOff;
-  const chatClassName = appLocation === AppLocation.CHAT ? "mr-5 font-semibold" : "mr-5";
+  const chatIsActive = appLocation === AppLocation.CHAT;
 
   const dataIcon = appLocation === AppLocation.DATA ? DataIconOn : DataIconOff;
-  const dataClassName = appLocation === AppLocation.DATA ? "mr-5 font-semibold" : "mr-5";
+  const dataIsActive = appLocation === AppLocation.DATA;
 
   const settingsIcon = appLocation === AppLocation.SETTINGS ? SettingsIconOn : SettingsIconOff;
-  const settingsClassName = appLocation === AppLocation.SETTINGS ? "mr-5 font-semibold" : "mr-5";
+  const settingsIsActive = appLocation === AppLocation.SETTINGS;
 
   return (
     <div className={className}>
       <div className="flex">
         <Link href={getTenantPath(tenant.slug)}>
-          <NavButton alt="Chat" src={chatIcon} className={chatClassName} />
+          <NavButton alt="Chat" src={chatIcon} className="mr-5" isActive={chatIsActive} />
         </Link>
         <Link href={getDataPath(tenant.slug)}>
-          <NavButton alt="Data" src={dataIcon} className={dataClassName} />
+          <NavButton alt="Data" src={dataIcon} className="mr-5" isActive={dataIsActive} />
         </Link>
         <Link href={getSettingsPath(tenant.slug)}>
-          <NavButton alt="Settings" src={settingsIcon} className={settingsClassName} />
+          <NavButton alt="Settings" src={settingsIcon} className="mr-5" isActive={settingsIsActive} />
         </Link>
       </div>
     </div>
