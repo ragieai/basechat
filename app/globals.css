@@ -12,8 +12,9 @@ body {
     --brand: #dc1714;
     --bg-app: #f0f9ff;
     --text-primary: #111827;
-    --header-h: 64px; /* adjust if your header is taller */
-    --bottom-nav-h: 80px; /* actual bottom bar height */
+    --header-h: 64px; /* set to your real header height */
+    /* bottom nav will be injected; default to 80px if not set yet */
+    --bottom-nav-h: 80px;
     --menu-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.12), 0 4px 12px -6px rgba(0, 0, 0, 0.08);
     --menu-border: #e4e4e7;
     --menu-bg: #ffffff;
@@ -168,39 +169,36 @@ body {
 /* ---- Line Lead layout helpers ---- */
 /* Full-width blue canvas just for the hero page */
 /* Full-width blue canvas */
+/* Full-width blue canvas sized to the visible area */
 .ll-hero-page {
   background: var(--bg-app);
-  /* Use dynamic viewport height so mobile chrome address bar changes don't break it */
-  min-height: 100dvh;
+  min-height: calc(100dvh - var(--header-h) - var(--bottom-nav-h));
   width: 100%;
-  /* Ensure content isn't hidden behind the fixed bottom nav */
-  padding-bottom: var(--bottom-nav-h);
-  display: flex; /* so child can center vertically */
+  display: flex;
 }
 
-/* The inner max-width column that should fill the blue area */
+/* Inner column fills that height and centers vertically */
 .ll-hero-container {
-  flex: 1; /* take all available height from parent flex */
-  min-height: inherit; /* = 100dvh from .ll-hero-page */
+  min-height: inherit; /* matches computed visible height */
+  flex: 1;
   display: flex;
   align-items: center; /* vertical center */
   max-width: 717px;
-  margin: 0 auto; /* center horizontally */
+  margin: 0 auto; /* horizontal center of column */
   padding: 0 1rem; /* px-4 */
   box-sizing: border-box;
 }
 
-/* Left-aligned vertical stack with equal spacing */
+/* Left-aligned stack with equal gaps (logo ↔ H1 ↔ input) */
 .ll-hero-stack {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  row-gap: 24px;
   width: 100%;
-  row-gap: 24px; /* equal gap: logo ↔ H1 ↔ input */
 }
 
 /* White composer shell */
-/* White chat composer shell */
 .ll-composer {
   background: #fff;
   border: 1px solid #d7d7d7;

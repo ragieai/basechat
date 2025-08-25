@@ -4,10 +4,10 @@
 
    ▲ Next.js 15.3.0
    - Local:        http://localhost:3000
-   - Network:      http://192.168.1.231:3000
+   - Network:      http://172.20.10.12:3000
    - Environments: .env
    - Experiments (use with caution):
      ✓ authInterrupts
 
  ✓ Starting...
- ✓ Ready in 1334ms
+ ✓ Ready in 1526ms

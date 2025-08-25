@@ -116,6 +116,18 @@ export default function Welcome({ tenant, className, profile }: Props) {
     localStorage.setItem("chatSettings", JSON.stringify(settingsToSave));
   }, [isBreadth, rerankEnabled, prioritizeRecent, selectedModel, tenant]);
 
+  // Measure bottom nav height and set CSS variable
+  useEffect(() => {
+    const nav = document.querySelector("[data-bottom-nav]") as HTMLElement | null;
+    const setVar = () => {
+      const h = nav?.offsetHeight ?? 80;
+      document.documentElement.style.setProperty("--bottom-nav-h", `${h}px`);
+    };
+    setVar();
+    window.addEventListener("resize", setVar);
+    return () => window.removeEventListener("resize", setVar);
+  }, []);
+
   const handleSubmit = async (content: string, model: LLMModel = DEFAULT_MODEL) => {
     const res = await fetch("/api/conversations", {
       method: "POST",
