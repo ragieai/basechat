@@ -37,3 +37,72 @@
  ✓ Compiled /api/tenants in 263ms (2227 modules)
  GET /api/tenants 200 in 865ms
  ✓ Compiled in 887ms (2794 modules)
+[2m2025-08-26T01:10:36.369Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: getaddrinfo ENOTFOUND ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech
+    at async requireSession (lib/server/utils.ts:23:18)
+    at async requireAuthContext (lib/server/utils.ts:32:18)
+    at async authOrRedirect (lib/server/utils.ts:65:11)
+    at async MainLayout (app/(main)/o/[slug]/layout.tsx:20:39)
+  21 |
+  22 | export async function requireSession() {
+> 23 |   const session = await auth.api.getSession({
+     |                  ^
+  24 |     headers: await headers(), // you need to pass the headers object.
+  25 |   });
+  26 | {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech'
+}
+[2m2025-08-26T01:10:36.416Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: getaddrinfo ENOTFOUND ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech
+    at async requireSession (lib/server/utils.ts:23:18)
+    at async requireAuthContext (lib/server/utils.ts:32:18)
+    at async authOrRedirect (lib/server/utils.ts:65:11)
+    at async Home (app/(main)/o/[slug]/page.tsx:7:18)
+  21 |
+  22 | export async function requireSession() {
+> 23 |   const session = await auth.api.getSession({
+     |                  ^
+  24 |     headers: await headers(), // you need to pass the headers object.
+  25 |   });
+  26 | {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech'
+}
+ ⨯ Error: getaddrinfo ENOTFOUND ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech
+    at async findTenantBySlug (lib/server/service.tsx:492:18)
+    at async authOrRedirect (lib/server/utils.ts:67:19)
+    at async MainLayout (app/(main)/o/[slug]/layout.tsx:20:39)
+  490 |
+  491 | export async function findTenantBySlug(slug: string) {
+> 492 |   const tenants = await db.select().from(schema.tenants).where(eq(schema.tenants.slug, slug));
+      |                  ^
+  493 |   assert(tenants.length === 0 || tenants.length === 1, "expect single record");
+  494 |   return tenants.length ? tenants[0] : null;
+  495 | } {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech',
+  digest: '2196113305'
+}
+ ⨯ Error: getaddrinfo ENOTFOUND ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech
+    at async findTenantBySlug (lib/server/service.tsx:492:18)
+    at async authOrRedirect (lib/server/utils.ts:67:19)
+    at async Home (app/(main)/o/[slug]/page.tsx:7:18)
+  490 |
+  491 | export async function findTenantBySlug(slug: string) {
+> 492 |   const tenants = await db.select().from(schema.tenants).where(eq(schema.tenants.slug, slug));
+      |                  ^
+  493 |   assert(tenants.length === 0 || tenants.length === 1, "expect single record");
+  494 |   return tenants.length ? tenants[0] : null;
+  495 | } {
+  errno: -3008,
+  code: 'ENOTFOUND',
+  syscall: 'getaddrinfo',
+  hostname: 'ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech',
+  digest: '788318598'
+}
+ GET /o/line-lead-dev 200 in 24791ms

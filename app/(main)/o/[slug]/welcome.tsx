@@ -181,7 +181,7 @@ export default function Welcome({ tenant, className, profile }: Props) {
                   priority
                 />
               </div>
-              <h1 className="text-3xl lg:text-[40px] font-bold leading-[50px] text-[#343A40] py-2 lg:py-3">
+              <h1 className="text-3xl lg:text-[40px] font-bold leading-[50px] text-[#343A40] py-4 lg:py-6">
                 {(tenant.welcomeMessage || DEFAULT_WELCOME_MESSAGE).replace("{{company.name}}", tenant.name)}
               </h1>
               {questions.length > 0 && (
