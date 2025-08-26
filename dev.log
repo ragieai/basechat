@@ -11,3 +11,29 @@
 
  ✓ Starting...
  ✓ Ready in 1526ms
+ ✓ Compiled /middleware in 194ms (165 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 1778ms (1710 modules)
+ GET / 307 in 3271ms
+ ○ Compiling /start ...
+ ✓ Compiled /start in 1495ms (2154 modules)
+ ✓ Compiled in 657ms (375 modules)
+ GET /start 307 in 2921ms
+ ○ Compiling /o/[slug] ...
+ ✓ Compiled /o/[slug] in 1278ms (2789 modules)
+ GET /o/line-lead-dev 200 in 3673ms
+ ○ Compiling /api/tenants ...
+ ✓ Compiled /api/tenants in 565ms (2792 modules)
+ GET /api/tenants 200 in 1801ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 943ms (2784 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 1134ms
+ ○ Compiling / ...
+ ✓ Compiled / in 534ms (2222 modules)
+ GET / 307 in 32908ms
+ ✓ Compiled /start in 227ms (2224 modules)
+ GET /start 307 in 6037ms
+ GET /o/line-lead-dev 200 in 1901ms
+ ✓ Compiled /api/tenants in 263ms (2227 modules)
+ GET /api/tenants 200 in 865ms
+ ✓ Compiled in 887ms (2794 modules)
