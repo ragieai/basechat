@@ -21,6 +21,7 @@ import HamburgerIcon from "@/public/icons/hamburger.svg";
 import LogOutIcon from "@/public/icons/log-out.svg";
 import NewChatIcon from "@/public/icons/new-chat.svg";
 import PlusIcon from "@/public/icons/plus.svg";
+import SettingsIcon from "@/public/icons/settings-off.svg";
 
 import { Banner, BannerLink } from "./banner";
 import ConversationHistory from "./conversation-history";
@@ -58,7 +59,10 @@ const HeaderPopoverContent = ({
 }) => (
   <PopoverContent
     align={align}
-    className={cn("bg-[#F5F5F7] w-[258px] border-none shadow-none rounded-[24px] py-6 px-2", className)}
+    className={cn(
+      "bg-white w-80 border border-[#E4E4E7] rounded-2xl py-6 px-2 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-6px_rgba(0,0,0,0.08)]",
+      className,
+    )}
   >
     {children}
   </PopoverContent>
@@ -70,7 +74,9 @@ const TenantPopoverContent = ({ children }: { children: React.ReactNode }) => (
     alignOffset={-60}
     side="right"
     sideOffset={-20}
-    className={cn("bg-[#F5F5F7] w-[120px] border border-[#D7D7D7] shadow-none rounded-[6px] mt-2 p-3")}
+    className={cn(
+      "bg-white w-[120px] border border-[#E4E4E7] rounded-2xl mt-2 p-3 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-6px_rgba(0,0,0,0.08)]",
+    )}
   >
     {children}
   </PopoverContent>
@@ -120,8 +126,8 @@ export default function Header({
   };
 
   return (
-    <header className="w-full shrink-0 flex justify-between p-4 items-center">
-      <div className="flex">
+    <header className="w-full shrink-0 flex justify-between p-4 items-center bg-white border-b">
+      <div className="flex items-center">
         <Popover>
           <PopoverTrigger asChild>
             <Image src={HamburgerIcon} alt="Expand chats" className="mr-2.5 cursor-pointer" onClick={onNavClick} />
@@ -130,8 +136,14 @@ export default function Header({
             <ConversationHistory tenant={tenant} />
           </HeaderPopoverContent>
         </Popover>
+        {/* New Chat icon hidden per brand spec; keep hamburger item */}
+        {false && (
+          <Link href={getTenantPath(tenant.slug)} className="mr-4">
+            <Image src={NewChatIcon} alt="New chat" />
+          </Link>
+        )}
         <Link href={getTenantPath(tenant.slug)}>
-          <Image src={NewChatIcon} alt="New chat" />
+          <Image src="/logo-linelead.svg" alt="Line Lead" width={128} height={28} />
         </Link>
       </div>
       {billingEnabled && (
@@ -174,7 +186,7 @@ export default function Header({
       {isAnonymous ? (
         <div className="flex">
           <Link
-            className="rounded-lg bg-[#D946EF] text-white px-4 py-2.5 mr-6 flex items-center"
+            className="rounded-lg bg-[color:var(--brand)] text-white px-4 py-2.5 mr-6 flex items-center"
             href={getSignUpPath()}
           >
             Create my own chatbot
@@ -312,9 +324,9 @@ export default function Header({
             <div className="mt-auto">
               <hr className="mb-4 bg-black border-none h-[1px] opacity-10" />
 
-              <Link className="flex cursor-pointer mb-4" href="/setup">
-                <Image src={PlusIcon} alt="New Chatbot" className="mr-3" />
-                New Chatbot
+              <Link className="flex cursor-pointer mb-4" href={`/o/${tenant.slug}/settings`}>
+                <Image src={SettingsIcon} alt="Settings" className="mr-3" width={16} height={16} />
+                Settings
               </Link>
 
               <hr className="mb-4 bg-black border-none h-[1px] opacity-10" />

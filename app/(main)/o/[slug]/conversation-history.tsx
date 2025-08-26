@@ -34,7 +34,9 @@ const ConversationPopoverContent = ({ children }: { children: React.ReactNode })
     alignOffset={-46}
     side="right"
     sideOffset={-16}
-    className={cn("bg-[#F5F5F7] w-[100px] border border-[#D7D7D7] shadow-none rounded-[6px] p-3")}
+    className={cn(
+      "bg-white w-[100px] border border-[#E4E4E7] rounded-2xl p-3 shadow-[0_8px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-6px_rgba(0,0,0,0.08)]",
+    )}
   >
     {children}
   </PopoverContent>

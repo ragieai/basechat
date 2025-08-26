@@ -35,7 +35,9 @@ export default function PlanCardRadio({
       <div className="flex items-center justify-between text-base">
         <div className="flex items-center">
           <span>${costPerMonth} / month</span>
-          {badge && <span className="bg-[#D946EF] py-[2px] px-[6px] rounded-sm ml-2 text-white">{badge}</span>}
+          {badge && (
+            <span className="bg-[color:var(--brand)] py-[2px] px-[6px] rounded-sm ml-2 text-white">{badge}</span>
+          )}
         </div>
         <Radio checked={selected} />
       </div>

@@ -120,16 +120,9 @@ export default function AssistantMessage({
   return (
     <div className="flex">
       <div className="mb-8 shrink-0">
-        <Logo
-          name={name}
-          url={logoUrl}
-          width={40}
-          height={40}
-          className="text-[13px] h-[40px] w-[40px]"
-          tenantId={tenantId}
-        />
+        <img src="/agent-linelead.png" alt="Lina" width={40} height={40} className="rounded" />
       </div>
-      <div className="self-start mb-6 rounded-md ml-7 max-w-[calc(100%-60px)]">
+      <div className="self-start mb-6 rounded-md ml-7 max-w-[calc(100%-60px)] bg-white p-4 border border-[#E5E7EB]">
         {content?.length ? (
           <Markdown
             className="markdown mt-[10px]"
@@ -141,16 +134,14 @@ export default function AssistantMessage({
             {content}
           </Markdown>
         ) : (
-          <div className="dot-pulse mt-[14px]" />
+          <div className="dot-pulse mt-[14px] ml-3" aria-label="Assistant is typing" aria-live="polite" />
         )}
         <div className="flex flex-wrap mt-4">
           {sources.map((source, i) => (
             <Citation key={i} source={source} onClick={() => onSelectedSource(source)} />
           ))}
         </div>
-        <div className="text-xs text-muted-foreground">
-          {isGenerating ? `Generating with ${LLM_DISPLAY_NAMES[model]}` : `Generated with ${LLM_DISPLAY_NAMES[model]}`}
-        </div>
+        {/* status label removed per spec */}
       </div>
     </div>
   );

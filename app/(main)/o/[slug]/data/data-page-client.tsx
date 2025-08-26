@@ -56,9 +56,9 @@ export default function DataPageClient({
   const chatbotDisabled = tenant.paidStatus === "expired";
 
   return (
-    <div className="max-w-[1140px] w-full p-4 flex flex-col h-full">
+    <div className="max-w-[1140px] w-full px-4 flex flex-col h-full mx-auto">
       <div className="flex w-full justify-between items-center pt-2">
-        <h1 className="font-bold text-[32px] text-[#343A40]">Chatbot data</h1>
+        <h1 className="text-2xl font-semibold">Library</h1>
         <div className="flex gap-2">
           <UploadFileButton
             tenant={tenant}

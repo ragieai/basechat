@@ -25,7 +25,7 @@ function ProgressDots({ currentPage }: { currentPage: Page }) {
       {[0, 1, 2].map((index) => (
         <div
           key={index}
-          className={`w-2 h-2 rounded-full ${index === currentIndex ? "bg-[#D946EF]" : "bg-[#D9D9D9]"}`}
+          className={`w-2 h-2 rounded-full ${index === currentIndex ? "bg-[color:var(--brand)]" : "bg-[#D9D9D9]"}`}
         />
       ))}
     </div>
@@ -111,7 +111,10 @@ export function WelcomeDialog({ displayWelcome, userId }: WelcomeDialogProps) {
                 >
                   Skip for now
                 </button>
-                <Button onClick={handleNext} className="bg-[#D946EF] text-white hover:bg-[#D946EF]/90 font-medium">
+                <Button
+                  onClick={handleNext}
+                  className="bg-[color:var(--brand)] text-white hover:bg-[color:var(--brand)]/90 font-medium"
+                >
                   Let&apos;s go
                 </Button>
               </div>
@@ -156,7 +159,10 @@ export function WelcomeDialog({ displayWelcome, userId }: WelcomeDialogProps) {
                   <button onClick={handleBack} className="text-muted-foreground text-sm pr-2 font-medium">
                     Back
                   </button>
-                  <Button onClick={handleNext} className="bg-[#D946EF] text-white hover:bg-[#D946EF]/90 font-medium">
+                  <Button
+                    onClick={handleNext}
+                    className="bg-[color:var(--brand)] text-white hover:bg-[color:var(--brand)]/90 font-medium"
+                  >
                     Next
                   </Button>
                 </div>
@@ -202,7 +208,10 @@ export function WelcomeDialog({ displayWelcome, userId }: WelcomeDialogProps) {
                   <button onClick={handleBack} className="text-muted-foreground text-sm pr-2 font-medium">
                     Back
                   </button>
-                  <Button onClick={handleNext} className="bg-[#D946EF] text-white hover:bg-[#D946EF]/90 font-medium">
+                  <Button
+                    onClick={handleNext}
+                    className="bg-[color:var(--brand)] text-white hover:bg-[color:var(--brand)]/90 font-medium"
+                  >
                     Next
                   </Button>
                 </div>
@@ -248,7 +257,10 @@ export function WelcomeDialog({ displayWelcome, userId }: WelcomeDialogProps) {
                   <button onClick={handleBack} className="text-muted-foreground text-sm pr-2 font-medium">
                     Back
                   </button>
-                  <Button onClick={handleNext} className="bg-[#D946EF] text-white hover:bg-[#D946EF]/90 font-medium">
+                  <Button
+                    onClick={handleNext}
+                    className="bg-[color:var(--brand)] text-white hover:bg-[color:var(--brand)]/90 font-medium"
+                  >
                     Next
                   </Button>
                 </div>
@@ -284,7 +296,10 @@ export function WelcomeDialog({ displayWelcome, userId }: WelcomeDialogProps) {
                   <button onClick={handleBack} className="text-muted-foreground text-sm pr-2 font-medium">
                     Back
                   </button>
-                  <Button onClick={handleNext} className="bg-[#D946EF] text-white hover:bg-[#D946EF]/90 font-medium">
+                  <Button
+                    onClick={handleNext}
+                    className="bg-[color:var(--brand)] text-white hover:bg-[color:var(--brand)]/90 font-medium"
+                  >
                     Start chatting
                   </Button>
                 </div>

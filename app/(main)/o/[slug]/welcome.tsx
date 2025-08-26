@@ -2,6 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { Inter } from "next/font/google";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import { z } from "zod";
@@ -115,6 +116,18 @@ export default function Welcome({ tenant, className, profile }: Props) {
     localStorage.setItem("chatSettings", JSON.stringify(settingsToSave));
   }, [isBreadth, rerankEnabled, prioritizeRecent, selectedModel, tenant]);
 
+  // Measure bottom nav height and set CSS variable
+  useEffect(() => {
+    const nav = document.querySelector("[data-bottom-nav]") as HTMLElement | null;
+    const setVar = () => {
+      const h = nav?.offsetHeight ?? 80;
+      document.documentElement.style.setProperty("--bottom-nav-h", `${h}px`);
+    };
+    setVar();
+    window.addEventListener("resize", setVar);
+    return () => window.removeEventListener("resize", setVar);
+  }, []);
+
   const handleSubmit = async (content: string, model: LLMModel = DEFAULT_MODEL) => {
     const res = await fetch("/api/conversations", {
       method: "POST",
@@ -156,16 +169,19 @@ export default function Welcome({ tenant, className, profile }: Props) {
       <div className={className}>
         {isMounted ? (
           <>
-            <div className={`h-full flex flex-col justify-center ${inter.className}`}>
-              <Logo
-                name={tenant.name}
-                url={tenant.logoUrl}
-                width={100}
-                height={100}
-                className="mb-8"
-                tenantId={tenant.id}
-              />
-              <h1 className="mb-12 text-3xl lg:text-[40px] font-bold leading-[50px] text-[#343A40]">
+            <div className={`flex flex-col ${inter.className}`}>
+              <div>
+                {/* Replace tenant/organization logo ONLY on this page */}
+                <Image
+                  src="/agent-linelead.png"
+                  alt="Line Lead"
+                  width={96}
+                  height={96}
+                  className="rounded-md"
+                  priority
+                />
+              </div>
+              <h1 className="text-3xl lg:text-[40px] font-bold leading-[50px] text-[#343A40] py-4 lg:py-6">
                 {(tenant.welcomeMessage || DEFAULT_WELCOME_MESSAGE).replace("{{company.name}}", tenant.name)}
               </h1>
               {questions.length > 0 && (
@@ -184,7 +200,7 @@ export default function Welcome({ tenant, className, profile }: Props) {
                 </div>
               )}
             </div>
-            <div className="w-full flex flex-col items-center p-2 pl-4 rounded-[16px] border border-[#D7D7D7] mt-auto">
+            <div className="ll-composer w-full flex flex-col items-center p-2 pl-4 bg-white">
               <ChatInput
                 handleSubmit={handleSubmit}
                 selectedModel={selectedModel}

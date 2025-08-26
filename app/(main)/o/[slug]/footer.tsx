@@ -4,14 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { getDataPath, getSettingsPath, getTenantPath } from "@/lib/paths";
+import { getDataPath, getTenantPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
 import ChatIconOff from "@/public/icons/chat-off.svg";
-import ChatIconOn from "@/public/icons/chat-on.svg";
+import ChatIconOn from "@/public/icons/chat-on-red.svg";
 import DataIconOff from "@/public/icons/data-off.svg";
-import DataIconOn from "@/public/icons/data-on.svg";
-import SettingsIconOff from "@/public/icons/settings-off.svg";
-import SettingsIconOn from "@/public/icons/settings-on.svg";
+import DataIconOn from "@/public/icons/data-on-red.svg";
 
 export enum AppLocation {
   CHAT,
@@ -24,11 +22,23 @@ export enum AppLocation {
   SETTINGS_BILLING,
 }
 
-export function NavButton({ alt, src, className }: { alt: string; src: any; className?: string }) {
+export function NavButton({
+  alt,
+  src,
+  className,
+  isActive,
+}: {
+  alt: string;
+  src: any;
+  className?: string;
+  isActive?: boolean;
+}) {
+  const labelClass = isActive ? "text-[color:var(--text-primary)]" : "text-slate-500";
+
   return (
-    <div className={cn("flex flex-col w-20 text-white items-center", className)}>
+    <div className={cn("flex flex-col w-20 items-center", className)}>
       <Image alt={alt} src={src} className="mb-2.5" />
-      <div className="text-[14px]">{alt}</div>
+      <div className={cn("text-[14px]", labelClass)}>{alt}</div>
     </div>
   );
 }
@@ -44,31 +54,24 @@ export default function Footer({ className, tenant }: Props) {
   let appLocation = AppLocation.CHAT;
   if (pathname.startsWith(getDataPath(tenant.slug))) {
     appLocation = AppLocation.DATA;
-  } else if (pathname.startsWith(getSettingsPath(tenant.slug))) {
-    appLocation = AppLocation.SETTINGS;
   }
 
   const chatIcon = appLocation === AppLocation.CHAT ? ChatIconOn : ChatIconOff;
-  const chatClassName = appLocation === AppLocation.CHAT ? "mr-5 font-semibold" : "mr-5";
+  const chatIsActive = appLocation === AppLocation.CHAT;
 
   const dataIcon = appLocation === AppLocation.DATA ? DataIconOn : DataIconOff;
-  const dataClassName = appLocation === AppLocation.DATA ? "mr-5 font-semibold" : "mr-5";
-
-  const settingsIcon = appLocation === AppLocation.SETTINGS ? SettingsIconOn : SettingsIconOff;
-  const settingsClassName = appLocation === AppLocation.SETTINGS ? "mr-5 font-semibold" : "mr-5";
+  const dataIsActive = appLocation === AppLocation.DATA;
 
   return (
     <div className={className}>
       <div className="flex">
         <Link href={getTenantPath(tenant.slug)}>
-          <NavButton alt="Chat" src={chatIcon} className={chatClassName} />
+          <NavButton alt="Chat" src={chatIcon} className="mr-5" isActive={chatIsActive} />
         </Link>
         <Link href={getDataPath(tenant.slug)}>
-          <NavButton alt="Data" src={dataIcon} className={dataClassName} />
+          <NavButton alt="Library" src={dataIcon} className="mr-5" isActive={dataIsActive} />
         </Link>
-        <Link href={getSettingsPath(tenant.slug)}>
-          <NavButton alt="Settings" src={settingsIcon} className={settingsClassName} />
-        </Link>
+        {/* Settings removed from main nav per spec */}
       </div>
     </div>
   );
