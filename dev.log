@@ -1,108 +1,215 @@
 
-> chatbot-example@0.1.0 dev
+> line-lead-frontend-demo@0.1.0 dev
 > next dev
 
    ▲ Next.js 15.3.0
-   - Local:        http://localhost:3000
-   - Network:      http://172.20.10.12:3000
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.1.231:3001
    - Environments: .env
    - Experiments (use with caution):
      ✓ authInterrupts
 
  ✓ Starting...
- ✓ Ready in 1526ms
- ✓ Compiled /middleware in 194ms (165 modules)
+ ✓ Ready in 1268ms
+ ✓ Compiled /middleware in 353ms (165 modules)
  ○ Compiling / ...
- ✓ Compiled / in 1778ms (1710 modules)
- GET / 307 in 3271ms
+ ✓ Compiled / in 4.3s (1710 modules)
+ GET / 307 in 6083ms
  ○ Compiling /start ...
- ✓ Compiled /start in 1495ms (2154 modules)
- ✓ Compiled in 657ms (375 modules)
- GET /start 307 in 2921ms
+ ✓ Compiled /start in 1950ms (2163 modules)
+ ✓ Compiled in 547ms (375 modules)
+ GET /start 307 in 2818ms
  ○ Compiling /o/[slug] ...
- ✓ Compiled /o/[slug] in 1278ms (2789 modules)
- GET /o/line-lead-dev 200 in 3673ms
+ ✓ Compiled /o/[slug] in 2s (2799 modules)
+ GET /o/line-lead-dev 200 in 4181ms
  ○ Compiling /api/tenants ...
- ✓ Compiled /api/tenants in 565ms (2792 modules)
- GET /api/tenants 200 in 1801ms
- ○ Compiling /_not-found ...
- ✓ Compiled /_not-found in 943ms (2784 modules)
- GET /.well-known/appspecific/com.chrome.devtools.json 404 in 1134ms
- ○ Compiling / ...
- ✓ Compiled / in 534ms (2222 modules)
- GET / 307 in 32908ms
- ✓ Compiled /start in 227ms (2224 modules)
- GET /start 307 in 6037ms
- GET /o/line-lead-dev 200 in 1901ms
- ✓ Compiled /api/tenants in 263ms (2227 modules)
- GET /api/tenants 200 in 865ms
- ✓ Compiled in 887ms (2794 modules)
-[2m2025-08-26T01:10:36.369Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: getaddrinfo ENOTFOUND ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech
-    at async requireSession (lib/server/utils.ts:23:18)
-    at async requireAuthContext (lib/server/utils.ts:32:18)
-    at async authOrRedirect (lib/server/utils.ts:65:11)
-    at async MainLayout (app/(main)/o/[slug]/layout.tsx:20:39)
-  21 |
-  22 | export async function requireSession() {
-> 23 |   const session = await auth.api.getSession({
-     |                  ^
-  24 |     headers: await headers(), // you need to pass the headers object.
-  25 |   });
-  26 | {
-  errno: -3008,
-  code: 'ENOTFOUND',
-  syscall: 'getaddrinfo',
-  hostname: 'ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech'
-}
-[2m2025-08-26T01:10:36.416Z[0m [31mERROR[0m [1m[Better Auth]:[0m INTERNAL_SERVER_ERROR Error: getaddrinfo ENOTFOUND ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech
-    at async requireSession (lib/server/utils.ts:23:18)
-    at async requireAuthContext (lib/server/utils.ts:32:18)
-    at async authOrRedirect (lib/server/utils.ts:65:11)
-    at async Home (app/(main)/o/[slug]/page.tsx:7:18)
-  21 |
-  22 | export async function requireSession() {
-> 23 |   const session = await auth.api.getSession({
-     |                  ^
-  24 |     headers: await headers(), // you need to pass the headers object.
-  25 |   });
-  26 | {
-  errno: -3008,
-  code: 'ENOTFOUND',
-  syscall: 'getaddrinfo',
-  hostname: 'ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech'
-}
- ⨯ Error: getaddrinfo ENOTFOUND ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech
-    at async findTenantBySlug (lib/server/service.tsx:492:18)
-    at async authOrRedirect (lib/server/utils.ts:67:19)
-    at async MainLayout (app/(main)/o/[slug]/layout.tsx:20:39)
-  490 |
-  491 | export async function findTenantBySlug(slug: string) {
-> 492 |   const tenants = await db.select().from(schema.tenants).where(eq(schema.tenants.slug, slug));
-      |                  ^
-  493 |   assert(tenants.length === 0 || tenants.length === 1, "expect single record");
-  494 |   return tenants.length ? tenants[0] : null;
-  495 | } {
-  errno: -3008,
-  code: 'ENOTFOUND',
-  syscall: 'getaddrinfo',
-  hostname: 'ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech',
-  digest: '2196113305'
-}
- ⨯ Error: getaddrinfo ENOTFOUND ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech
-    at async findTenantBySlug (lib/server/service.tsx:492:18)
-    at async authOrRedirect (lib/server/utils.ts:67:19)
-    at async Home (app/(main)/o/[slug]/page.tsx:7:18)
-  490 |
-  491 | export async function findTenantBySlug(slug: string) {
-> 492 |   const tenants = await db.select().from(schema.tenants).where(eq(schema.tenants.slug, slug));
-      |                  ^
-  493 |   assert(tenants.length === 0 || tenants.length === 1, "expect single record");
-  494 |   return tenants.length ? tenants[0] : null;
-  495 | } {
-  errno: -3008,
-  code: 'ENOTFOUND',
-  syscall: 'getaddrinfo',
-  hostname: 'ep-orange-snow-ae78symz-pooler.c-2.us-east-2.aws.neon.tech',
-  digest: '788318598'
-}
- GET /o/line-lead-dev 200 in 24791ms
+ ✓ Compiled /api/tenants in 505ms (2238 modules)
+ ✓ Compiled in 206ms (565 modules)
+ GET /favicon.ico 200 in 1188ms
+ GET /api/tenants 200 in 1554ms
+ ○ Compiling /api/conversations ...
+ ✓ Compiled /api/conversations in 629ms (2854 modules)
+ POST /api/conversations 200 in 1632ms
+ ○ Compiling /o/[slug]/conversations/[id] ...
+ ✓ Compiled /o/[slug]/conversations/[id] in 2.2s (3906 modules)
+ GET /o/line-lead-dev/conversations/31e9cf10-b64d-4d6f-9ead-9fc65a1b75c1 200 in 3642ms
+ ○ Compiling /api/conversations/[conversationId]/messages ...
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+ragie response includes 0 chunk(s)
+No chunks found, trying again with rerank disabled
+ragie response (rereank fallback) includes 6 chunk(s)
+Using provider: openai for model: gpt-4o
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+ GET /api/conversations/31e9cf10-b64d-4d6f-9ead-9fc65a1b75c1/messages/2528f37d-48d9-4214-9d9a-2f7afcd043ee 200 in 1814ms
+Stream generation took 10044 ms
+ POST /api/conversations/31e9cf10-b64d-4d6f-9ead-9fc65a1b75c1/messages 200 in 18407ms
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+ ✓ Compiled /_not-found in 1694ms (3809 modules)
+ GET /.well-known/appspecific/com.chrome.devtools.json 404 in 1874ms
+ ○ Compiling /api/conversations/[conversationId]/messages ...
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+ragie response includes 0 chunk(s)
+No chunks found, trying again with rerank disabled
+ragie response (rereank fallback) includes 6 chunk(s)
+Using provider: openai for model: gpt-4o
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+ ⚠ ./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+
+./node_modules/handlebars/lib/index.js
+require.extensions is not supported by webpack. Use a loader instead.
+
+Import trace for requested module:
+./node_modules/handlebars/lib/index.js
+./lib/server/conversation-context/utils.ts
+./app/api/conversations/[conversationId]/messages/route.ts
+ GET /api/conversations/31e9cf10-b64d-4d6f-9ead-9fc65a1b75c1/messages/fce9ecef-3650-4b78-85c8-b9d15d2ba376 200 in 983ms
+Stream generation took 4196 ms
+ POST /api/conversations/31e9cf10-b64d-4d6f-9ead-9fc65a1b75c1/messages 200 in 10595ms
+[?25h

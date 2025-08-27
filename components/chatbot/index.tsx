@@ -292,6 +292,7 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
                   model={message.model || selectedModel}
                   isGenerating={false}
                   tenantId={tenant.id}
+                  tenantSlug={tenant.slug}
                 />
               </Fragment>
             ),
@@ -307,6 +308,7 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
               model={pendingMessage?.model || selectedModel}
               isGenerating
               tenantId={tenant.id}
+              tenantSlug={tenant.slug}
             />
           )}
         </div>

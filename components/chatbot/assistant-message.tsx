@@ -9,6 +9,7 @@ import rehypeHighlight from "rehype-highlight";
 import CONNECTOR_MAP from "@/lib/connector-map";
 import { IMAGE_FILE_TYPES, VIDEO_FILE_TYPES, AUDIO_FILE_TYPES } from "@/lib/file-utils";
 import { LLM_DISPLAY_NAMES, LLMModel } from "@/lib/llm/types";
+import { getRagieSourcePath } from "@/lib/paths";
 
 import { SourceMetadata } from "../../lib/types";
 import Logo from "../tenant/logo/logo";
@@ -97,6 +98,7 @@ const CodeBlock = ({ children, className, ...props }: CodeBlockProps) => {
 
 interface Props {
   tenantId: string;
+  tenantSlug: string;
   content: string | undefined;
   id?: string | null;
   name: string;
@@ -116,13 +118,44 @@ export default function AssistantMessage({
   model,
   isGenerating,
   tenantId,
+  tenantSlug,
 }: Props) {
+  // Filter image sources for inline rendering
+  const imageSources = sources.filter(
+    (s) =>
+      IMAGE_FILE_TYPES.some((ext) => (s.documentName ?? "").toLowerCase().endsWith(ext)) &&
+      (s.imageUrl || s.ragieSourceUrl),
+  );
   return (
     <div className="flex">
       <div className="mb-8 shrink-0">
         <img src="/agent-linelead.png" alt="Lina" width={40} height={40} className="rounded" />
       </div>
       <div className="self-start mb-6 rounded-md ml-7 max-w-[calc(100%-60px)] bg-white p-4 border border-[#E5E7EB]">
+        {/* Inline image rendering */}
+        {imageSources.length > 0 && (
+          <div className="space-y-3 mb-3">
+            {imageSources.slice(0, 2).map((source) => {
+              const imageUrl = source.imageUrl || source.ragieSourceUrl;
+              if (!imageUrl) return null;
+
+              const url = getRagieSourcePath(tenantSlug, imageUrl);
+              return (
+                <div key={source.documentId} className="relative">
+                  <img
+                    src={url}
+                    alt={source.documentName || "Retrieved image"}
+                    className="max-h-72 w-auto rounded-md border border-[#E5E7EB] cursor-pointer hover:shadow-md transition-shadow"
+                    loading="lazy"
+                    onClick={() => onSelectedSource(source)}
+                  />
+                  <div className="text-xs text-gray-500 mt-1">{source.documentName}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {content?.length ? (
           <Markdown
             className="markdown mt-[10px]"

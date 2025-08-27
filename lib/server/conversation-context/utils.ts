@@ -113,6 +113,80 @@ export async function getRetrievalSystemPrompt(
     };
   });
 
+  // Check if query is image-focused and add image document fallback if needed
+  const wantsImage = /image|picture|photo|diagram|look like|show me|exploded|view|component|part|schematic/i.test(
+    query,
+  );
+  const hasImageSource = sources.some((s) =>
+    IMAGE_FILE_TYPES.some((ext) => (s.documentName ?? "").toLowerCase().endsWith(ext)),
+  );
+
+  console.log(`LL media debug - wantsImage: ${wantsImage}, hasImageSource: ${hasImageSource}`);
+
+  if (wantsImage && !hasImageSource) {
+    console.log("Adding image document fallback for image-focused query");
+
+    try {
+      // Search for image documents using Ragie documents.list with a simple query approach
+      // Since we don't have a documents.search method, we'll use a targeted retrieval
+      const imageResponse = await client.retrievals.retrieve({
+        partition,
+        query: query + " filetype:png OR filetype:jpg OR filetype:jpeg",
+        topK: 3,
+        rerank: false,
+      });
+
+      const imageChunks = imageResponse.scoredChunks.filter(
+        (chunk) => chunk.documentName && IMAGE_FILE_TYPES.some((ext) => chunk.documentName.toLowerCase().endsWith(ext)),
+      );
+
+      console.log(`Found ${imageChunks.length} image chunks in fallback search`);
+
+      // Add unique image sources
+      const existingDocIds = new Set(sources.map((s) => s.documentId));
+      const newImageSources = imageChunks
+        .filter((chunk) => !existingDocIds.has(chunk.documentId))
+        .slice(0, 2) // Limit to 2 additional image sources
+        .map((chunk) => {
+          const imageUrl = chunk.links.self_image?.href ?? `${RAGIE_API_BASE_URL}/documents/${chunk.documentId}/source`;
+
+          return {
+            ...chunk.documentMetadata,
+            source_type: chunk.documentMetadata.source_type || "manual",
+            file_path: chunk.documentMetadata.file_path || "",
+            source_url: chunk.documentMetadata.source_url || "",
+            documentId: chunk.documentId,
+            documentName: chunk.documentName,
+            streamUrl: undefined,
+            downloadUrl: undefined,
+            documentStreamUrl: undefined,
+            startTime: chunk.metadata?.start_time,
+            endTime: chunk.metadata?.end_time,
+            imageUrl,
+            startPage: chunk.metadata?.start_page,
+            endPage: chunk.metadata?.end_page,
+            ragieSourceUrl: `${RAGIE_API_BASE_URL}/documents/${chunk.documentId}/source`,
+          };
+        });
+
+      sources.push(...newImageSources);
+      console.log(`Added ${newImageSources.length} image sources via fallback`);
+    } catch (error) {
+      console.error("Error in image document fallback:", error);
+    }
+  }
+
+  // Log final sources for debugging
+  console.log(
+    "LL media debug - final sources:",
+    sources.map((s) => ({
+      id: s.documentId,
+      name: s.documentName,
+      hasImageUrl: Boolean(s.imageUrl),
+      isImageFile: IMAGE_FILE_TYPES.some((ext) => (s.documentName ?? "").toLowerCase().endsWith(ext)),
+    })),
+  );
+
   // Deduplicate sources by documentId and merge contiguous ranges
   const groupedByDocument = sources.reduce<Record<string, SourceMetadata[]>>((acc, source) => {
     if (!acc[source.documentId]) {
