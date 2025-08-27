@@ -45,6 +45,12 @@ export const getRagieSourcePath = (slug: string, sourceUrl: string, page?: numbe
   return baseUrl;
 };
 
+export function getRagieContentPath(slug: string, rawUrl: string) {
+  if (!rawUrl || !/^https?:\/\//i.test(rawUrl)) return "";
+  const params = new URLSearchParams({ url: rawUrl, tenant: slug });
+  return `/api/ragie/stream?${params.toString()}`;
+}
+
 export const getPricingPlanChangePath = (slug: string) => `/pricing/${slug}/plan-change`;
 
 export const getPricingPlansPath = (slug: string) => `/pricing/${slug}/plans`;

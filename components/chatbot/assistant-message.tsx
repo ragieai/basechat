@@ -9,7 +9,7 @@ import rehypeHighlight from "rehype-highlight";
 import CONNECTOR_MAP from "@/lib/connector-map";
 import { IMAGE_FILE_TYPES, VIDEO_FILE_TYPES, AUDIO_FILE_TYPES } from "@/lib/file-utils";
 import { LLM_DISPLAY_NAMES, LLMModel } from "@/lib/llm/types";
-import { getRagieSourcePath } from "@/lib/paths";
+import { getRagieContentPath } from "@/lib/paths";
 
 import { SourceMetadata } from "../../lib/types";
 import Logo from "../tenant/logo/logo";
@@ -109,6 +109,10 @@ interface Props {
   isGenerating?: boolean;
 }
 
+function isImageLike(name?: string) {
+  return !!name?.toLowerCase().match(/\.(png|jpe?g|gif|webp|bmp|tiff?)$/);
+}
+
 export default function AssistantMessage({
   name,
   logoUrl,
@@ -120,12 +124,7 @@ export default function AssistantMessage({
   tenantId,
   tenantSlug,
 }: Props) {
-  // Filter image sources for inline rendering
-  const imageSources = sources.filter(
-    (s) =>
-      IMAGE_FILE_TYPES.some((ext) => (s.documentName ?? "").toLowerCase().endsWith(ext)) &&
-      (s.imageUrl || s.ragieSourceUrl),
-  );
+  const mediaSources = (sources ?? []).filter((s) => s.imageUrl || isImageLike(s.documentName));
   return (
     <div className="flex">
       <div className="mb-8 shrink-0">
@@ -133,28 +132,19 @@ export default function AssistantMessage({
       </div>
       <div className="self-start mb-6 rounded-md ml-7 max-w-[calc(100%-60px)] bg-white p-4 border border-[#E5E7EB]">
         {/* Inline image rendering */}
-        {imageSources.length > 0 && (
-          <div className="space-y-3 mb-3">
-            {imageSources.slice(0, 2).map((source) => {
-              const imageUrl = source.imageUrl || source.ragieSourceUrl;
-              if (!imageUrl) return null;
-
-              const url = getRagieSourcePath(tenantSlug, imageUrl);
-              return (
-                <div key={source.documentId} className="relative">
-                  <img
-                    src={url}
-                    alt={source.documentName || "Retrieved image"}
-                    className="max-h-72 w-auto rounded-md border border-[#E5E7EB] cursor-pointer hover:shadow-md transition-shadow"
-                    loading="lazy"
-                    onClick={() => onSelectedSource(source)}
-                  />
-                  <div className="text-xs text-gray-500 mt-1">{source.documentName}</div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {mediaSources.slice(0, 2).map((s, i) => {
+          const proxied = s.imageUrl ? getRagieContentPath(tenantSlug, s.imageUrl) : "";
+          if (!proxied) return null;
+          return (
+            <a key={`${s.documentId}-${i}`} href={proxied} target="_blank" rel="noreferrer">
+              <img
+                src={proxied}
+                alt={s.documentName || "Referenced image"}
+                className="mb-3 rounded-lg max-h-64 w-auto"
+              />
+            </a>
+          );
+        })}
 
         {content?.length ? (
           <Markdown
