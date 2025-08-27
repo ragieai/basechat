@@ -1,6 +1,7 @@
 import Handlebars from "handlebars";
 
 import { DEFAULT_GROUNDING_PROMPT, DEFAULT_SYSTEM_PROMPT } from "@/lib/constants";
+import { IMAGE_FILE_TYPES } from "@/lib/file-utils";
 import * as schema from "@/lib/server/db/schema";
 import { getRagieClientAndPartition } from "@/lib/server/ragie";
 import { SourceMetadata } from "@/lib/types";
@@ -51,10 +52,17 @@ export async function getRetrievalSystemPrompt(
     const documentName = chunk.documentName;
     let isVideo = false;
     let isAudio = false;
+    let isImage = false;
+
     if ("self_video_stream" in chunk.links) {
       isVideo = chunk.links.self_video_stream !== null;
     } else if ("self_audio_stream" in chunk.links) {
       isAudio = chunk.links.self_audio_stream !== null;
+    }
+
+    // Check if this is an image file by extension
+    if (documentName && IMAGE_FILE_TYPES.some((ext) => documentName.toLowerCase().endsWith(ext))) {
+      isImage = true;
     }
 
     const streamUrl = isVideo
@@ -73,7 +81,13 @@ export async function getRetrievalSystemPrompt(
         ? chunk.links.document_audio_stream?.href
         : undefined;
 
-    const imageUrl = chunk.links.self_image?.href ?? undefined;
+    // For images, prefer self_image link but fallback to document source for rendering
+    let imageUrl = chunk.links.self_image?.href ?? undefined;
+
+    // If this is an image file but no self_image link, use document source as fallback
+    if (isImage && !imageUrl) {
+      imageUrl = `${RAGIE_API_BASE_URL}/documents/${chunk.documentId}/source`;
+    }
 
     let ragieSourceUrl = undefined;
     if (!chunk.documentMetadata.source_url) {

@@ -11,6 +11,7 @@ import rehypeHighlight from "rehype-highlight";
 import "@/components/chatbot/style.css";
 import { Skeleton } from "@/components/ui/skeleton";
 import CONNECTOR_MAP from "@/lib/connector-map";
+import { IMAGE_FILE_TYPES } from "@/lib/file-utils";
 import { getRagieSourcePath, getRagieStreamPath } from "@/lib/paths";
 import { SourceMetadata } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -176,6 +177,9 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
       mediaType = "audio";
     }
   } else if (source.imageUrl) {
+    mediaType = "image";
+  } else if (source.documentName && IMAGE_FILE_TYPES.some((ext) => source.documentName!.toLowerCase().endsWith(ext))) {
+    // Detect image files by extension even without imageUrl
     mediaType = "image";
   }
 
@@ -444,9 +448,13 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
           })()}
         </div>
       )}
-      {mediaType === "image" && source.imageUrl && (
+      {mediaType === "image" && (
         <div className="mb-6">
-          <Image src={getRagieStreamPath(slug, source.imageUrl)} alt="Image" width={500} height={500} />
+          <img
+            src={getRagieSourcePath(slug, source.imageUrl || source.ragieSourceUrl || "")}
+            alt={source.documentName || "Image"}
+            className="w-full h-auto rounded-md max-w-md"
+          />
         </div>
       )}
 
