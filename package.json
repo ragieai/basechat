@@ -18,7 +18,9 @@
     "enable-claude-sonnet-4": "node scripts/enable-claude-sonnet-4.js",
     "migrate-to-disabled-models": "node scripts/migrate-to-disabled-models.js",
     "ragie:inspect": "tsx scripts/inspect-ragie-asset.ts --name Taylor_602C_Exploaded.png",
-    "ragie:inspect:any": "tsx scripts/inspect-ragie-asset.ts --name Taylor --ctype any --topK 5"
+    "ragie:inspect:any": "tsx scripts/inspect-ragie-asset.ts --name Taylor --ctype any --topK 5",
+    "ragie:query": "tsx scripts/inspect-ragie-asset.ts --ctype any --topK 5 --name",
+    "ragie:doc": "tsx scripts/inspect-document-details.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.1",
