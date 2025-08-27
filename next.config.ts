@@ -9,7 +9,9 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
   },
-  eslint: { ignoreDuringBuilds: true },
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "api.ragie.ai" }],
+  },
 };
 
 export default nextConfig;

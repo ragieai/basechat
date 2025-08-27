@@ -10,8 +10,10 @@ import CONNECTOR_MAP from "@/lib/connector-map";
 import { IMAGE_FILE_TYPES, VIDEO_FILE_TYPES, AUDIO_FILE_TYPES } from "@/lib/file-utils";
 import { LLM_DISPLAY_NAMES, LLMModel } from "@/lib/llm/types";
 import { getRagieContentPath } from "@/lib/paths";
+import { stripImageDisclaimers } from "@/lib/ui/sanitize";
 
 import { SourceMetadata } from "../../lib/types";
+import ImageGallery, { ChatImage } from "../chat/ImageGallery";
 import Logo from "../tenant/logo/logo";
 
 const MAX_CITATION_LENGTH = 30;
@@ -113,6 +115,43 @@ function isImageLike(name?: string) {
   return !!name?.toLowerCase().match(/\.(png|jpe?g|gif|webp|bmp|tiff?)$/);
 }
 
+function extractImagesFromSources(sources?: SourceMetadata[], tenantSlug?: string): ChatImage[] {
+  if (!sources || !tenantSlug) return [];
+  const imgs: ChatImage[] = [];
+  for (const s of sources) {
+    if (s?.imageUrl) {
+      imgs.push({
+        url: getRagieContentPath(tenantSlug, s.imageUrl),
+        title: s.documentName,
+        sourceUrl: s.ragieSourceUrl,
+        alt: s.documentName,
+      });
+    }
+  }
+  return imgs;
+}
+
+function extractAndStripInlineImgTags(markdown: string): { images: ChatImage[]; text: string } {
+  if (!markdown) return { images: [], text: "" };
+  const images: ChatImage[] = [];
+  let text = markdown;
+
+  // Match <img ... src="..."> OR markdown ![alt](src)
+  const htmlImg = /<img[^>]*src=["']([^"']+)["'][^>]*alt=["']?([^"'>]*)["']?[^>]*>/gi;
+  text = text.replace(htmlImg, (_m, src, alt) => {
+    images.push({ url: src, alt: alt || "image" });
+    return "";
+  });
+
+  const mdImg = /!\[([^\]]*)\]\(([^)]+)\)/gi;
+  text = text.replace(mdImg, (_m, alt, src) => {
+    images.push({ url: src, alt: alt || "image" });
+    return "";
+  });
+
+  return { images, text: text.trim() };
+}
+
 export default function AssistantMessage({
   name,
   logoUrl,
@@ -124,29 +163,22 @@ export default function AssistantMessage({
   tenantId,
   tenantSlug,
 }: Props) {
-  const mediaSources = (sources ?? []).filter((s) => s.imageUrl || isImageLike(s.documentName));
+  // Extract images from sources and inline content
+  const srcImages = extractImagesFromSources(sources, tenantSlug);
+  const { images: inlineImages, text: strippedContent } = extractAndStripInlineImgTags(content || "");
+  const images = [...srcImages, ...inlineImages];
+
+  const cleaned = stripImageDisclaimers(strippedContent, images.length > 0);
   return (
     <div className="flex">
       <div className="mb-8 shrink-0">
         <img src="/agent-linelead.png" alt="Lina" width={40} height={40} className="rounded" />
       </div>
       <div className="self-start mb-6 rounded-md ml-7 max-w-[calc(100%-60px)] bg-white p-4 border border-[#E5E7EB]">
-        {/* Inline image rendering */}
-        {mediaSources.slice(0, 2).map((s, i) => {
-          const proxied = s.imageUrl ? getRagieContentPath(tenantSlug, s.imageUrl) : "";
-          if (!proxied) return null;
-          return (
-            <a key={`${s.documentId}-${i}`} href={proxied} target="_blank" rel="noreferrer">
-              <img
-                src={proxied}
-                alt={s.documentName || "Referenced image"}
-                className="mb-3 rounded-lg max-h-64 w-auto"
-              />
-            </a>
-          );
-        })}
+        {/* Image gallery above content */}
+        {images.length > 0 && <ImageGallery images={images} className="mb-3" />}
 
-        {content?.length ? (
+        {cleaned?.length ? (
           <Markdown
             className="markdown mt-[10px]"
             rehypePlugins={[rehypeHighlight]}
@@ -154,7 +186,7 @@ export default function AssistantMessage({
               pre: CodeBlock,
             }}
           >
-            {content}
+            {cleaned}
           </Markdown>
         ) : (
           <div className="dot-pulse mt-[14px] ml-3" aria-label="Assistant is typing" aria-live="polite" />
