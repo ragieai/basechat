@@ -16,7 +16,9 @@
     "update-partition-limit": "node scripts/update-partition-limit.js",
     "update-all-partition-limits": "node scripts/update-all-partition-limits.js",
     "enable-claude-sonnet-4": "node scripts/enable-claude-sonnet-4.js",
-    "migrate-to-disabled-models": "node scripts/migrate-to-disabled-models.js"
+    "migrate-to-disabled-models": "node scripts/migrate-to-disabled-models.js",
+    "ragie:inspect": "tsx scripts/inspect-ragie-asset.ts --name Taylor_602C_Exploaded.png",
+    "ragie:inspect:any": "tsx scripts/inspect-ragie-asset.ts --name Taylor --ctype any --topK 5"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.2.1",

@@ -1,0 +1,55 @@
+
+> line-lead-frontend-demo@0.1.0 ragie:inspect
+> tsx scripts/inspect-ragie-asset.ts --name Taylor_602C_Exploaded.png
+
+🤖 Ragie Asset Inspector
+📋 Parameters: name="Taylor_602C_Exploaded.png", content-type="image/png", top-k=10
+
+✅ Connected to Ragie API
+🎯 Using partition: "6d05528e-347d-4055-98bf-d68cff6f0ca2"
+
+🎯 Checking known PNG document: ffd56ea0-b398-4336-8da5-ba700e41468c
+✅ Found known document:
+   - ID: ffd56ea0-b398-4336-8da5-ba700e41468c
+   - Filename: N/A
+   - Content Type: N/A
+   - URL: N/A
+
+🔍 Checking what other content exists in this partition...
+📚 Found 5 documents in partition
+   - 48eac37c-c7ad-466f-97d2-2f6472317721 (unknown)
+   - e3b6ef05-7f1b-4b9d-abff-820209db2922 (unknown)
+   - 0e74390b-1584-4c72-a799-85587bc004bb (unknown)
+   - d3e70780-84d9-4942-af6f-a49570e4cb6d (unknown)
+   - 8692a000-ac2f-4f9c-b82e-50be7d0b448f (unknown)
+🔄 Testing 13 filename variants...
+🔍 Searching for: "Taylor_602C_Exploaded.png" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "taylor_602c_exploaded.png" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "TAYLOR_602C_EXPLOADED.PNG" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "Taylor_C602_Exploded.png" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "Taylor_602C_Exploded.png" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "taylor_602c_exploded.png" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "TAYLOR_602C_EXPLODED.PNG" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "Taylor-602C-Exploded.png" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "Taylor 602C Exploded.png" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "Taylor_602C_Exploaded" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "Taylor_602C_Exploaded.PNG" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "Taylor_602C_Exploaded.jpg" (content type: image/png)
+📄 Found 10 search results
+🔍 Searching for: "Taylor_602C_Exploaded.jpeg" (content type: image/png)
+📄 Found 10 search results
+
+📊 Summary: Found 1 unique assets
+
+{"id":"unknown","score":0.1,"parent_document_id":"48eac37c-c7ad-466f-97d2-2f6472317721","text":"Taylor_C602_Instruction_Manual.pdf\nThe image is a technical illustration depicting an exploded view of a mechanical component. It includes the following elements:\n\n1. A square mounting plate with four..."}
