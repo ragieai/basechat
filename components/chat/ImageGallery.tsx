@@ -49,20 +49,7 @@ export default function ImageGallery({ images, className }: Props) {
               priority
             />
           </button>
-          {(img.title || proxied) && (
-            <figcaption className="mt-2 text-center text-xs text-gray-500">
-              {img.title}
-              {proxied && (
-                <>
-                  {" "}
-                  ·{" "}
-                  <a className="underline" href={proxied} target="_blank" rel="noreferrer">
-                    open source
-                  </a>
-                </>
-              )}
-            </figcaption>
-          )}
+          {img.title && <figcaption className="mt-2 text-center text-xs text-gray-500">{img.title}</figcaption>}
         </figure>
         {active && (
           <LightboxDialog
@@ -71,7 +58,6 @@ export default function ImageGallery({ images, className }: Props) {
             src={active.url}
             alt={active.alt}
             title={active.title}
-            sourceUrl={toProxied(active)}
           />
         )}
       </>
@@ -100,19 +86,8 @@ export default function ImageGallery({ images, className }: Props) {
                     sizes="352px"
                   />
                 </button>
-                {(img.title || proxied) && (
-                  <figcaption className="mt-1 text-center text-[11px] text-gray-500">
-                    {img.title}
-                    {proxied && (
-                      <>
-                        {" "}
-                        ·{" "}
-                        <a className="underline" href={proxied} target="_blank" rel="noreferrer">
-                          open source
-                        </a>
-                      </>
-                    )}
-                  </figcaption>
+                {img.title && (
+                  <figcaption className="mt-1 text-center text-[11px] text-gray-500">{img.title}</figcaption>
                 )}
               </figure>
             );
@@ -126,7 +101,6 @@ export default function ImageGallery({ images, className }: Props) {
           src={active.url}
           alt={active.alt}
           title={active.title}
-          sourceUrl={toProxied(active)}
         />
       )}
     </>
