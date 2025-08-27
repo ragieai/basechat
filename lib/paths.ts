@@ -51,6 +51,10 @@ export function getRagieContentPath(slug: string, rawUrl: string) {
   return `/api/ragie/stream?${params.toString()}`;
 }
 
+export function getRagieDocumentSourcePath(documentId: string) {
+  return `/api/ragie/source/${documentId}`;
+}
+
 export const getPricingPlanChangePath = (slug: string) => `/pricing/${slug}/plan-change`;
 
 export const getPricingPlansPath = (slug: string) => `/pricing/${slug}/plans`;

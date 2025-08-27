@@ -125,6 +125,7 @@ function extractImagesFromSources(sources?: SourceMetadata[], tenantSlug?: strin
         title: s.documentName,
         sourceUrl: s.ragieSourceUrl,
         alt: s.documentName,
+        documentId: s.documentId, // NEW: for proxied source links
       });
     }
   }
