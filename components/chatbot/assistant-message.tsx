@@ -15,6 +15,13 @@ import Logo from "../tenant/logo/logo";
 
 const MAX_CITATION_LENGTH = 30;
 
+function getDisplayName(model: string) {
+  if (LLM_DISPLAY_NAMES[model as LLMModel]) {
+    return LLM_DISPLAY_NAMES[model as LLMModel];
+  }
+  return "unsupported model";
+}
+
 const Citation = ({ source, onClick = () => {} }: { source: SourceMetadata; onClick?: () => void }) => {
   const connector = CONNECTOR_MAP[source.source_type];
   const isAudio =
@@ -149,7 +156,7 @@ export default function AssistantMessage({
           ))}
         </div>
         <div className="text-xs text-muted-foreground">
-          {isGenerating ? `Generating with ${LLM_DISPLAY_NAMES[model]}` : `Generated with ${LLM_DISPLAY_NAMES[model]}`}
+          {isGenerating ? `Generating with ${getDisplayName(model)}` : `Generated with ${getDisplayName(model)}`}
         </div>
       </div>
     </div>
