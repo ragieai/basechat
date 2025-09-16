@@ -25,16 +25,25 @@ interface ChatInputProps {
   onRerankChange?: (enabled: boolean) => void;
   prioritizeRecent?: boolean;
   onPrioritizeRecentChange?: (enabled: boolean) => void;
+  agenticLevel?: "fast" | "balanced" | "thorough";
+  onAgenticLevelChange?: (level: "fast" | "balanced" | "thorough") => void;
   enabledModels: LLMModel[];
   canSetIsBreadth: boolean;
   canSetRerankEnabled: boolean;
   canSetPrioritizeRecent: boolean;
+  canSetAgenticLevel?: boolean;
   tenantPaidStatus: string;
 }
 
 const TOOLTIP_CONTENT = "This chatbot is currently inactive. For support, please reach out to the admin.";
 const ADMIN_TOOLTIP_CONTENT =
   "Your organization's subscription has expired. Please renew to continue using this chatbot.";
+
+const RETRIEVAL_MODE_DISPLAY_NAMES = {
+  breadth: "Breadth",
+  depth: "Depth",
+  agentic: "Research",
+} as const;
 
 const useIsDesktop = () => {
   // Whether to display model popover to the right of settings or on top
@@ -94,17 +103,40 @@ const ModelPopoverContent = ({
   );
 };
 
+const RetrievalModePopoverContent = ({
+  children,
+  isStandalone = false,
+}: {
+  children: React.ReactNode;
+  isStandalone?: boolean;
+}) => {
+  const isDesktop = useIsDesktop();
+
+  return (
+    <PopoverContent
+      align={isStandalone ? "start" : "end"}
+      alignOffset={isStandalone ? 4 : -255} // TODO: prob need to change this after adding token progress section
+      {...(isDesktop && !isStandalone ? { side: "right", sideOffset: 30 } : {})}
+      className={cn("bg-[#F5F5F7] w-[280px] border border-[#D7D7D7] shadow-none rounded-[8px] p-6")}
+    >
+      {children}
+    </PopoverContent>
+  );
+};
+
 export default function ChatInput(props: ChatInputProps) {
   const { profile } = useProfile();
   const [value, setValue] = useState("");
 
-  const { retrievalMode, rerankEnabled, prioritizeRecent } = props;
+  const { retrievalMode, rerankEnabled, prioritizeRecent, agenticLevel } = props;
   const isBreadth = retrievalMode === "breadth";
   const ref = useRef<AutosizeTextAreaRef>(null);
-  const canOverrideSomething = false;
-  // const canOverrideSomething = props.canSetIsBreadth || props.canSetRerankEnabled || props.canSetPrioritizeRecent;
-  const canSwitchModel = false;
-  // const canSwitchModel = props.enabledModels.length > 1;
+  // const canOverrideSomething = false;
+  // TODO: should prob separate out the breadth, rerank, and recency from the agentic
+  const canOverrideSomething =
+    props.canSetIsBreadth || props.canSetRerankEnabled || props.canSetPrioritizeRecent || props.canSetAgenticLevel;
+  // const canSwitchModel = false;
+  const canSwitchModel = props.enabledModels.length > 1 && retrievalMode !== "agentic";
 
   const handleSubmit = (value: string) => {
     if (props.tenantPaidStatus === "expired") return;
@@ -124,7 +156,7 @@ export default function ChatInput(props: ChatInputProps) {
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <div className="flex w-full items-end items-center">
+      <div className="flex w-full items-end">
         <AutosizeTextarea
           className="pt-1.5"
           ref={ref}
@@ -177,96 +209,170 @@ export default function ChatInput(props: ChatInputProps) {
         {canOverrideSomething ? (
           <SettingsPopoverContent>
             <div className="flex flex-col gap-4">
-              <span className="text-sm text-muted-foreground">Chat settings</span>
               <div className="flex flex-col gap-2">
                 {props.canSetIsBreadth && (
-                  <RadioGroup
-                    value={props.retrievalMode}
-                    onValueChange={(value) => {
-                      props.onRetrievalModeChange(value as "breadth" | "depth" | "agentic");
-                    }}
-                  >
-                    <div className="flex flex-col space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="breadth"
-                          id="breadth"
-                          className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
-                        />
-                        <label htmlFor="breadth" className="text-sm">
-                          Breadth
-                        </label>
-                      </div>
-                      <span className="text-xs text-muted-foreground ml-6">
-                        Searches a wider range of documents for a broader response (slower)
-                      </span>
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="depth"
-                          id="depth"
-                          className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
-                        />
-                        <label htmlFor="depth" className="text-sm">
-                          Depth
-                        </label>
-                      </div>
-                      <span className="text-xs text-muted-foreground ml-6">
-                        Retrieves results from a smaller range of documents for more depth (faster)
-                      </span>
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="agentic"
-                          id="agentic"
-                          className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
-                        />
-                        <label htmlFor="agentic" className="text-sm">
-                          Research
-                        </label>
-                      </div>
-                      <span className="text-xs text-muted-foreground ml-6">
-                        Uses a more advanced retrieval method that can handle complex questions, perform multiple
-                        searches, and provide more accurate results (much slower)
-                      </span>
-                    </div>
-                  </RadioGroup>
+                  <>
+                    <span className="text-sm font-medium text-muted-foreground">Chat mode</span>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="flex items-center justify-between w-full text-sm text-black hover:text-foreground">
+                          <span>{RETRIEVAL_MODE_DISPLAY_NAMES[props.retrievalMode]}</span>
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+                      </PopoverTrigger>
+
+                      <RetrievalModePopoverContent isStandalone={false}>
+                        <div className="flex flex-col gap-1">
+                          <button
+                            className="flex flex-col rounded-sm px-4 py-3 text-sm text-left hover:bg-black hover:bg-opacity-5"
+                            onClick={() => props.onRetrievalModeChange("breadth")}
+                          >
+                            <div className="flex items-center">
+                              <div className="w-4">
+                                {props.retrievalMode === "breadth" && <Image src={CheckIcon} alt="selected" />}
+                              </div>
+                              <span className="ml-3 font-medium">Breadth</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground ml-7 mt-1">
+                              Searches a wider range of documents for a broader response (slower)
+                            </span>
+                          </button>
+
+                          <button
+                            className="flex flex-col rounded-sm px-4 py-3 text-sm text-left hover:bg-black hover:bg-opacity-5"
+                            onClick={() => props.onRetrievalModeChange("depth")}
+                          >
+                            <div className="flex items-center">
+                              <div className="w-4">
+                                {props.retrievalMode === "depth" && <Image src={CheckIcon} alt="selected" />}
+                              </div>
+                              <span className="ml-3 font-medium">Depth</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground ml-7 mt-1">
+                              Retrieves results from a smaller range of documents for more depth (faster)
+                            </span>
+                          </button>
+
+                          <button
+                            className="flex flex-col rounded-sm px-4 py-3 text-sm text-left hover:bg-black hover:bg-opacity-5"
+                            onClick={() => props.onRetrievalModeChange("agentic")}
+                          >
+                            <div className="flex items-center">
+                              <div className="w-4">
+                                {props.retrievalMode === "agentic" && <Image src={CheckIcon} alt="selected" />}
+                              </div>
+                              <span className="ml-3 font-medium">Research</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground ml-7 mt-1">
+                              Uses a more advanced retrieval method that can handle complex questions, perform multiple
+                              searches, and provide more accurate results (much slower)
+                            </span>
+                          </button>
+                        </div>
+                      </RetrievalModePopoverContent>
+                    </Popover>
+                  </>
                 )}
               </div>
-              <div className="flex flex-col gap-2">
-                {props.canSetRerankEnabled && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">Rerank</span>
+
+              {/* Options for breadth/depth modes */}
+              {(retrievalMode === "breadth" || retrievalMode === "depth") &&
+                (props.canSetRerankEnabled || props.canSetPrioritizeRecent) && (
+                  <>
+                    <div className="h-[1px] w-full bg-[#D7D7D7] my-4" />
+                    <div className="flex flex-col gap-2">
+                      <span className="text-sm font-medium text-muted-foreground">Options</span>
+                      {props.canSetRerankEnabled && (
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">Rerank</span>
+                            <span className="text-xs text-muted-foreground mt-1">Choose top matches</span>
+                          </div>
+                          <Switch
+                            checked={rerankEnabled}
+                            onCheckedChange={(checked: boolean) => {
+                              props.onRerankChange?.(checked);
+                            }}
+                            className="data-[state=checked]:bg-[#D946EF]"
+                          />
+                        </div>
+                      )}
+                      {props.canSetPrioritizeRecent && (
+                        <div className="flex items-center justify-between mt-4">
+                          <>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium">Prioritize recent data</span>
+                              <span className="text-xs text-muted-foreground mt-1">Favors newer sources</span>
+                            </div>
+                            <Switch
+                              checked={prioritizeRecent}
+                              onCheckedChange={(checked: boolean) => {
+                                props.onPrioritizeRecentChange?.(checked);
+                              }}
+                              className="data-[state=checked]:bg-[#D946EF]"
+                            />
+                          </>
+                        </div>
+                      )}
                     </div>
-                    <Switch
-                      checked={rerankEnabled}
-                      onCheckedChange={(checked: boolean) => {
-                        props.onRerankChange?.(checked);
+                  </>
+                )}
+
+              {/* Level selection for agentic mode */}
+              {retrievalMode === "agentic" && props.canSetAgenticLevel && (
+                <>
+                  <div className="h-[1px] w-full bg-[#D7D7D7] my-4" />
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-muted-foreground">Level</span>
+                    <RadioGroup
+                      value={agenticLevel || "balanced"}
+                      onValueChange={(value) => {
+                        props.onAgenticLevelChange?.(value as "fast" | "balanced" | "thorough");
                       }}
-                      className="data-[state=checked]:bg-[#D946EF]"
-                    />
-                  </div>
-                )}
-                {props.canSetPrioritizeRecent && (
-                  <div className="flex items-center justify-between mt-4">
-                    <>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">Prioritize recent data</span>
+                    >
+                      <div className="flex flex-col space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value="fast"
+                            id="fast"
+                            className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
+                          />
+                          <label htmlFor="fast" className="text-sm">
+                            Fast
+                          </label>
+                        </div>
+                        <span className="text-xs text-muted-foreground ml-6">Quick results, uses fewer resources</span>
                       </div>
-                      <Switch
-                        checked={prioritizeRecent}
-                        onCheckedChange={(checked: boolean) => {
-                          props.onPrioritizeRecentChange?.(checked);
-                        }}
-                        className="data-[state=checked]:bg-[#D946EF]"
-                      />
-                    </>
+                      <div className="flex flex-col space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value="balanced"
+                            id="balanced"
+                            className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
+                          />
+                          <label htmlFor="balanced" className="text-sm">
+                            Balanced
+                          </label>
+                        </div>
+                        <span className="text-xs text-muted-foreground ml-6">Good accuracy, moderate speed</span>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value="thorough"
+                            id="thorough"
+                            className="text-[#D946EF] border-[#D7D7D7] data-[state=checked]:bg-[#D946EF]"
+                          />
+                          <label htmlFor="thorough" className="text-sm">
+                            Thorough
+                          </label>
+                        </div>
+                        <span className="text-xs text-muted-foreground ml-6">Most accurate, uses more resources</span>
+                      </div>
+                    </RadioGroup>
                   </div>
-                )}
-              </div>
+                </>
+              )}
 
               {canSwitchModel && (
                 <>
@@ -313,6 +419,8 @@ export default function ChatInput(props: ChatInputProps) {
                   </div>
                 </>
               )}
+
+              {/* TODO: Insert token progess bar here */}
             </div>
           </SettingsPopoverContent>
         ) : canSwitchModel ? (

@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const ragieApiKey = await getRagieApiKey(tenant);
+    // TODO: should call get ragie client and partition here to get partition, even if not using client
     const controller = new AbortController();
     request.signal.addEventListener("abort", () => controller.abort());
 

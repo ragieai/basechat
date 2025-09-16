@@ -51,6 +51,7 @@ interface Props {
     overrideBreadth: boolean | null;
     overrideRerank: boolean | null;
     overridePrioritizeRecent: boolean | null;
+    overrideAgenticLevel?: boolean | null;
     paidStatus: string;
   };
   initMessage?: string;
@@ -164,6 +165,17 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
     return tenant.prioritizeRecent ?? false;
   });
 
+  const [agenticLevel, setAgenticLevel] = useState<"fast" | "balanced" | "thorough">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("initialSettings");
+      if (saved && tenant.overrideAgenticLevel) {
+        const settings = JSON.parse(saved);
+        return settings.agenticLevel || "balanced";
+      }
+    }
+    return "balanced";
+  });
+
   const [selectedModel, setSelectedModel] = useState<LLMModel>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("chatSettings");
@@ -236,10 +248,11 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       // ...(tenant?.overrideRetrievalMode ? { retrievalMode } : {}),
       ...(tenant?.overrideRerank ? { rerankEnabled } : {}),
       ...(tenant?.overridePrioritizeRecent ? { prioritizeRecent } : {}),
+      ...(tenant?.overrideAgenticLevel ? { agenticLevel } : {}),
     };
 
     localStorage.setItem("chatSettings", JSON.stringify(settingsToSave));
-  }, [retrievalMode, rerankEnabled, prioritizeRecent, selectedModel, tenant]);
+  }, [retrievalMode, rerankEnabled, prioritizeRecent, agenticLevel, selectedModel, tenant]);
 
   const { isLoading, object, submit } = useObject({
     api: `/api/conversations/${conversationId}/messages`,
@@ -289,8 +302,17 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       console.log("Submitting to agentic retrieval mode:", content);
       // TODO: Implement agentic mode submission
       setAgenticMessages((prev) => [...prev, { content, role: "user", id: createRandomId(), sources: [] }]);
+
+      // Map agentic level to effort parameter
+      const effortMap = {
+        fast: "low",
+        balanced: "medium",
+        thorough: "high",
+      } as const;
+
       agenticRetriever.submit({
         query: content,
+        effort: effortMap[agenticLevel],
       });
     }
   };
@@ -419,10 +441,13 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
             onRerankChange={setRerankEnabled}
             prioritizeRecent={prioritizeRecent}
             onPrioritizeRecentChange={setPrioritizeRecent}
+            agenticLevel={agenticLevel}
+            onAgenticLevelChange={setAgenticLevel}
             enabledModels={enabledModels}
             canSetIsBreadth={tenant?.overrideBreadth ?? true}
             canSetRerankEnabled={tenant?.overrideRerank ?? true}
             canSetPrioritizeRecent={tenant?.overridePrioritizeRecent ?? true}
+            canSetAgenticLevel={tenant?.overrideAgenticLevel ?? true}
             tenantPaidStatus={tenant.paidStatus}
           />
         </div>

@@ -33,6 +33,7 @@ type Run = {
 // TODO: test surrender step
 type AgenticRetrieverState = {
   query: string;
+  effort: string;
   runId: string | null;
   pastRuns: Record<string, Run>;
   result: null | z.infer<typeof finalAnswerSchema>;
@@ -63,7 +64,7 @@ export type AgenticRetriever = {
   result: AgenticRetrieverState["result"];
   evidence: EvidenceCollection;
   stepTiming: Array<number>;
-  submit: (payload: { query: string }) => void;
+  submit: (payload: { query: string; effort?: string }) => void;
   getRun: (id: string) => Run | null;
   getEvidence: (runId: string, evidenceId: string) => z.infer<typeof evidenceSchema> | null;
   reset: () => void;
@@ -71,6 +72,11 @@ export type AgenticRetriever = {
 
 type SetQueryAction = {
   type: "SET_QUERY";
+  payload: string;
+};
+
+type SetEffortAction = {
+  type: "SET_EFFORT";
   payload: string;
 };
 
@@ -117,6 +123,7 @@ type SetErrorAction = {
 
 type AgenticRetrieverAction =
   | SetQueryAction
+  | SetEffortAction
   | StartRun
   | TakeDoneEvent
   | ResetAction
@@ -133,6 +140,12 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
         return state;
       }
       return { ...state, status: "loading", query: action.payload };
+
+    case "SET_EFFORT":
+      return {
+        ...state,
+        effort: action.payload,
+      };
 
     case "START_RUN":
       return { ...state, runId: action.payload.runId, _stepTiming: [action.payload.startTime] };
@@ -306,6 +319,7 @@ export default function useAgenticRetriever({
   const abortControllerRef = useRef<AbortController | null>(null);
   const [state, dispatch] = useReducer(agenticRetrieverReducer, {
     query: "",
+    effort: "medium",
     runId: null,
     status: "idle",
     pastRuns: {},
@@ -322,8 +336,9 @@ export default function useAgenticRetriever({
     _inprogressResponse: "",
   });
 
-  const submit = useCallback((payload: { query: string }) => {
+  const submit = useCallback((payload: { query: string; effort?: string }) => {
     dispatch({ type: "SET_QUERY", payload: payload.query });
+    dispatch({ type: "SET_EFFORT", payload: payload.effort || "medium" });
   }, []);
 
   const close = useCallback(() => {
@@ -404,7 +419,7 @@ export default function useAgenticRetriever({
       method: "POST",
       body: JSON.stringify({
         query: state.query,
-        effort: "medium",
+        effort: state.effort, // was previously hard coded to "medium"
         stream: true,
         tenantSlug,
       }),
