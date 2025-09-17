@@ -1,11 +1,9 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { getRagieApiKey } from "@/lib/server/ragie";
+import { getRagieApiKeyAndPartition } from "@/lib/server/ragie";
 import { RAGIE_API_BASE_URL } from "@/lib/server/settings";
 import { requireAuthContext } from "@/lib/server/utils";
-
-const PARTITION_OVERIDE = null;
 
 const reqBodySchema = z.object({
   query: z.string(),
@@ -23,14 +21,13 @@ export async function POST(request: NextRequest) {
   const { tenant } = await requireAuthContext(params.tenantSlug);
 
   try {
-    const ragieApiKey = await getRagieApiKey(tenant);
-    // TODO: should call get ragie client and partition here to get partition, even if not using client
+    const { apiKey, partition } = await getRagieApiKeyAndPartition(tenant.id);
     const controller = new AbortController();
     request.signal.addEventListener("abort", () => controller.abort());
 
     const upstreamResponse = await fetch(`${RAGIE_API_BASE_URL}/agents/search`, {
       headers: {
-        authorization: `Bearer ${ragieApiKey}`,
+        authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       signal: controller.signal,
@@ -38,7 +35,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         query: params.query,
         effort: params.effort,
-        partitions: [PARTITION_OVERIDE || tenant.ragiePartition || tenant.id],
+        partitions: [partition],
         stream: true,
       }),
     });

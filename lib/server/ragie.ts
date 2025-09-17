@@ -63,3 +63,22 @@ export async function getRagieClientAndPartition(tenantId: string) {
 
   return { client, partition };
 }
+
+// we should use the client from the function above^ this is only while agentic is not in the SDK
+export async function getRagieApiKeyAndPartition(tenantId: string) {
+  const { ragieApiKey, ragiePartition } = await getRagieSettingsByTenantId(tenantId);
+
+  let apiKey;
+  let partition;
+  if (ragieApiKey) {
+    apiKey = decrypt(ragieApiKey);
+    partition = ragiePartition || "default";
+  } else {
+    apiKey = settings.RAGIE_API_KEY;
+    partition = tenantId;
+  }
+
+  assert(!!apiKey, "No API key found");
+
+  return { apiKey, partition };
+}

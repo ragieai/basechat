@@ -33,6 +33,11 @@ interface ChatInputProps {
   canSetPrioritizeRecent: boolean;
   canSetAgenticLevel?: boolean;
   tenantPaidStatus: string;
+  // Token-related props
+  remainingTokens?: number;
+  tokenBudget?: number;
+  nextTokenDate?: string;
+  billingSettingsUrl?: string;
 }
 
 const TOOLTIP_CONTENT = "This chatbot is currently inactive. For support, please reach out to the admin.";
@@ -115,7 +120,7 @@ const RetrievalModePopoverContent = ({
   return (
     <PopoverContent
       align={isStandalone ? "start" : "end"}
-      alignOffset={isStandalone ? 4 : -255} // TODO: prob need to change this after adding token progress section
+      alignOffset={isStandalone ? 4 : -320}
       {...(isDesktop && !isStandalone ? { side: "right", sideOffset: 30 } : {})}
       className={cn("bg-[#F5F5F7] w-[280px] border border-[#D7D7D7] shadow-none rounded-[8px] p-6")}
     >
@@ -201,8 +206,7 @@ export default function ChatInput(props: ChatInputProps) {
         {(canOverrideSomething || canSwitchModel) && (
           <PopoverTrigger className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
             {canOverrideSomething && <Image src={GearIcon} alt="settings" className="h-4 w-4" />}
-            {/* {canSwitchModel && LLM_DISPLAY_NAMES[props.selectedModel]} */}
-            <>Deep Search</>
+            {retrievalMode === "agentic" ? "Deep Search" : canSwitchModel && LLM_DISPLAY_NAMES[props.selectedModel]}
             {(canOverrideSomething || canSwitchModel) && <ChevronDown className="h-4 w-4" />}
           </PopoverTrigger>
         )}
@@ -420,7 +424,46 @@ export default function ChatInput(props: ChatInputProps) {
                 </>
               )}
 
-              {/* TODO: Insert token progess bar here */}
+              {/* TODO mock default values Token progress bar for agentic mode */}
+              {retrievalMode === "agentic" && (
+                <>
+                  <div className="h-[1px] w-full bg-[#D7D7D7] my-4" />
+                  <div className="flex flex-col gap-3">
+                    <span className="text-sm font-medium text-muted-foreground">Tokens</span>
+
+                    {/* Token count */}
+                    <div className="text-sm text-black">
+                      {props.remainingTokens || 0} / {props.tokenBudget || 1000}
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-[#D946EF] h-2 rounded-full transition-all duration-500 ease-out"
+                        style={{
+                          width: `${Math.min(
+                            ((props.remainingTokens || 0) / (props.tokenBudget || 1000)) * 100,
+                            100,
+                          )}%`,
+                        }}
+                      />
+                    </div>
+
+                    {/* Reset date */}
+                    <span className="text-xs text-muted-foreground">
+                      Resets {props.nextTokenDate || "January 1, 2024"}
+                    </span>
+
+                    {/* Billing settings button */}
+                    <a
+                      href={props.billingSettingsUrl || "/billing"}
+                      className="w-full text-center text-sm text-[#D946EF] hover:text-[#C73DE8] py-2 px-4 border border-[#D946EF] rounded-md hover:bg-[#D946EF] hover:bg-opacity-5 transition-colors"
+                    >
+                      Plans and Billing Settings
+                    </a>
+                  </div>
+                </>
+              )}
             </div>
           </SettingsPopoverContent>
         ) : canSwitchModel ? (

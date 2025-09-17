@@ -18,6 +18,7 @@ import {
   LLMModel,
   modelSchema,
 } from "@/lib/llm/types";
+import { getBillingSettingsPath } from "@/lib/paths";
 
 import { SourceMetadata } from "../../lib/types";
 import AgenticResponse from "../agentic-retriever/agentic-response";
@@ -449,6 +450,11 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
             canSetPrioritizeRecent={tenant?.overridePrioritizeRecent ?? true}
             canSetAgenticLevel={tenant?.overrideAgenticLevel ?? true}
             tenantPaidStatus={tenant.paidStatus}
+            // TODO Mock token data for testing
+            remainingTokens={7500}
+            tokenBudget={10000}
+            nextTokenDate="January 15, 2067"
+            billingSettingsUrl={getBillingSettingsPath(tenant.slug)}
           />
         </div>
       </div>
