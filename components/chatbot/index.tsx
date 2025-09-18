@@ -6,19 +6,15 @@ import { experimental_useObject as useObject } from "ai/react";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
+import { useSearchSettings } from "@/hooks/use-search-settings";
 import {
   conversationMessagesResponseSchema,
   CreateConversationMessageRequest,
   createConversationMessageResponseSchema,
 } from "@/lib/api";
-import {
-  DEFAULT_MODEL,
-  getEnabledModelsFromDisabled,
-  getProviderForModel,
-  LLMModel,
-  modelSchema,
-} from "@/lib/llm/types";
+import { getProviderForModel, LLMModel } from "@/lib/llm/types";
 import { getBillingSettingsPath } from "@/lib/paths";
+import * as schema from "@/lib/server/db/schema";
 
 import { SourceMetadata } from "../../lib/types";
 import AgenticResponse from "../agentic-retriever/agentic-response";
@@ -28,7 +24,14 @@ import { finalAnswerSchema, resultSchema } from "../agentic-retriever/types";
 import AssistantMessage from "./assistant-message";
 import ChatInput from "./chat-input";
 
-type AiMessage = { content: string; role: "assistant"; id?: string; sources: SourceMetadata[]; model?: LLMModel };
+type AiMessage = {
+  content: string;
+  role: "assistant";
+  id?: string;
+  sources: SourceMetadata[];
+  model?: LLMModel;
+  type?: "agentic" | "standard";
+};
 type UserMessage = { content: string; role: "user" };
 type SystemMessage = { content: string; role: "system" };
 type Message = AiMessage | UserMessage | SystemMessage;
@@ -39,22 +42,7 @@ const UserMessage = ({ content }: { content: string }) => (
 
 interface Props {
   conversationId: string;
-  tenant: {
-    name: string;
-    logoUrl?: string | null;
-    slug: string;
-    id: string;
-    disabledModels: LLMModel[];
-    defaultModel: LLMModel | null;
-    isBreadth: boolean | null;
-    rerankEnabled: boolean | null;
-    prioritizeRecent: boolean | null;
-    overrideBreadth: boolean | null;
-    overrideRerank: boolean | null;
-    overridePrioritizeRecent: boolean | null;
-    overrideAgenticLevel?: boolean | null;
-    paidStatus: string;
-  };
+  tenant: typeof schema.tenants.$inferSelect;
   initMessage?: string;
   onSelectedSource: (source: SourceMetadata) => void;
   onMessageConsumed?: () => void;
@@ -70,7 +58,27 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
   const pendingMessageRef = useRef<null | { id: string; model: LLMModel }>(null);
   pendingMessageRef.current = pendingMessage;
 
-  const enabledModels = useMemo(() => getEnabledModelsFromDisabled(tenant.disabledModels), [tenant.disabledModels]);
+  const {
+    retrievalMode,
+    selectedModel,
+    rerankEnabled,
+    prioritizeRecent,
+    agenticLevel,
+    setRetrievalMode,
+    setSelectedModel,
+    setRerankEnabled,
+    setPrioritizeRecent,
+    setAgenticLevel,
+    enabledModels,
+    canSetIsBreadth,
+    canSetRerankEnabled,
+    canSetPrioritizeRecent,
+    canSetAgenticLevel,
+    canUseAgentic,
+  } = useSearchSettings({
+    tenant,
+    enableGlobalState: false,
+  });
 
   const handleAgenticStart = useCallback((runId: string) => {
     console.log("Agentic retrieval mode started with run ID:", runId);
@@ -81,6 +89,8 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
   const handleAgenticDone = useCallback((payload: { result: z.infer<typeof finalAnswerSchema>; runId: string }) => {
     console.log("Agentic retrieval mode done with payload:", payload);
     setAgenticMessages((prev) => [
+      // TODO: this is where we save to the DB
+      // may need to save in mem, wait for response with ID, then replace and save real one with ID
       ...prev,
       {
         content: payload.result.text,
@@ -121,139 +131,6 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
 
     return unregister;
   }, [registerCallbacks, handleAgenticStart, handleAgenticDone, handleAgenticError]);
-
-  const retrievalMode: any = "agentic";
-  const setRetrievalMode = (mode: any) => {
-    return;
-  };
-  // Get initial settings from localStorage if they exist
-  // const [retrievalMode, setRetrievalMode] = useState(() => {
-  //   if (typeof window !== "undefined") {
-  //     const saved = localStorage.getItem("initialSettings");
-  //     if (saved && tenant.overrideBreadth) {
-  //       const settings = JSON.parse(saved);
-  //       if (settings.retrievalMode) {
-  //         return settings.retrievalMode;
-  //       }
-  //       return settings.isBreadth ? "breadth" : "depth";
-  //     }
-  //   }
-  //   if (tenant.retrievalMode) {
-  //     return tenant.retrievalMode;
-  //   }
-  //   return tenant.isBreadth ? "breadth" : "depth";
-  // });
-
-  const [rerankEnabled, setRerankEnabled] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("initialSettings");
-      if (saved && tenant.overrideRerank) {
-        const settings = JSON.parse(saved);
-        return settings.rerankEnabled;
-      }
-    }
-    return tenant.rerankEnabled ?? false;
-  });
-
-  const [prioritizeRecent, setPrioritizeRecent] = useState(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("initialSettings");
-      if (saved && tenant.overridePrioritizeRecent) {
-        const settings = JSON.parse(saved);
-        return settings.prioritizeRecent;
-      }
-    }
-    return tenant.prioritizeRecent ?? false;
-  });
-
-  const [agenticLevel, setAgenticLevel] = useState<"fast" | "balanced" | "thorough">(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("initialSettings");
-      if (saved && tenant.overrideAgenticLevel) {
-        const settings = JSON.parse(saved);
-        return settings.agenticLevel || "balanced";
-      }
-    }
-    return "balanced";
-  });
-
-  const [selectedModel, setSelectedModel] = useState<LLMModel>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("chatSettings");
-      if (saved) {
-        const settings = JSON.parse(saved);
-        const savedModel = settings.selectedModel;
-        const parsed = modelSchema.safeParse(savedModel);
-        if (parsed.success && enabledModels.includes(savedModel)) {
-          return savedModel;
-        }
-      }
-    }
-    // Validate first enabled model or default model
-    const firstModel = enabledModels[0];
-    const parsed = modelSchema.safeParse(firstModel);
-    if (parsed.success) {
-      return tenant.defaultModel || firstModel;
-    }
-    return DEFAULT_MODEL;
-  });
-
-  // Load user settings from localStorage after initial render and tenant settings are loaded
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("chatSettings");
-      if (saved) {
-        const settings = JSON.parse(saved);
-        // Apply user settings only if overrides are allowed
-        if (!tenant.isBreadth || tenant.overrideBreadth) {
-          if (settings.retrievalMode) {
-            setRetrievalMode(settings.retrievalMode);
-          } else {
-            // TODO: Migrate local storage value
-            setRetrievalMode(settings.isBreadth ? "breadth" : "depth");
-          }
-        }
-        if (!tenant.rerankEnabled || tenant.overrideRerank) {
-          setRerankEnabled(settings.rerankEnabled ?? false);
-        }
-        if (!tenant.prioritizeRecent || tenant.overridePrioritizeRecent) {
-          setPrioritizeRecent(settings.prioritizeRecent ?? false);
-        }
-        // Model selection is always allowed
-        const savedModel = settings.selectedModel;
-        const parsed = modelSchema.safeParse(savedModel);
-        if (parsed.success && enabledModels.includes(savedModel)) {
-          setSelectedModel(savedModel);
-        } else {
-          setSelectedModel(tenant.defaultModel || enabledModels[0]);
-        }
-      }
-    }
-  }, [
-    enabledModels,
-    tenant.overrideBreadth,
-    tenant.overrideRerank,
-    tenant.overridePrioritizeRecent,
-    tenant.defaultModel,
-    tenant.isBreadth,
-    tenant.rerankEnabled,
-    tenant.prioritizeRecent,
-  ]);
-
-  // Save user settings to localStorage whenever they change
-  useEffect(() => {
-    // Only save settings that can be overridden
-    const settingsToSave = {
-      selectedModel,
-      ...(tenant?.overrideBreadth ? { isBreadth: retrievalMode === "breadth" } : {}),
-      // ...(tenant?.overrideRetrievalMode ? { retrievalMode } : {}),
-      ...(tenant?.overrideRerank ? { rerankEnabled } : {}),
-      ...(tenant?.overridePrioritizeRecent ? { prioritizeRecent } : {}),
-      ...(tenant?.overrideAgenticLevel ? { agenticLevel } : {}),
-    };
-
-    localStorage.setItem("chatSettings", JSON.stringify(settingsToSave));
-  }, [retrievalMode, rerankEnabled, prioritizeRecent, agenticLevel, selectedModel, tenant]);
 
   const { isLoading, object, submit } = useObject({
     api: `/api/conversations/${conversationId}/messages`,
@@ -357,10 +234,21 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
         const json = await res.json();
         const messages = conversationMessagesResponseSchema.parse(json);
         setMessages(messages);
+        // TODO: set agentic messages from messages.agenticInfo JSONB column
       })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once
   }, []);
+
+  // Combine normal messages and agentic messages for display
+  const allMessages = useMemo(() => {
+    const normalMessages = messages
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => (m.role === "assistant" && m.id && sourceCache[m.id] ? { ...m, sources: sourceCache[m.id] } : m));
+
+    // Combine normal messages with agentic messages
+    return [...normalMessages, ...agenticMessages];
+  }, [messages, sourceCache, agenticMessages]);
 
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -368,37 +256,32 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       top: container.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [messages]);
-
-  const messagesWithSources = useMemo(
-    () =>
-      messages
-        .filter((m) => m.role === "user" || m.role === "assistant")
-        .map((m) => (m.role === "assistant" && m.id && sourceCache[m.id] ? { ...m, sources: sourceCache[m.id] } : m)),
-    [messages, sourceCache],
-  );
+  }, [allMessages]);
 
   return (
     <div className="flex h-full w-full items-center flex-col">
       <div ref={container} className="flex flex-col h-full w-full items-center overflow-y-auto">
         <div className="flex flex-col h-full w-full p-4 max-w-[717px]">
-          {agenticMessages.map((message, i) =>
+          {allMessages.map((message, i) =>
             message.role === "user" ? (
               <UserMessage key={i} content={message.content} />
             ) : (
               <Fragment key={i}>
-                <AgenticResponseContainer runId={message.id!} tenant={tenant} />
-                {/* <AssistantMessage
-                  name={tenant.name}
-                  logoUrl={tenant.logoUrl}
-                  content={message.content}
-                  id={message.id}
-                  sources={message.sources}
-                  onSelectedSource={onSelectedSource}
-                  model={message.model || selectedModel}
-                  isGenerating={false}
-                  tenantId={tenant.id}
-                /> */}
+                {message.type === "agentic" ? (
+                  <AgenticResponseContainer runId={message.id!} tenant={tenant} />
+                ) : (
+                  <AssistantMessage
+                    name={tenant.name}
+                    logoUrl={tenant.logoUrl}
+                    content={message.content}
+                    id={message.id}
+                    sources={message.sources}
+                    onSelectedSource={onSelectedSource}
+                    model={message.model || selectedModel}
+                    isGenerating={false}
+                    tenantId={tenant.id}
+                  />
+                )}
               </Fragment>
             ),
           )}
@@ -444,11 +327,12 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
             onPrioritizeRecentChange={setPrioritizeRecent}
             agenticLevel={agenticLevel}
             onAgenticLevelChange={setAgenticLevel}
+            agenticEnabled={canUseAgentic}
             enabledModels={enabledModels}
-            canSetIsBreadth={tenant?.overrideBreadth ?? true}
-            canSetRerankEnabled={tenant?.overrideRerank ?? true}
-            canSetPrioritizeRecent={tenant?.overridePrioritizeRecent ?? true}
-            canSetAgenticLevel={tenant?.overrideAgenticLevel ?? true}
+            canSetIsBreadth={canSetIsBreadth}
+            canSetRerankEnabled={canSetRerankEnabled}
+            canSetPrioritizeRecent={canSetPrioritizeRecent}
+            canSetAgenticLevel={canSetAgenticLevel}
             tenantPaidStatus={tenant.paidStatus}
             // TODO Mock token data for testing
             remainingTokens={7500}
@@ -476,13 +360,29 @@ function AgenticResponseContainer({
 }) {
   const { getRun } = useAgenticRetrieverContext();
   const run = getRun(runId);
-  assert(run);
+
+  // If no run is available yet, show a loading state
+  if (!run) {
+    return (
+      <div className="flex w-full">
+        <div className="mb-8 shrink-0">
+          <div className="h-[40px] w-[40px] rounded-full bg-gray-200 animate-pulse" />
+        </div>
+        <div className="self-start flex-grow mb-6 rounded-md ml-7 max-w-[calc(100%-60px)]">
+          <div className="text-sm text-gray-500">Loading agentic response...</div>
+        </div>
+      </div>
+    );
+  }
+
+  //assert(run) was here instead of the loading state
+
   return (
     <AgenticResponse
       runId={runId}
       currentStepType={null}
       currentResponse={null}
-      steps={run.steps}
+      steps={run.steps} // TODO: this run stuff (runId, step, stepTiming, result) is in messages.agenticInfo JSONB col
       stepTiming={run.stepTiming}
       result={run.result}
       avatarName={tenant.name}

@@ -27,6 +27,7 @@ interface ChatInputProps {
   onPrioritizeRecentChange?: (enabled: boolean) => void;
   agenticLevel?: "fast" | "balanced" | "thorough";
   onAgenticLevelChange?: (level: "fast" | "balanced" | "thorough") => void;
+  agenticEnabled?: boolean;
   enabledModels: LLMModel[];
   canSetIsBreadth: boolean;
   canSetRerankEnabled: boolean;
@@ -47,7 +48,7 @@ const ADMIN_TOOLTIP_CONTENT =
 const RETRIEVAL_MODE_DISPLAY_NAMES = {
   breadth: "Breadth",
   depth: "Depth",
-  agentic: "Research",
+  agentic: "Deep Search",
 } as const;
 
 const useIsDesktop = () => {
@@ -120,7 +121,7 @@ const RetrievalModePopoverContent = ({
   return (
     <PopoverContent
       align={isStandalone ? "start" : "end"}
-      alignOffset={isStandalone ? 4 : -320}
+      alignOffset={isStandalone ? 4 : -255}
       {...(isDesktop && !isStandalone ? { side: "right", sideOffset: 30 } : {})}
       className={cn("bg-[#F5F5F7] w-[280px] border border-[#D7D7D7] shadow-none rounded-[8px] p-6")}
     >
@@ -133,14 +134,13 @@ export default function ChatInput(props: ChatInputProps) {
   const { profile } = useProfile();
   const [value, setValue] = useState("");
 
-  const { retrievalMode, rerankEnabled, prioritizeRecent, agenticLevel } = props;
-  const isBreadth = retrievalMode === "breadth";
+  const { retrievalMode, rerankEnabled, prioritizeRecent, agenticLevel, agenticEnabled } = props;
   const ref = useRef<AutosizeTextAreaRef>(null);
   // const canOverrideSomething = false;
   // TODO: should prob separate out the breadth, rerank, and recency from the agentic
-  const canOverrideSomething =
-    props.canSetIsBreadth || props.canSetRerankEnabled || props.canSetPrioritizeRecent || props.canSetAgenticLevel;
-  // const canSwitchModel = false;
+  const canOverrideSomething = props.canSetIsBreadth || props.canSetRerankEnabled || props.canSetPrioritizeRecent;
+
+  // do not display options to switch models in agentic mode
   const canSwitchModel = props.enabledModels.length > 1 && retrievalMode !== "agentic";
 
   const handleSubmit = (value: string) => {
@@ -257,21 +257,24 @@ export default function ChatInput(props: ChatInputProps) {
                             </span>
                           </button>
 
-                          <button
-                            className="flex flex-col rounded-sm px-4 py-3 text-sm text-left hover:bg-black hover:bg-opacity-5"
-                            onClick={() => props.onRetrievalModeChange("agentic")}
-                          >
-                            <div className="flex items-center">
-                              <div className="w-4">
-                                {props.retrievalMode === "agentic" && <Image src={CheckIcon} alt="selected" />}
+                          {/* Agentic mode only visible if enabled */}
+                          {agenticEnabled && (
+                            <button
+                              className="flex flex-col rounded-sm px-4 py-3 text-sm text-left hover:bg-black hover:bg-opacity-5"
+                              onClick={() => props.onRetrievalModeChange("agentic")}
+                            >
+                              <div className="flex items-center">
+                                <div className="w-4">
+                                  {props.retrievalMode === "agentic" && <Image src={CheckIcon} alt="selected" />}
+                                </div>
+                                <span className="ml-3 font-medium">Deep Search</span>
                               </div>
-                              <span className="ml-3 font-medium">Research</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground ml-7 mt-1">
-                              Uses a more advanced retrieval method that can handle complex questions, perform multiple
-                              searches, and provide more accurate results (much slower)
-                            </span>
-                          </button>
+                              <span className="text-xs text-muted-foreground ml-7 mt-1">
+                                Uses a more advanced retrieval method that can handle complex questions, perform
+                                multiple searches, and provide more accurate results (much slower)
+                              </span>
+                            </button>
+                          )}
                         </div>
                       </RetrievalModePopoverContent>
                     </Popover>
@@ -323,7 +326,7 @@ export default function ChatInput(props: ChatInputProps) {
                 )}
 
               {/* Level selection for agentic mode */}
-              {retrievalMode === "agentic" && props.canSetAgenticLevel && (
+              {retrievalMode === "agentic" && props.canSetAgenticLevel && agenticEnabled && (
                 <>
                   <div className="h-[1px] w-full bg-[#D7D7D7] my-4" />
                   <div className="flex flex-col gap-2">
@@ -423,47 +426,48 @@ export default function ChatInput(props: ChatInputProps) {
                   </div>
                 </>
               )}
+              {/* TODO mock default values for Token progress bar for agentic mode */}
+              {/* Token progress bar for agentic mode - only show when data is available */}
+              {retrievalMode === "agentic" &&
+                (props.remainingTokens !== undefined || props.tokenBudget !== undefined) && (
+                  <>
+                    <div className="h-[1px] w-full bg-[#D7D7D7] my-4" />
+                    <div className="flex flex-col gap-3">
+                      <span className="text-sm font-medium text-muted-foreground">Tokens</span>
 
-              {/* TODO mock default values Token progress bar for agentic mode */}
-              {retrievalMode === "agentic" && (
-                <>
-                  <div className="h-[1px] w-full bg-[#D7D7D7] my-4" />
-                  <div className="flex flex-col gap-3">
-                    <span className="text-sm font-medium text-muted-foreground">Tokens</span>
+                      {/* Token count */}
+                      <div className="text-sm text-black">
+                        {props.remainingTokens || 0} / {props.tokenBudget || 1000}
+                      </div>
 
-                    {/* Token count */}
-                    <div className="text-sm text-black">
-                      {props.remainingTokens || 0} / {props.tokenBudget || 1000}
+                      {/* Progress bar */}
+                      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-[#D946EF] h-2 rounded-full transition-all duration-500 ease-out"
+                          style={{
+                            width: `${Math.min(
+                              ((props.remainingTokens || 0) / (props.tokenBudget || 1000)) * 100,
+                              100,
+                            )}%`,
+                          }}
+                        />
+                      </div>
+
+                      {/* Reset date */}
+                      <span className="text-xs text-muted-foreground">
+                        Resets {props.nextTokenDate || "January 1, 2024"}
+                      </span>
+
+                      {/* Billing settings button */}
+                      <a
+                        href={props.billingSettingsUrl || "/billing"}
+                        className="w-full text-center text-sm text-[#D946EF] hover:text-[#C73DE8] py-2 px-4 border border-[#D946EF] rounded-md hover:bg-[#D946EF] hover:bg-opacity-5 transition-colors"
+                      >
+                        Plans and Billing Settings
+                      </a>
                     </div>
-
-                    {/* Progress bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-[#D946EF] h-2 rounded-full transition-all duration-500 ease-out"
-                        style={{
-                          width: `${Math.min(
-                            ((props.remainingTokens || 0) / (props.tokenBudget || 1000)) * 100,
-                            100,
-                          )}%`,
-                        }}
-                      />
-                    </div>
-
-                    {/* Reset date */}
-                    <span className="text-xs text-muted-foreground">
-                      Resets {props.nextTokenDate || "January 1, 2024"}
-                    </span>
-
-                    {/* Billing settings button */}
-                    <a
-                      href={props.billingSettingsUrl || "/billing"}
-                      className="w-full text-center text-sm text-[#D946EF] hover:text-[#C73DE8] py-2 px-4 border border-[#D946EF] rounded-md hover:bg-[#D946EF] hover:bg-opacity-5 transition-colors"
-                    >
-                      Plans and Billing Settings
-                    </a>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
             </div>
           </SettingsPopoverContent>
         ) : canSwitchModel ? (

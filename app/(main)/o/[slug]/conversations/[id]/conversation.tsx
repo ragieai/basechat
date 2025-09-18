@@ -6,7 +6,8 @@ import { useGlobalState } from "@/app/(main)/o/[slug]/context";
 import Chatbot from "@/components/chatbot";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Profile } from "@/lib/api";
-import { LLMModel, getEnabledModelsFromDisabled } from "@/lib/llm/types";
+import { getEnabledModelsFromDisabled } from "@/lib/llm/types";
+import * as schema from "@/lib/server/db/schema";
 import { SourceMetadata } from "@/lib/types";
 
 import { ProfileProvider } from "../../profile-context";
@@ -15,21 +16,7 @@ import Summary from "./summary";
 
 interface Props {
   id: string;
-  tenant: {
-    name: string;
-    logoUrl?: string | null;
-    slug: string;
-    id: string;
-    disabledModels: LLMModel[];
-    defaultModel: LLMModel | null;
-    isBreadth: boolean | null;
-    rerankEnabled: boolean | null;
-    prioritizeRecent: boolean | null;
-    overrideBreadth: boolean | null;
-    overrideRerank: boolean | null;
-    overridePrioritizeRecent: boolean | null;
-    paidStatus: string;
-  };
+  tenant: typeof schema.tenants.$inferSelect;
   profile: Profile;
 }
 

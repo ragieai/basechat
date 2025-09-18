@@ -15,6 +15,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { z } from "zod";
 
+import { stepResultSchema, finalAnswerSchema } from "@/components/agentic-retriever/types";
 import { DEFAULT_MODEL, modelSchema, modelArraySchema } from "@/lib/llm/types";
 
 const timestampFields = {
@@ -90,6 +91,8 @@ export const tenants = pgTable(
     overrideBreadth: boolean("override_breadth").default(true),
     overrideRerank: boolean("override_rerank").default(true),
     overridePrioritizeRecent: boolean("override_prioritize_recent").default(true),
+    //overrideAgenticLevel: boolean("override_agentic_level").default(true), // for now it is true for all always
+    agenticEnabled: boolean("agentic_enabled").default(true),
     ragieApiKey: text("ragie_api_key"),
     ragiePartition: text("ragie_partition"),
     slackEnabled: boolean("slack_enabled").default(false),
@@ -154,6 +157,8 @@ export const profiles = pgTable(
 
 export const messageRolesEnum = pgEnum("message_roles", ["assistant", "system", "user"]);
 
+export const messageRetrievalTypesEnum = pgEnum("message_retrieval_types", ["agentic", "standard"]);
+
 export const messages = pgTable(
   "messages",
   {
@@ -169,6 +174,15 @@ export const messages = pgTable(
     isBreadth: boolean("is_breadth").notNull().default(false),
     rerankEnabled: boolean("rerank_enabled").notNull().default(false),
     prioritizeRecent: boolean("prioritize_recent").notNull().default(false),
+    type: messageRetrievalTypesEnum("type").notNull().default("standard"),
+    agenticInfo: jsonb("agentic_info").default({}).$type<{
+      runId: string;
+      timestamp: string;
+      stepTiming: Array<number>;
+      steps: Array<z.infer<typeof stepResultSchema>>;
+      query: string;
+      result: z.infer<typeof finalAnswerSchema> | null;
+    }>(),
   },
   (t) => ({
     conversationIdx: index("messages_conversation_idx").on(t.conversationId),
