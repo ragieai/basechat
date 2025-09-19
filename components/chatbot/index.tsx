@@ -173,8 +173,9 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       rerankEnabled,
       prioritizeRecent,
     };
-    setMessages([...messages, { content, role: "user" }]);
+
     if (retrievalMode !== "agentic") {
+      setMessages([...messages, { content, role: "user" }]);
       submit(payload);
     } else {
       console.log("Submitting to agentic retrieval mode:", content);
