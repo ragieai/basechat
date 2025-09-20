@@ -14,12 +14,14 @@ import {
 } from "@/lib/api";
 import { getProviderForModel, LLMModel } from "@/lib/llm/types";
 import { getBillingSettingsPath } from "@/lib/paths";
+import { saveAgenticUserMessage, saveAgenticAssistantMessage } from "@/lib/server/agentic-actions";
 import * as schema from "@/lib/server/db/schema";
 
 import { SourceMetadata } from "../../lib/types";
 import AgenticResponse from "../agentic-retriever/agentic-response";
 import { useAgenticRetrieverContext } from "../agentic-retriever/agentic-retriever-context";
-import { finalAnswerSchema, resultSchema } from "../agentic-retriever/types";
+import { finalAnswerSchema, resultSchema, evidenceSchema } from "../agentic-retriever/types";
+import { AgenticRetriever, Run } from "../agentic-retriever/use-agentic-retriever";
 
 import AssistantMessage from "./assistant-message";
 import ChatInput from "./chat-input";
@@ -51,8 +53,8 @@ interface Props {
 export default function Chatbot({ tenant, conversationId, initMessage, onSelectedSource, onMessageConsumed }: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [agenticMessages, setAgenticMessages] = useState<Array<AiMessage | UserMessage>>([]);
   const [agenticRunId, setAgenticRunId] = useState<string | null>(null);
+  const agenticQueryRef = useRef<string | null>(null);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});
   const [pendingMessage, setPendingMessage] = useState<null | { id: string; model: LLMModel }>(null);
   const pendingMessageRef = useRef<null | { id: string; model: LLMModel }>(null);
@@ -80,47 +82,118 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
     enableGlobalState: false,
   });
 
-  const handleAgenticStart = useCallback((runId: string) => {
-    console.log("Agentic retrieval mode started with run ID:", runId);
-    setAgenticRunId(runId);
-    return Promise.resolve();
-  }, []);
+  const {
+    registerCallbacks,
+    submit: agenticSubmit,
+    status: agenticStatus,
+    currentStepType,
+    currentResponse,
+    steps,
+    stepTiming,
+    result,
+    setPastRuns,
+    getRun,
+  } = useAgenticRetrieverContext();
 
-  const handleAgenticDone = useCallback((payload: { result: z.infer<typeof finalAnswerSchema>; runId: string }) => {
-    console.log("Agentic retrieval mode done with payload:", payload);
-    setAgenticMessages((prev) => [
-      // TODO: this is where we save to the DB
-      // may need to save in mem, wait for response with ID, then replace and save real one with ID
-      ...prev,
-      {
-        content: payload.result.text,
-        role: "assistant",
-        id: payload.runId,
-        sources: payload.result.evidence
-          .filter((e) => e.type === "ragie")
-          .map(
-            (e) =>
-              ({
-                source_type: e.document_metadata.source_type || "API",
-                file_path: e.document_metadata.file_path || "",
-                source_url: e.document_metadata.source_url || "",
-                documentId: e.document_id,
-                documentName: e.document_name,
-              }) as SourceMetadata,
-          ),
-        model: "Deep Search",
-      },
-    ]);
-    setAgenticRunId(null);
-    return Promise.resolve();
-  }, []);
+  const handleAgenticStart = useCallback(
+    async (runId: string) => {
+      console.log("Agentic retrieval mode started with run ID:", runId);
+      setAgenticRunId(runId);
+
+      // Save the user message to the database immediately
+      const query = agenticQueryRef.current;
+      if (query) {
+        try {
+          const userMessage = await saveAgenticUserMessage({
+            conversationId,
+            tenantId: tenant.id,
+            userMessage: query,
+            runId,
+          });
+          console.log("Saved user message to database:", userMessage.id);
+        } catch (error) {
+          console.error("Failed to save user message to database:", error);
+        }
+      }
+
+      return Promise.resolve();
+    },
+    [conversationId, tenant.id],
+  );
+
+  const handleAgenticDone = useCallback(
+    async (payload: { result: z.infer<typeof finalAnswerSchema>; runId: string }) => {
+      console.log("Agentic retrieval mode done with payload:", payload);
+
+      // Prepare sources
+      const sources = payload.result.evidence
+        .filter((e) => e.type === "ragie")
+        .map(
+          (e) =>
+            ({
+              source_type: e.document_metadata.source_type || "API",
+              file_path: e.document_metadata.file_path || "",
+              source_url: e.document_metadata.source_url || "",
+              documentId: e.document_id,
+              documentName: e.document_name,
+            }) as SourceMetadata,
+        );
+
+      // Prepare evidence for storage - we need to reconstruct the evidence collection
+      // from the result evidence since the context evidence might be cleared
+      const evidenceForStorage: Record<string, Array<z.infer<typeof evidenceSchema>>> = {};
+      if (payload.result.evidence.length > 0) {
+        evidenceForStorage["0"] = payload.result.evidence;
+      }
+
+      // Update local state with the saved messages
+      setMessages((prev) => [
+        ...prev,
+        {
+          content: payload.result.text,
+          role: "assistant",
+          id: payload.runId,
+          sources,
+          model: "Deep Search",
+          type: "agentic",
+        } as AiMessage,
+      ]);
+
+      // Prepare agentic info for database storage using current state data
+      const agenticInfo = {
+        runId: payload.runId,
+        timestamp: new Date().toISOString(),
+        stepTiming: stepTiming, // Use current state stepTiming (result doesn't have stepTiming)
+        steps: payload.result.steps || steps, // Prefer result steps
+        query: agenticQueryRef.current || "", // Use the stored query from ref
+        result: payload.result,
+      };
+
+      try {
+        // Save the assistant message to the database
+        const assistantMessage = await saveAgenticAssistantMessage({
+          conversationId,
+          tenantId: tenant.id,
+          agenticInfo,
+          sources,
+        });
+
+        console.log("Saved agentic messages to database:", assistantMessage.id);
+      } catch (error) {
+        console.error("Failed to save agentic messages to database:", error);
+      }
+
+      setAgenticRunId(null);
+      agenticQueryRef.current = null; // Clear the ref
+      return Promise.resolve();
+    },
+    [],
+  ); //conversationId, tenant.id, getRun ?
 
   const handleAgenticError = useCallback((payload: string) => {
     console.log("Agentic retrieval mode error with payload:", payload);
     return Promise.resolve();
   }, []);
-
-  const { registerCallbacks, ...agenticRetriever } = useAgenticRetrieverContext();
 
   useEffect(() => {
     const unregister = registerCallbacks({
@@ -179,8 +252,9 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       submit(payload);
     } else {
       console.log("Submitting to agentic retrieval mode:", content);
-      // TODO: Implement agentic mode submission
-      setAgenticMessages((prev) => [...prev, { content, role: "user", id: createRandomId(), sources: [] }]);
+      // Store the query in ref for later use in callbacks
+      agenticQueryRef.current = content;
+      setMessages((prev) => [...prev, { content, role: "user" } as UserMessage]);
 
       // Map agentic level to effort parameter
       const effortMap = {
@@ -189,7 +263,7 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
         thorough: "high",
       } as const;
 
-      agenticRetriever.submit({
+      agenticSubmit({
         query: content,
         effort: effortMap[agenticLevel],
       });
@@ -234,22 +308,76 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
         if (!res.ok) throw new Error("Could not load conversation");
         const json = await res.json();
         const messages = conversationMessagesResponseSchema.parse(json);
-        setMessages(messages);
-        // TODO: set agentic messages from messages.agenticInfo JSONB column
+
+        // Process all messages and extract agentic info for context
+        const pastRuns: Record<string, Run> = {};
+        const processedMessages: Message[] = [];
+
+        messages.forEach((message) => {
+          if ("type" in message && message.type === "agentic" && "agenticInfo" in message && message.agenticInfo) {
+            const agenticInfo = message.agenticInfo;
+
+            // Convert to Run format for agentic context
+            const run: Run = {
+              timestamp: agenticInfo.timestamp,
+              query: agenticInfo.query,
+              result: agenticInfo.result,
+              stepTiming: agenticInfo.stepTiming,
+              steps: agenticInfo.steps,
+            };
+
+            // Add to past runs
+            pastRuns[agenticInfo.runId] = run;
+
+            // For agentic messages, transform them for display
+            if (message.role === "assistant") {
+              // Extract sources from the result evidence
+              const sources =
+                agenticInfo.result?.evidence
+                  ?.filter((e: any) => e.type === "ragie")
+                  .map((e: any) => ({
+                    source_type: e.document_metadata?.source_type || "API",
+                    file_path: e.document_metadata?.file_path || "",
+                    source_url: e.document_metadata?.source_url || "",
+                    documentId: e.document_id,
+                    documentName: e.document_name,
+                  })) || [];
+
+              // Add transformed agentic message
+              processedMessages.push({
+                content: message.content || "",
+                role: "assistant",
+                id: agenticInfo.runId,
+                sources,
+                model: "Deep Search",
+                type: "agentic",
+              } as AiMessage);
+            } else {
+              // Add user messages as-is
+              processedMessages.push(message);
+            }
+          } else {
+            // Add standard messages as-is
+            processedMessages.push(message);
+          }
+        });
+
+        // Set all processed messages in chronological order
+        setMessages(processedMessages);
+
+        // Populate agentic context with past runs
+        setPastRuns(pastRuns);
       })();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once
   }, []);
 
-  // Combine normal messages and agentic messages for display
+  // Process messages for display (add source cache for standard messages)
   const allMessages = useMemo(() => {
-    const normalMessages = messages
+    return messages
       .filter((m) => m.role === "user" || m.role === "assistant")
       .map((m) => (m.role === "assistant" && m.id && sourceCache[m.id] ? { ...m, sources: sourceCache[m.id] } : m));
-
-    // Combine normal messages with agentic messages
-    return [...normalMessages, ...agenticMessages];
-  }, [messages, sourceCache, agenticMessages]);
+  }, [messages, sourceCache]);
 
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -268,8 +396,8 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
               <UserMessage key={i} content={message.content} />
             ) : (
               <Fragment key={i}>
-                {message.type === "agentic" ? (
-                  <AgenticResponseContainer runId={message.id!} tenant={tenant} />
+                {message.type === "agentic" && message.id ? (
+                  <AgenticResponseContainer runId={message.id} tenant={tenant} />
                 ) : (
                   <AssistantMessage
                     name={tenant.name}
@@ -299,17 +427,17 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
               tenantId={tenant.id}
             />
           )}
-          {agenticRetriever.status !== "idle" && agenticRunId && (
+          {agenticStatus !== "idle" && agenticRunId && (
             <AgenticResponse
               runId={agenticRunId}
               avatarName={tenant.name}
               avatarLogoUrl={tenant.logoUrl}
               tenantId={tenant.id}
-              currentStepType={agenticRetriever.currentStepType}
-              currentResponse={agenticRetriever.currentResponse}
-              steps={agenticRetriever.steps}
-              stepTiming={agenticRetriever.stepTiming}
-              result={agenticRetriever.result}
+              currentStepType={currentStepType}
+              currentResponse={currentResponse}
+              steps={steps}
+              stepTiming={stepTiming}
+              result={result}
             />
           )}
         </div>
@@ -383,7 +511,7 @@ function AgenticResponseContainer({
       runId={runId}
       currentStepType={null}
       currentResponse={null}
-      steps={run.steps} // TODO: this run stuff (runId, step, stepTiming, result) is in messages.agenticInfo JSONB col
+      steps={run.steps}
       stepTiming={run.stepTiming}
       result={run.result}
       avatarName={tenant.name}

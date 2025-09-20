@@ -134,12 +134,16 @@ export const PROVIDER_CONFIG = {
 export const DEFAULT_MODEL = "claude-sonnet-4-20250514";
 export const DEFAULT_PROVIDER = "anthropic";
 export const DEFAULT_NAMING_MODEL = "gpt-4o-mini";
+export const AGENTIC_MOCK_MODEL = "Deep Search"; // TODO
 
 // Derive types from the config
 export type LLMProvider = keyof typeof PROVIDER_CONFIG;
 
 // List of all currently valid model names for validation
-export const ALL_VALID_MODELS = Object.values(PROVIDER_CONFIG).flatMap((config) => config.models) as string[];
+export const ALL_VALID_MODELS = [
+  ...Object.values(PROVIDER_CONFIG).flatMap((config) => config.models),
+  AGENTIC_MOCK_MODEL, // TODO: this is the wrong approach bc this will show Deep Search in model settings and model picker
+] as string[];
 
 // Create Zod schema for model validation
 export const modelSchema = z.enum(ALL_VALID_MODELS as [string, ...string[]]);

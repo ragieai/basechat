@@ -22,7 +22,7 @@ import {
 
 type StepType = "think" | "search" | "code" | "answer" | "plan" | "citation" | "surrender";
 
-type Run = {
+export type Run = {
   timestamp: string;
   stepTiming: Array<number>;
   steps: Array<z.infer<typeof stepResultSchema>>;
@@ -67,6 +67,7 @@ export type AgenticRetriever = {
   submit: (payload: { query: string; effort?: string }) => void;
   getRun: (id: string) => Run | null;
   getEvidence: (runId: string, evidenceId: string) => z.infer<typeof evidenceSchema> | null;
+  setPastRuns: (runs: Record<string, Run>) => void;
   reset: () => void;
 };
 
@@ -121,6 +122,11 @@ type SetErrorAction = {
   payload: string;
 };
 
+type SetPastRunsAction = {
+  type: "SET_PAST_RUNS";
+  payload: Record<string, Run>;
+};
+
 type AgenticRetrieverAction =
   | SetQueryAction
   | SetEffortAction
@@ -131,7 +137,8 @@ type AgenticRetrieverAction =
   | SetErrorAction
   | TakeAgentUpdatedStreamEventAction
   | TakeRunItemStreamEventAction
-  | TakeRawResponseEventAction;
+  | TakeRawResponseEventAction
+  | SetPastRunsAction;
 
 function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRetrieverAction): AgenticRetrieverState {
   switch (action.type) {
@@ -192,13 +199,13 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
       let _streamedResponses = state._streamedResponses;
       switch (parsed.type) {
         case "response.created":
-          console.log("Response created:", parsed);
+          //console.log("Response created:", parsed);
           break;
         case "response.in_progress":
-          console.log("In-progress response:", parsed);
+          //console.log("In-progress response:", parsed);
           break;
         case "response.output_item.added":
-          console.log("Output item added:", parsed);
+          //console.log("Output item added:", parsed);
           _inprogressResponse = "";
           // Check if the item is a function call (which has a name property)
           if (parsed.item.type === "function_call") {
@@ -216,20 +223,20 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
           }
           break;
         case "handoff_call_item":
-          console.log("Handoff call item:", parsed);
+          //("Handoff call item:", parsed);
           _inprogressResponse = "";
           break;
         case "response.output_text.delta":
-          console.log("Output text delta:", parsed);
+          //console.log("Output text delta:", parsed);
           _inprogressResponse += parsed.delta;
           break;
         case "response.function_call_arguments.delta":
-          console.log("Function call arguments delta:", parsed);
+          //console.log("Function call arguments delta:", parsed);
           // TypeScript now knows parsed.delta exists because of discriminated union
           _inprogressResponse += parsed.delta;
           break;
         case "response.function_call_arguments.done":
-          console.log("Function call arguments done:", parsed);
+          //console.log("Function call arguments done:", parsed);
           try {
             const parsed = JSON.parse(state._inprogressResponse);
             _streamedResponses = [..._streamedResponses, { type: currentStepType || "think", data: parsed }];
@@ -238,10 +245,10 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
           }
           break;
         case "response.completed":
-          console.log("Response completed:", parsed);
+          //console.log("Response completed:", parsed);
           break;
         default:
-          console.log("Parsed response:", parsed);
+        //console.log("Parsed response:", parsed);
       }
 
       return {
@@ -300,6 +307,12 @@ function agenticRetrieverReducer(state: AgenticRetrieverState, action: AgenticRe
       // TODO: Implement retry logic
       return state;
     }
+    case "SET_PAST_RUNS": {
+      return {
+        ...state,
+        pastRuns: action.payload,
+      };
+    }
     default:
       return state;
   }
@@ -342,11 +355,11 @@ export default function useAgenticRetriever({
   }, []);
 
   const close = useCallback(() => {
-    console.log("Closing EventSource");
+    //console.log("Closing EventSource");
   }, []);
 
   const reset = useCallback(() => {
-    console.log("Resetting agentic retrieval state");
+    //console.log("Resetting agentic retrieval state");
     abortControllerRef.current?.abort();
     close();
     dispatch({ type: "RESET" });
@@ -394,7 +407,7 @@ export default function useAgenticRetriever({
     };
 
     const handleDone = async (e: EventSourceMessage) => {
-      console.log("Stream done event:", e.data);
+      //console.log("Stream done event:", e.data);
       let doneEvent = resultSchema.safeParse(JSON.parse(e.data));
       if (!doneEvent.success) {
         console.error("Failed to parse done event:", e.data, doneEvent.error);
@@ -408,7 +421,7 @@ export default function useAgenticRetriever({
       dispatch({ type: "TAKE_DONE_EVENT", payload: doneEvent.data.data });
       assert(runId, "Run ID is required");
       await onDone({ result: doneEvent.data.data, runId });
-      console.log("Stream closed", e.data);
+      //console.log("Stream closed", e.data);
     };
 
     let runId = "";
@@ -434,7 +447,7 @@ export default function useAgenticRetriever({
         }
       },
       async onopen(response) {
-        console.log("Stream opened");
+        //console.log("Stream opened");
         runId = response.headers.get("run-id")!;
         if (!runId) {
           throw new Error("Run ID is required");
@@ -443,7 +456,7 @@ export default function useAgenticRetriever({
         dispatch({ type: "START_RUN", payload: { runId, startTime: Date.now() } });
       },
       async onclose() {
-        console.log("Stream closed");
+        //console.log("Stream closed");
       },
       onerror(event) {
         console.error("Stream error:", event);
@@ -506,7 +519,7 @@ export default function useAgenticRetriever({
         const searchResultMap = item.output.query_details
           .flatMap((q) => q.search_results)
           .reduce<Record<string, z.infer<typeof evidenceSchema>>>((searchAcc, searchItem) => {
-            console.log("searchItem", searchItem.id);
+            //console.log("searchItem", searchItem.id);
             searchAcc[searchItem.id] = searchItem;
             return searchAcc;
           }, {});
@@ -528,7 +541,6 @@ export default function useAgenticRetriever({
 
   const getRun = useCallback(
     (runId: string) => {
-      console.log("getRun", runId, state.pastRuns[runId], state.pastRuns);
       if (runId in state.pastRuns) {
         return state.pastRuns[runId];
       }
@@ -583,6 +595,10 @@ export default function useAgenticRetriever({
     [getRun],
   );
 
+  const setPastRuns = useCallback((runs: Record<string, Run>) => {
+    dispatch({ type: "SET_PAST_RUNS", payload: runs });
+  }, []);
+
   console.log("state", state, new Set(state._rawResponseEvent.map((e) => e.type)));
 
   const hookRes = useMemo(() => {
@@ -599,6 +615,7 @@ export default function useAgenticRetriever({
       getRun,
       reset,
       getEvidence,
+      setPastRuns,
     };
   }, [
     state.query,
@@ -613,6 +630,7 @@ export default function useAgenticRetriever({
     getRun,
     reset,
     getEvidence,
+    setPastRuns,
   ]);
 
   return hookRes;

@@ -17,6 +17,7 @@ export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   const params = reqBodySchema.parse(await request.json());
+  // TODO: ^ this was getting syntax error, request was invalid JSON
 
   const { tenant } = await requireAuthContext(params.tenantSlug);
 

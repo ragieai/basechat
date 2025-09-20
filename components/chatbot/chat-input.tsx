@@ -429,6 +429,7 @@ export default function ChatInput(props: ChatInputProps) {
               {/* TODO mock default values for Token progress bar for agentic mode */}
               {/* Token progress bar for agentic mode - only show when data is available */}
               {retrievalMode === "agentic" &&
+                false && // TODO: remove false when tokens ready
                 (props.remainingTokens !== undefined || props.tokenBudget !== undefined) && (
                   <>
                     <div className="h-[1px] w-full bg-[#D7D7D7] my-4" />
