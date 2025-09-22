@@ -14,13 +14,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { updateTenantSchema } from "@/lib/api";
 import {
-  ALL_VALID_MODELS,
   LLM_DISPLAY_NAMES,
   LLM_LOGO_MAP,
   LLMModel,
   modelArraySchema,
   getEnabledModelsFromDisabled,
   modelSchema,
+  NON_AGENTIC_MODELS,
 } from "@/lib/llm/types";
 import * as schema from "@/lib/server/db/schema";
 
@@ -98,7 +98,7 @@ const ModelsField = (form: UseFormReturn<FormValues>) => {
             <p className="text-sm text-muted-foreground">Choose which models can be used by this chatbot</p>
           </div>
           <div className="space-y-5 pl-8">
-            {ALL_VALID_MODELS.map((model) => {
+            {NON_AGENTIC_MODELS.map((model) => {
               const isEnabled = !field.value?.includes(model);
               const isDefault = model === form.getValues("defaultModel");
               const [_, logoPath] = LLM_LOGO_MAP[model as string];

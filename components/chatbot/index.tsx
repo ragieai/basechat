@@ -329,7 +329,7 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
             // Add to past runs
             pastRuns[agenticInfo.runId] = run;
 
-            // For agentic messages, transform them for display
+            // For agent messages, transform them for display
             if (message.role === "assistant") {
               // Extract sources from the result evidence
               const sources =
