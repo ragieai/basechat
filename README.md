@@ -13,7 +13,7 @@ Base Chat is a multi-tenant RAG chatbot that uses [Ragie Connect](https://www.ra
 - **Knowledge Management**: Connect to various data sources through Ragie Connect
 - **Authentication**: Secure login using Auth.js with Google provider support
 - **Customization**: Add your organization's logo and customize the chat interface
-- **Multiple LLM Support**: Compatible with OpenAI, Google AI, Anthropic, and Groq
+- **Multiple LLM Support**: Compatible with OpenAI, Google AI, Anthropic, Groq, and more
 
 ## Prerequisites
 
