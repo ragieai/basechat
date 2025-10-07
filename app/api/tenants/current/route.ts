@@ -14,14 +14,6 @@ export async function PATCH(request: NextRequest) {
   const json = await request.json();
   const update = updateTenantSchema.partial().parse(json);
 
-  // Additional validation for disabledModels if it's being updated
-  if (update.disabledModels !== undefined) {
-    const modelParseResult = modelArraySchema.safeParse(update.disabledModels);
-    if (!modelParseResult.success) {
-      return Response.json({ error: "Invalid model array" }, { status: 400 });
-    }
-  }
-
   try {
     await db.update(schema.tenants).set(update).where(eq(schema.tenants.id, tenant.id));
   } catch (error) {
