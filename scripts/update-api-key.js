@@ -2,7 +2,7 @@ import crypto from "crypto";
 
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { pgTable, text } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 // run with: npm run update-api-key <slug> <apiKey> [partition]
 // <slug> is the tenant identifier
@@ -39,6 +39,10 @@ const tenantsSchema = pgTable("tenants", {
   slug: text("slug").notNull(),
   ragieApiKey: text("ragie_api_key"),
   ragiePartition: text("ragie_partition"),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
 });
 
 console.log(`Updating tenant ${slug} with API key ${apiKey} and partition ${partition}`);
@@ -48,14 +52,19 @@ async function updateRagieApiKey(slug, apiKey, partition) {
     // Encrypt the API key
     const encryptedApiKey = encryptApiKey(apiKey);
 
-    // Update the tenant record
-    await db
+    // Update the tenant record and get the result
+    const result = await db
       .update(tenantsSchema)
       .set({
         ragieApiKey: encryptedApiKey,
         ragiePartition: partition || null,
       })
       .where(eq(tenantsSchema.slug, slug));
+
+    // Check if any rows were affected
+    if (result.rowCount === 0) {
+      throw new Error(`No tenant found with slug: ${slug}`);
+    }
 
     console.log(`Successfully updated Ragie API key for tenant ${slug}`);
   } catch (error) {
