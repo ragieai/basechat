@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { anonymous } from "better-auth/plugins";
+import { anonymous, mcp } from "better-auth/plugins";
 
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
@@ -20,6 +20,7 @@ if (settings.AUTH_GOOGLE_ID && settings.AUTH_GOOGLE_SECRET) {
 }
 
 export const auth = betterAuth({
+  baseURL: settings.BETTER_AUTH_URL,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema,
@@ -53,6 +54,9 @@ export const auth = betterAuth({
       onLinkAccount: async ({ anonymousUser, newUser }) => {
         await linkUsers(anonymousUser.user.id, newUser.user.id);
       },
+    }),
+    mcp({
+      loginPage: "/sign-in",
     }),
     nextCookies(), // This must be the last plugin
   ],
