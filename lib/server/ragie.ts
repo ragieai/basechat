@@ -59,7 +59,9 @@ export async function getRagieClientAndPartition(tenantId: string) {
   return { client, partition };
 }
 
-// we should use the client from the function above^ this is only for certain features not in the SDK (agentic, streaming)
+/**
+ * WARNING: only use for certain features not in the SDK (agentic, streaming, mcp).
+ */
 export async function getRagieApiKeyAndPartition(tenantId: string) {
   const { ragieApiKey, ragiePartition } = await getRagieSettingsByTenantId(tenantId);
 
