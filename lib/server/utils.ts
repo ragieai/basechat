@@ -28,6 +28,15 @@ export async function requireSession() {
   return session;
 }
 
+export async function requireMcpSession() {
+  const session = await auth.api.getMcpSession({
+    headers: await headers(),
+  });
+
+  assert(session, "not logged in");
+  return session;
+}
+
 export async function requireAuthContext(slug: string) {
   const session = await requireSession();
   const { profile, tenant } = await getCachedAuthContextByUserId(session.user.id, slug);
@@ -41,6 +50,12 @@ export async function requireAuthContext(slug: string) {
     await invalidateAuthContextCacheForTenant(tenant.id);
   }
 
+  return { profile, tenant, session };
+}
+
+export async function requireMcpAuthContext(slug: string) {
+  const session = await requireMcpSession();
+  const { profile, tenant } = await getCachedAuthContextByUserId(session.userId, slug);
   return { profile, tenant, session };
 }
 

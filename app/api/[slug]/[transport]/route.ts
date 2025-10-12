@@ -1,17 +1,24 @@
 import { createMcpHandler } from "@vercel/mcp-adapter";
-import { withMcpAuth } from "better-auth/plugins";
+import { NextRequest } from "next/server";
 import { z } from "zod";
 
 import auth from "@/auth";
+import { getRagieClientAndPartition } from "@/lib/server/ragie";
+import { requireMcpAuthContext } from "@/lib/server/utils";
 
-const handler = withMcpAuth(auth, async (req, session) => {
-  // session contains the access token record with scopes and user ID
+const handler = async (req: NextRequest, { params }: { params: Promise<{ slug: string }> }) => {
+  const session = await auth.api.getMcpSession({
+    headers: req.headers,
+  });
   if (!session) {
-    //this is important and you must return 401
     return new Response(null, {
       status: 401,
     });
   }
+  const { slug } = await params;
+
+  const { profile, tenant } = await requireMcpAuthContext(slug);
+  const { client, partition } = await getRagieClientAndPartition(tenant.id);
 
   return createMcpHandler(
     (server) => {
@@ -73,6 +80,44 @@ const handler = withMcpAuth(auth, async (req, session) => {
           };
         },
       );
+
+      server.tool(
+        "retrieve",
+        "Retrieve relevant documents using Ragie SDK",
+        { query: z.string().describe("The search query for retrieval") },
+        async ({ query }: { query: string }) => {
+          try {
+            const response = await client.retrievals.retrieve({
+              partition,
+              query,
+              topK: 6,
+              rerank: false,
+              recencyBias: false,
+            });
+
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(response),
+                },
+              ],
+            };
+          } catch (error) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify({
+                    error: "Failed to retrieve documents",
+                    message: error instanceof Error ? error.message : "Unknown error",
+                  }),
+                },
+              ],
+            };
+          }
+        },
+      );
     },
     {
       capabilities: {
@@ -83,15 +128,18 @@ const handler = withMcpAuth(auth, async (req, session) => {
           fetch: {
             description: "Fetch the full contents of a document by its ID",
           },
+          retrieve: {
+            description: "Retrieve relevant documents using Ragie SDK",
+          },
         },
       },
     },
     {
-      basePath: "/api",
+      basePath: `/api/${slug}`,
       verboseLogs: true,
       maxDuration: 60,
     },
   )(req);
-});
+};
 
 export { handler as GET, handler as POST, handler as DELETE, handler as OPTIONS };
