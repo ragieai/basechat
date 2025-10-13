@@ -20,10 +20,10 @@ const handler = async (req: NextRequest, { params }: { params: Promise<{ slug: s
   const { apiKey, partition } = await getRagieApiKeyAndPartition(tenant.id);
 
   // Proxy the request to the Ragie MCP server
-  const ragieMcpUrl = `${RAGIE_API_BASE_URL}/mcp/${partition}/`;
+  const localRagieMcpUrl = `${RAGIE_API_BASE_URL}/mcp/${partition}/`;
 
   try {
-    const response = await fetch(ragieMcpUrl, {
+    const response = await fetch(localRagieMcpUrl, {
       method: req.method,
       headers: {
         ...Object.fromEntries(req.headers.entries()),
