@@ -7,6 +7,8 @@ export const COMPANY_NAME = "Acme Corp";
 // assert(process.env.BASE_URL);
 export const BASE_URL = process.env.BASE_URL!;
 
+export const BETTER_AUTH_URL = process.env.BETTER_AUTH_URL!;
+
 // assert(process.env.DATABASE_URL);
 export const DATABASE_URL = process.env.DATABASE_URL!;
 

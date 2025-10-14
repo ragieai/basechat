@@ -276,3 +276,51 @@ export const authenticators = pgTable(
   ],
 );
 /** End Auth.js schema */
+
+export const oauthApplications = pgTable(
+  "oauth_applications",
+  {
+    ...timestampFields, // define id here as not a primary key, must use composite
+    id: uuid("id").notNull().defaultRandom(),
+    clientId: text("client_id").notNull().unique(),
+    clientSecret: text("client_secret"), // Optional for public clients using PKCE
+    name: text("name").notNull(), // Name of the OAuth client
+    redirectURLs: text("redirect_urls"), // Comma-separated list of redirect URLs
+    metadata: text("metadata"), // Additional metadata for the OAuth client
+    type: text("type").notNull(), // Type of OAuth client (e.g., web, mobile)
+    disabled: boolean("disabled").notNull().default(false), // Indicates if the client is disabled
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }), // ID of the user who owns the client (optional)
+  },
+  (t) => ({
+    compositePK: primaryKey({
+      columns: [t.id, t.clientId],
+    }),
+  }),
+);
+
+export const oauthAccessTokens = pgTable("oauth_access_tokens", {
+  ...baseFields,
+  accessToken: text("access_token").notNull(), // Access token issued to the client
+  refreshToken: text("refresh_token"), // Refresh token issued to the client
+  accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true, mode: "date" }).notNull(), // Expiration date of the access token
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true, mode: "date" }), // Expiration date of the refresh token
+  clientId: text("client_id")
+    .references(() => oauthApplications.clientId, { onDelete: "cascade" })
+    .notNull(), // ID of the OAuth client
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(), // ID of the user associated with the token
+  scopes: text("scopes"), // Comma-separated list of scopes granted
+});
+
+export const oauthConsents = pgTable("oauth_consents", {
+  ...baseFields,
+  userId: uuid("user_id")
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull(), // ID of the user who gave consent
+  clientId: text("client_id")
+    .references(() => oauthApplications.clientId, { onDelete: "cascade" })
+    .notNull(), // ID of the OAuth client
+  scopes: text("scopes"), // Comma-separated list of scopes granted
+  consentGiven: boolean("consent_given").notNull().default(false), // Indicates if the user has given consent
+});
