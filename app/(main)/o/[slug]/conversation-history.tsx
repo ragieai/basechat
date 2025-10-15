@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { conversationListResponseSchema, conversationSchema } from "@/lib/api";

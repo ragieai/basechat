@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v3";
 
 const DEFAULT_TEMPERATURE = 0.3;
 

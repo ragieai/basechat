@@ -2,7 +2,7 @@
 
 import assert from "assert";
 
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { finalAnswerSchema, stepResultSchema, evidenceSchema } from "@/components/agentic-retriever/types";
 import db from "@/lib/server/db";

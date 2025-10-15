@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import Logo from "@/components/tenant/logo/logo";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

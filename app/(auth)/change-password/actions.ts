@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { z, ZodError } from "zod";
+import { z, ZodError } from "zod/v3";
 
 import auth from "@/auth";
 import { getSignInPath } from "@/lib/paths";

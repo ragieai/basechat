@@ -1,5 +1,5 @@
 import { AppMentionEvent, GenericMessageEvent } from "@slack/web-api";
-import { CoreMessage } from "ai";
+import { ModelMessage } from "ai";
 import assertNever from "assert-never";
 
 import * as schema from "@/lib/server/db/schema";
@@ -17,7 +17,7 @@ interface RetrieverSettings {
 
 export interface ReplyContext {
   conversationId: string;
-  messages: CoreMessage[];
+  messages: ModelMessage[];
   sources: any[];
 }
 
@@ -116,7 +116,7 @@ export default class ConversationContext {
       conversationId: this._conversation.id,
     });
 
-    const messages: CoreMessage[] = all.map(({ role, content }) => {
+    const messages: ModelMessage[] = all.map(({ role, content }) => {
       switch (role) {
         case "assistant":
           return { role: "assistant" as const, content: content ?? "" };

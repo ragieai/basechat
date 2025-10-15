@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { createInvites } from "@/lib/server/service";
 import { requireAdminContextFromRequest } from "@/lib/server/utils";

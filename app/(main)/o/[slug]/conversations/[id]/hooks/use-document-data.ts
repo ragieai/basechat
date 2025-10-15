@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { getRagieSourcePath } from "@/lib/paths";
 

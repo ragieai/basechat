@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useCallback, useState, useMemo, ReactNode } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { finalAnswerSchema } from "./types";
 import useAgenticRetriever, { AgenticRetriever } from "./use-agentic-retriever";

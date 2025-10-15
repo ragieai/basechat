@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { SourceMetadata } from "@/lib/types";
 

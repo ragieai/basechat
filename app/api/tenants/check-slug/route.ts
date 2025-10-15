@@ -1,6 +1,6 @@
 import { and, eq, not } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import db from "@/lib/server/db";
 import { tenants } from "@/lib/server/db/schema";

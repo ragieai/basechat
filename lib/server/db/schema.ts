@@ -13,7 +13,7 @@ import {
   uuid,
   index,
 } from "drizzle-orm/pg-core";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { stepResultSchema, finalAnswerSchema } from "@/components/agentic-retriever/types";
 import { DEFAULT_MODEL, modelSchema, modelArraySchema } from "@/lib/llm/types";

@@ -1,7 +1,7 @@
 import { WebClient } from "@slack/web-api";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";

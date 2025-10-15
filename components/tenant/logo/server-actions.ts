@@ -4,7 +4,7 @@ import assert from "assert";
 import { Readable } from "stream";
 
 import * as Minio from "minio";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { deleteTenantLogo, setTenantLogo } from "@/lib/server/service";
 import { requireAuthContext } from "@/lib/server/utils";

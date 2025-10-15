@@ -495,7 +495,7 @@ export default function ModelSettings({ tenant }: Props) {
   }, [tenant]);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: formSchema.parse(formattedTenant),
   });
 

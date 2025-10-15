@@ -3,7 +3,7 @@ import assert from "assert";
 import argon2 from "argon2";
 import { headers } from "next/headers";
 import { redirect, unauthorized } from "next/navigation";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import auth from "@/auth";
 

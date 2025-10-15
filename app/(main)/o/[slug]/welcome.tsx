@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import ChatInput from "@/components/chatbot/chat-input";
 import Logo from "@/components/tenant/logo/logo";

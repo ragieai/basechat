@@ -4,7 +4,7 @@ import { openai } from "@ai-sdk/openai";
 import { WebClient } from "@slack/web-api";
 import { generateObject } from "ai";
 import Handlebars from "handlebars";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { ConversationMessageResponse, ReplyContext } from "@/lib/server/conversation-context";
 import * as schema from "@/lib/server/db/schema";

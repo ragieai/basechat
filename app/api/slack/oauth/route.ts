@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { BASE_URL, SLACK_CLIENT_ID } from "@/lib/server/settings";
 import { requireAdminContext } from "@/lib/server/utils";

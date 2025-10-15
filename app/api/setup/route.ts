@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { createTenant, setCurrentProfileId } from "@/lib/server/service";
 import { requireSession } from "@/lib/server/utils";
