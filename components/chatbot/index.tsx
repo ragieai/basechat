@@ -1,10 +1,10 @@
 "use client";
 
-import assert from "assert";
+import * as assert from "assert";
 
-import { experimental_useObject as useObject } from "ai/react";
+import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { useSearchSettings } from "@/hooks/use-search-settings";
 import {
@@ -13,9 +13,11 @@ import {
   createConversationMessageResponseSchema,
 } from "@/lib/api";
 import { getProviderForModel, LLMModel } from "@/lib/llm/types";
+import { getMessageText } from "@/lib/message-utils";
 import { getBillingSettingsPath } from "@/lib/paths";
 import { saveAgenticUserMessage, saveAgenticAssistantMessage } from "@/lib/server/agentic-actions";
 import * as schema from "@/lib/server/db/schema";
+import { ExtendedUIMessage } from "@/lib/types/messages";
 
 import { SourceMetadata } from "../../lib/types";
 import AgenticResponse from "../agentic-retriever/agentic-response";
@@ -26,18 +28,6 @@ import { Run } from "../agentic-retriever/use-agentic-retriever";
 
 import AssistantMessage from "./assistant-message";
 import ChatInput from "./chat-input";
-
-type AiMessage = {
-  content: string;
-  role: "assistant";
-  id?: string;
-  sources: SourceMetadata[];
-  model?: LLMModel;
-  type?: "agentic" | "standard";
-};
-type UserMessage = { content: string; role: "user" };
-type SystemMessage = { content: string; role: "system" };
-type Message = AiMessage | UserMessage | SystemMessage;
 
 const UserMessage = ({ content }: { content: string }) => (
   <div className="mb-6 rounded-md px-4 py-2 self-end bg-[#F5F5F7] max-w-[70%]">{content}</div>
@@ -53,7 +43,7 @@ interface Props {
 
 export default function Chatbot({ tenant, conversationId, initMessage, onSelectedSource, onMessageConsumed }: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ExtendedUIMessage[]>([]);
   const [agenticRunId, setAgenticRunId] = useState<string | null>(null);
   const [sourceCache, setSourceCache] = useState<Record<string, SourceMetadata[]>>({});
   const [pendingMessage, setPendingMessage] = useState<null | { id: string; model: LLMModel }>(null);
@@ -150,13 +140,13 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       setMessages((prev) => [
         ...prev,
         {
-          content: payload.result.text,
-          role: "assistant",
           id: payload.runId,
+          role: "assistant",
+          parts: [{ type: "text", text: payload.result.text }],
           sources,
           model: "Deep Search",
           type: "agentic",
-        } as AiMessage,
+        } as ExtendedUIMessage,
       ]);
 
       // Prepare agentic info for database storage using payload data
@@ -184,10 +174,10 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
   );
 
   const handleAgenticError = useCallback(async (payload: string) => {
-    const myMessage: AiMessage = {
-      content: `Agentic response failed: ${payload}`,
-      role: "assistant",
+    const myMessage: ExtendedUIMessage = {
       id: "123", // run won't be found by id, will show failed state
+      role: "assistant",
+      parts: [{ type: "text", text: `Agentic response failed: ${payload}` }],
       sources: [],
       model: "Deep Search",
       type: "agentic",
@@ -219,9 +209,9 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
       const id = res.headers.get("x-message-id");
       const model = res.headers.get("x-model");
 
-      assert(id);
+      assert.ok(id);
 
-      setPendingMessage({ id, model: model as LLMModel });
+      setPendingMessage({ id: id!, model: model as LLMModel });
       return res;
     },
     onError: console.error,
@@ -230,7 +220,16 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
 
       const content = event.object.message;
       const model = pendingMessageRef.current?.model;
-      setMessages((prev) => [...prev, { content: content, role: "assistant", sources: [], model }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          parts: [{ type: "text", text: content }],
+          sources: [],
+          model,
+        },
+      ]);
     },
   });
 
@@ -251,18 +250,32 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
 
     if (retrievalMode !== "agentic") {
       console.log("Submitting message:", content, "with model:", model);
-      setMessages([...messages, { content, role: "user" }]);
+      setMessages([
+        ...messages,
+        {
+          id: crypto.randomUUID(),
+          role: "user",
+          parts: [{ type: "text", text: content }],
+        },
+      ]);
       submit(payload);
     } else {
       console.log("Submitting to agentic retrieval mode:", content);
-      setMessages((prev) => [...prev, { content, role: "user" } as UserMessage]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "user",
+          parts: [{ type: "text", text: content }],
+        },
+      ]);
 
       // HACK: Agentic currently does not have a construct for previous messages in a conversation,
       // so shoe-horn in previous messages
       const contextQuery = allMessages
         .map((message) => {
           const roleLabel = message.role === "user" ? "userMessage" : "assistantMessage";
-          return `${roleLabel}: ${message.content}`;
+          return `${roleLabel}: ${getMessageText(message)}`;
         })
         .join("\n");
 
@@ -317,9 +330,9 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
 
         // Process all messages and extract agentic info for context
         const pastRuns: Record<string, Run> = {};
-        const processedMessages: Message[] = [];
+        const processedMessages: ExtendedUIMessage[] = [];
 
-        messages.forEach((message) => {
+        messages.forEach((message: any) => {
           if ("type" in message && message.type === "agentic" && "agenticInfo" in message && message.agenticInfo) {
             const agenticInfo = message.agenticInfo;
 
@@ -352,20 +365,34 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
 
               // Add transformed agentic message
               processedMessages.push({
-                content: message.content || "",
-                role: "assistant",
                 id: agenticInfo.runId,
+                role: "assistant",
+                parts: [{ type: "text", text: message.content || "" }],
                 sources,
                 model: "Deep Search",
                 type: "agentic",
-              } as AiMessage);
+              });
             } else {
-              // Add user messages as-is
-              processedMessages.push(message);
+              // Convert user message to UIMessage format
+              processedMessages.push({
+                id: (message as any).id,
+                role: (message as any).role,
+                parts: [{ type: "text", text: (message as any).content || "" }],
+                sources: (message as any).sources || [],
+                model: (message as any).model,
+                type: (message as any).type,
+              });
             }
           } else {
-            // Add standard messages as-is
-            processedMessages.push(message);
+            // Convert standard message to UIMessage format
+            processedMessages.push({
+              id: (message as any).id,
+              role: (message as any).role,
+              parts: [{ type: "text", text: (message as any).content || "" }],
+              sources: (message as any).sources || [],
+              model: (message as any).model,
+              type: (message as any).type,
+            });
           }
         });
 
@@ -400,7 +427,7 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
         <div className="flex flex-col h-full w-full p-4 max-w-[717px]">
           {allMessages.map((message, i) =>
             message.role === "user" ? (
-              <UserMessage key={i} content={message.content} />
+              <UserMessage key={i} content={getMessageText(message)} />
             ) : (
               <Fragment key={i}>
                 {message.type === "agentic" && message.id ? (
@@ -409,9 +436,9 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
                   <AssistantMessage
                     name={tenant.name}
                     logoUrl={tenant.logoUrl}
-                    content={message.content}
+                    content={getMessageText(message)}
                     id={message.id}
-                    sources={message.sources}
+                    sources={message.sources || []}
                     onSelectedSource={onSelectedSource}
                     model={message.model || selectedModel}
                     isGenerating={false}

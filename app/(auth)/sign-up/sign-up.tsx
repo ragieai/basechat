@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useReducer } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { signUp } from "@/lib/auth-client";
 import { getStartPath } from "@/lib/paths";

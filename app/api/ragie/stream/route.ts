@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { getRagieApiKeyAndPartition } from "@/lib/server/ragie";
 import { RAGIE_API_BASE_URL } from "@/lib/server/settings";

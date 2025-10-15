@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { modelSchema, modelArraySchema } from "@/lib/llm/types";
 

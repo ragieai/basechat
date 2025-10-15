@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v3";
 
 const toolNames = z.enum(["plan", "search", "code", "answer", "transfer_to_citation", "surrender"]);
 

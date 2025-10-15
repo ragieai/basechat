@@ -4,14 +4,13 @@ import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { NAMING_SYSTEM_PROMPT } from "@/lib/constants";
 import { DEFAULT_NAMING_MODEL } from "@/lib/llm/types";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 import { requireAuthContextFromRequest } from "@/lib/server/utils";
-
 
 const createConversationRequest = z.object({
   content: z.string(),

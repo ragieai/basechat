@@ -1,7 +1,7 @@
 import assert from "assert";
 
 import { NextRequest } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { getDataPath } from "@/lib/paths";
 import { saveConnection } from "@/lib/server/service";
