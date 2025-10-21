@@ -4,7 +4,6 @@ import { render } from "@react-email/components";
 import { User as SlackUser } from "@slack/web-api/dist/types/response/UsersInfoResponse";
 import { asc, and, eq, ne, sql, inArray, like, or } from "drizzle-orm";
 import { union } from "drizzle-orm/pg-core";
-import { unstable_cache, revalidateTag, revalidatePath } from "next/cache";
 import nodemailer from "nodemailer";
 import SMTPConnection from "nodemailer/lib/smtp-connection";
 
@@ -12,6 +11,7 @@ import { Member, MemberType } from "@/lib/api";
 import { getDisabledModels } from "@/lib/llm/types";
 import * as settings from "@/lib/server/settings";
 
+import { redisCacheWrapper, redisCache } from "../../cache-handler";
 import { InviteHtml, PagesLimitReachedHtml, ResetPasswordHtml, VerifyEmailHtml } from "../mail";
 
 import { provisionBillingCustomer } from "./billing";
@@ -325,7 +325,7 @@ async function getAuthContextByUserIdInternal(userId: string, slug: string) {
 }
 
 // Cached version that returns serialized data
-const getCachedAuthContextByUserIdInternal = unstable_cache(
+const getCachedAuthContextByUserIdInternal = redisCacheWrapper(
   async (userId: string, slug: string) => {
     return await getAuthContextByUserIdInternal(userId, slug);
   },
@@ -338,17 +338,11 @@ const getCachedAuthContextByUserIdInternal = unstable_cache(
 
 export async function invalidateAuthContextCache(userId: string) {
   try {
-    // Revalidate the auth-context tag
-    revalidateTag("auth-context");
+    // Revalidate the auth-context tag using Redis
+    await redisCache.revalidateTag("auth-context");
     console.log(`Cache invalidated for user: ${userId}`);
   } catch (error) {
     console.warn("Failed to invalidate auth context cache:", error);
-    // Fallback to revalidatePath if revalidateTag fails
-    try {
-      revalidatePath("/", "layout");
-    } catch (fallbackError) {
-      console.error("Failed to invalidate cache with fallback method:", fallbackError);
-    }
   }
 }
 
