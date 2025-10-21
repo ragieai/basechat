@@ -165,6 +165,15 @@ export async function saveConnection(tenantId: string, ragieConnectionId: string
   }
 }
 
+export async function getConnectionById(tenantId: string, connectionId: string) {
+  const rs = await db
+    .select()
+    .from(schema.connections)
+    .where(and(eq(schema.connections.tenantId, tenantId), eq(schema.connections.id, connectionId)));
+  assert(rs.length === 1);
+  return rs[0];
+}
+
 async function getMembersByTenantIdInternal(
   tenantId: string,
   page: number = 1,

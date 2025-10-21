@@ -1,9 +1,10 @@
 "use client";
 
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { MoreHorizontal, Trash } from "lucide-react";
+import { MoreHorizontal, RefreshCw, Trash } from "lucide-react";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
@@ -14,19 +15,43 @@ interface Props {
   tenant: {
     slug: string;
   };
+  connectionStatus: string;
 }
 
-export default function ManageConnectionMenu({ id, tenant }: Props) {
+export default function ManageConnectionMenu({ id, tenant, connectionStatus }: Props) {
   const router = useRouter();
+  const isSyncDisabled = connectionStatus !== "ready" && connectionStatus !== "failed";
 
   async function deleteConnection() {
-    const res = await fetch(`/api/connections/${id}`, {
-      headers: { tenant: tenant.slug },
-      method: "DELETE",
-    });
+    try {
+      const res = await fetch(`/api/connections/${id}`, {
+        headers: { tenant: tenant.slug },
+        method: "DELETE",
+      });
 
-    if (!res.ok) throw new Error("delete failed");
-    router.refresh();
+      if (!res.ok) throw new Error("delete failed");
+
+      toast.success("Connection deleted successfully");
+      router.refresh();
+    } catch (error) {
+      toast.error("Failed to delete connection");
+    }
+  }
+
+  async function syncConnection() {
+    try {
+      const res = await fetch(`/api/connections/${id}/sync`, {
+        headers: { tenant: tenant.slug },
+        method: "POST",
+      });
+
+      if (!res.ok) throw new Error("sync failed");
+
+      toast.success("Connector sync scheduled");
+      router.refresh();
+    } catch (error) {
+      toast.error("Failed to sync connection");
+    }
   }
 
   return (
@@ -37,6 +62,14 @@ export default function ManageConnectionMenu({ id, tenant }: Props) {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className={inter.className}>
+        <DropdownMenuItem
+          onSelect={isSyncDisabled ? undefined : syncConnection}
+          disabled={isSyncDisabled}
+          className={isSyncDisabled ? "opacity-50 cursor-not-allowed" : ""}
+        >
+          <RefreshCw />
+          Sync now
+        </DropdownMenuItem>
         <DropdownMenuItem onSelect={deleteConnection}>
           <Trash />
           Delete
