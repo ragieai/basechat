@@ -36,7 +36,6 @@ class CacheHandler {
     });
 
     this.redis.on("connect", () => {
-      console.log("Redis Client Connected");
       this.isConnected = true;
     });
 
@@ -60,12 +59,7 @@ class CacheHandler {
 
   private async ensureConnection() {
     if (!this.isConnected) {
-      try {
-        await this.connect();
-      } catch (error) {
-        console.error("Failed to reconnect to Redis:", error);
-        throw new Error("Redis connection failed");
-      }
+      await this.connect();
     }
   }
 
