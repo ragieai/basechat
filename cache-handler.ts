@@ -20,6 +20,7 @@ class CacheHandler {
   private redis: any;
   private options: CacheHandlerOptions;
   private isConnected: boolean = false;
+  private prefix: string = "basechat:";
 
   constructor(options: CacheHandlerOptions) {
     this.options = options;
@@ -67,7 +68,8 @@ class CacheHandler {
     try {
       await this.ensureConnection();
 
-      const cached = await this.redis.get(key);
+      const prefixedKey = `${this.prefix}${key}`;
+      const cached = await this.redis.get(prefixedKey);
       if (!cached) {
         return null;
       }
@@ -76,7 +78,7 @@ class CacheHandler {
 
       // Check if cache has expired
       if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
-        await this.redis.del(key);
+        await this.redis.del(prefixedKey);
         return null;
       }
 
@@ -101,15 +103,16 @@ class CacheHandler {
         expiresAt: expiresAt || 0,
       };
 
+      const prefixedKey = `${this.prefix}${key}`;
       // Store the cache value
-      await this.redis.set(key, JSON.stringify(cacheValue));
+      await this.redis.set(prefixedKey, JSON.stringify(cacheValue));
 
       // Store tag-to-key mappings for efficient tag-based invalidation
       if (ctx.tags && ctx.tags.length > 0) {
         const pipeline = this.redis.multi();
 
         for (const tag of ctx.tags) {
-          pipeline.sAdd(`tag:${tag}`, key);
+          pipeline.sAdd(`${this.prefix}tag:${tag}`, prefixedKey);
         }
 
         await pipeline.exec();
@@ -128,13 +131,14 @@ class CacheHandler {
       const pipeline = this.redis.multi();
 
       for (const tag of tagArray) {
-        const keys = await this.redis.sMembers(`tag:${tag}`);
+        const prefixedTag = `${this.prefix}tag:${tag}`;
+        const keys = await this.redis.sMembers(prefixedTag);
 
         if (keys.length > 0) {
           for (const key of keys) {
             pipeline.del(key);
           }
-          pipeline.del(`tag:${tag}`);
+          pipeline.del(prefixedTag);
         }
       }
 
