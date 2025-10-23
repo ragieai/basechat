@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 
   try {
     await changeRole(tenant.id, id, payload.role);
-    await invalidateTenantCache(tenant.id);
+    await invalidateTenantCache(tenant.slug);
   } catch (e) {
     return renderError(e);
   }

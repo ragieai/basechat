@@ -98,7 +98,7 @@ export default class CacheHandler {
     // Start new connection attempt
     this.connectionPromise = (async () => {
       try {
-        await this.redisClient!.connect();
+        await this.redisClient.connect();
         this.isConnected = true;
         return true;
       } catch (error) {
@@ -162,7 +162,7 @@ export default class CacheHandler {
         return undefined;
       }
 
-      const data = await this.redisClient!.get(key);
+      const data = await this.redisClient.get(key);
       if (!data) {
         return undefined;
       }
@@ -209,11 +209,11 @@ export default class CacheHandler {
       const serialized = JSON.stringify(cacheEntry);
 
       // Store the cache entry with TTL
-      await this.redisClient!.setEx(key, TTL_SECONDS, serialized);
+      await this.redisClient.setEx(key, TTL_SECONDS, serialized);
 
       // Update tag indices - add this cache key to each tag's set
       // Using a pipeline for efficiency (though not strictly atomic)
-      const multi = this.redisClient!.multi();
+      const multi = this.redisClient.multi();
 
       for (const tag of tags) {
         const tagIndexKey = this.getTagIndexKey(tag);
@@ -244,14 +244,14 @@ export default class CacheHandler {
         const tagIndexKey = this.getTagIndexKey(tag);
 
         // Get all cache keys associated with this tag
-        const cacheKeys = await this.redisClient!.sMembers(tagIndexKey);
+        const cacheKeys = await this.redisClient.sMembers(tagIndexKey);
 
         if (cacheKeys.length === 0) {
           continue;
         }
 
         // Delete all cache entries and the tag index
-        const multi = this.redisClient!.multi();
+        const multi = this.redisClient.multi();
 
         for (const cacheKey of cacheKeys) {
           multi.del(cacheKey);
