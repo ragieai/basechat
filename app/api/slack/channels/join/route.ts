@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
       // Remove channel from tenant's configured channels
       const currentChannels = tenant.slackChannels || [];
-      const updatedChannels = currentChannels.filter((id) => id !== channelId);
+      const updatedChannels = currentChannels.filter((id: any) => id !== channelId);
       await db.update(schema.tenants).set({ slackChannels: updatedChannels }).where(eq(schema.tenants.id, tenant.id));
     }
 

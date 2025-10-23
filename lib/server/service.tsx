@@ -11,7 +11,7 @@ import { Member, MemberType } from "@/lib/api";
 import { getDisabledModels } from "@/lib/llm/types";
 import * as settings from "@/lib/server/settings";
 
-import CacheHandler from "../../cache-handler";
+import CacheHandler, { buildCacheKey, buildTenantTag, buildTenantUserTag } from "../../cache-handler";
 import { InviteHtml, PagesLimitReachedHtml, ResetPasswordHtml, VerifyEmailHtml } from "../mail";
 
 import { provisionBillingCustomer } from "./billing";
@@ -305,7 +305,10 @@ export async function createInvites(tenantId: string, invitedBy: string, emails:
   return invites;
 }
 
-// Internal function that gets data from DB - this gets cached
+/**
+ * Internal function that retrieves authentication context data from the database
+ * This function gets cached
+ */
 async function getAuthContextByUserIdInternal(userId: string, slug: string) {
   const rs = await db
     .select()
@@ -326,9 +329,11 @@ async function getAuthContextByUserIdInternal(userId: string, slug: string) {
   };
 }
 
-// Cached version that returns serialized data (internal)
+/**
+ * Retrieves serialized authentication context data from cache or database
+ */
 export async function getSerializedCachedAuthContext(userId: string, slug: string): Promise<any> {
-  const cacheKey = `basechat:cache:${slug}:${userId}`; // TODO: abstract cache tag
+  const cacheKey = buildCacheKey(slug, userId);
 
   const cached = await cacheHandler.get(cacheKey);
   if (cached) {
@@ -344,17 +349,22 @@ export async function getSerializedCachedAuthContext(userId: string, slug: strin
 
 // Invalidate the auth context cache for a specific user in a tenant
 export async function invalidateUserCache(slug: string, userId: string) {
-  const tag = `tenant:${slug}:user:${userId}`; // TODO: abstract cache tag
+  const tag = buildTenantUserTag(slug, userId);
   await cacheHandler.revalidateTag(tag);
 }
 
 // Invalidate the auth context cache for all users in a tenant
 export async function invalidateTenantCache(slug: string) {
-  const tag = `tenant:${slug}`; // TODO: abstract cachet tag
+  const tag = buildTenantTag(slug);
   await cacheHandler.revalidateTag(tag);
 }
 
-// Public function that transforms cached data back to proper types
+/**
+ * Retrieves authentication context data with proper type transformations.
+ * Gets cached data and transforms serialized date strings back to Date objects
+ * ensuring proper type handling.
+ *
+ */
 export async function getCachedAuthContext(userId: string, slug: string): Promise<any> {
   const cachedResult = await getSerializedCachedAuthContext(userId, slug);
 

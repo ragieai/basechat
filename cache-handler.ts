@@ -6,13 +6,35 @@ interface CacheEntry {
   tags: string[];
 }
 
+const TTL_SECONDS = 86400; // 24 hours
+const CACHE_KEY_PREFIX = "basechat:cache:";
+const TAG_INDEX_PREFIX = "basechat:tags:";
+
+/**
+ * Builds a cache key from tenant and user IDs
+ */
+export function buildCacheKey(slug: string, userId: string): string {
+  return `${CACHE_KEY_PREFIX}${slug}:${userId}`;
+}
+
+/**
+ * Builds a tenant-user tag for cache invalidation purposes
+ */
+export function buildTenantUserTag(slug: string, userId: string): string {
+  return `tenant:${slug}:user:${userId}`;
+}
+
+/**
+ * Builds a tenant tag for cache invalidation purposes
+ */
+export function buildTenantTag(slug: string): string {
+  return `tenant:${slug}`;
+}
+
 export default class CacheHandler {
   private redisClient: any | null = null;
   private isConnected: boolean = false;
   private connectionPromise: Promise<boolean> | null = null;
-  private readonly TTL_SECONDS = 86400; // 24 hours
-  private readonly CACHE_KEY_PREFIX = "basechat:cache:";
-  private readonly TAG_INDEX_PREFIX = "basechat:tags:";
 
   constructor() {
     // lazily initialize Redis
@@ -92,23 +114,15 @@ export default class CacheHandler {
   }
 
   /**
-   * Builds a cache key from tenant and user IDs
-   */
-  // THIS IS USED IN getCachedAuthContext in lib/server/service.tsx
-  private buildCacheKey(slug: string, userId: string): string {
-    return `${this.CACHE_KEY_PREFIX}${slug}:${userId}`;
-  }
-
-  /**
    * Parses a cache key to extract tenant and user IDs
    * Returns null if key format is invalid
    */
   private parseCacheKey(key: string): { slug: string; userId: string } | null {
-    if (!key.startsWith(this.CACHE_KEY_PREFIX)) {
+    if (!key.startsWith(CACHE_KEY_PREFIX)) {
       return null;
     }
 
-    const parts = key.slice(this.CACHE_KEY_PREFIX.length).split(":");
+    const parts = key.slice(CACHE_KEY_PREFIX.length).split(":");
     if (parts.length !== 2) {
       return null;
     }
@@ -125,8 +139,8 @@ export default class CacheHandler {
    */
   private buildTags(slug: string, userId: string): string[] {
     return [
-      `tenant:${slug}:user:${userId}`, // User-specific
-      `tenant:${slug}`, // Tenant-wide
+      buildTenantUserTag(slug, userId), // User-specific
+      buildTenantTag(slug), // Tenant-wide
     ];
   }
 
@@ -134,7 +148,7 @@ export default class CacheHandler {
    * Gets the Redis key for a tag index
    */
   private getTagIndexKey(tag: string): string {
-    return `${this.TAG_INDEX_PREFIX}${tag}`;
+    return `${TAG_INDEX_PREFIX}${tag}`;
   }
 
   /**
@@ -163,10 +177,6 @@ export default class CacheHandler {
 
   /**
    * Set a value in cache with tags
-   *
-   * This method expects the key to already contain tenant and user information.
-   * If you're generating the key elsewhere, ensure it follows the format:
-   * basechat:cache:{slug}:{userId}
    */
   async set(key: string, data: any): Promise<void> {
     try {
@@ -199,7 +209,7 @@ export default class CacheHandler {
       const serialized = JSON.stringify(cacheEntry);
 
       // Store the cache entry with TTL
-      await this.redisClient!.setEx(key, this.TTL_SECONDS, serialized);
+      await this.redisClient!.setEx(key, TTL_SECONDS, serialized);
 
       // Update tag indices - add this cache key to each tag's set
       // Using a pipeline for efficiency (though not strictly atomic)
@@ -208,7 +218,7 @@ export default class CacheHandler {
       for (const tag of tags) {
         const tagIndexKey = this.getTagIndexKey(tag);
         multi.sAdd(tagIndexKey, key);
-        multi.expire(tagIndexKey, this.TTL_SECONDS);
+        multi.expire(tagIndexKey, TTL_SECONDS);
       }
 
       await multi.exec();
@@ -219,9 +229,6 @@ export default class CacheHandler {
 
   /**
    * Revalidate (invalidate) cache entries by tag(s)
-   *
-   * This is called by Next.js when you use revalidateTag() in your app,
-   * or you can call it directly through helper functions.
    */
   async revalidateTag(tags: string | string[]): Promise<void> {
     try {
