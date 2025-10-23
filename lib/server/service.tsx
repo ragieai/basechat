@@ -11,7 +11,7 @@ import { Member, MemberType } from "@/lib/api";
 import { getDisabledModels } from "@/lib/llm/types";
 import * as settings from "@/lib/server/settings";
 
-import { redisCacheWrapper, redisCache } from "../../cache-handler";
+import CacheHandler from "../../cache-handler";
 import { InviteHtml, PagesLimitReachedHtml, ResetPasswordHtml, VerifyEmailHtml } from "../mail";
 
 import { provisionBillingCustomer } from "./billing";
@@ -20,6 +20,8 @@ import * as schema from "./db/schema";
 import { getRagieClientAndPartition } from "./ragie";
 
 type Role = (typeof schema.rolesEnum.enumValues)[number];
+
+const cacheHandler = new CacheHandler();
 
 async function getUniqueSlug(name: string) {
   // Remove any non-alphanumeric characters except hyphens and spaces
@@ -324,55 +326,39 @@ async function getAuthContextByUserIdInternal(userId: string, slug: string) {
   };
 }
 
-// Cached version that returns serialized data
-const getCachedAuthContextByUserIdInternal = redisCacheWrapper(
-  async (userId: string, slug: string) => {
-    return await getAuthContextByUserIdInternal(userId, slug);
-  },
-  ["auth-context-by-user-id"],
-  {
-    revalidate: 60 * 60 * 24, // 24 hours
-    tags: ["auth-context"],
-  },
-);
+// Cached version that returns serialized data (internal)
+export async function getSerializedCachedAuthContext(userId: string, slug: string): Promise<any> {
+  const cacheKey = `basechat:cache:${slug}:${userId}`; // TODO: abstract cache tag
 
-export async function invalidateAuthContextCache(userId: string) {
-  try {
-    // Revalidate the auth-context tag using Redis
-    await redisCache.revalidateTag("auth-context");
-    console.log(`Cache invalidated for user: ${userId}`);
-  } catch (error) {
-    console.warn("Failed to invalidate auth context cache:", error);
+  const cached = await cacheHandler.get(cacheKey);
+  if (cached) {
+    return cached.value;
   }
+
+  // Cache miss - fetch from DB
+  const data = await getAuthContextByUserIdInternal(userId, slug);
+
+  await cacheHandler.set(cacheKey, data);
+  return data;
 }
 
-// Helper function to invalidate auth context cache for all users in a tenant
-export async function invalidateAuthContextCacheForTenant(tenantId: string) {
-  try {
-    // Get all user IDs for this tenant
-    const userProfiles = await db
-      .select({
-        userId: schema.profiles.userId,
-      })
-      .from(schema.profiles)
-      .where(eq(schema.profiles.tenantId, tenantId));
+// Invalidate the auth context cache for a specific user in a tenant
+export async function invalidateUserCache(slug: string, userId: string) {
+  const tag = `tenant:${slug}:user:${userId}`; // TODO: abstract cache tag
+  await cacheHandler.revalidateTag(tag);
+}
 
-    // Invalidate cache for each user
-    const invalidationPromises = userProfiles.map((profile) => invalidateAuthContextCache(profile.userId));
-
-    await Promise.allSettled(invalidationPromises);
-    console.log(`Cache invalidated for ${userProfiles.length} users in tenant: ${tenantId}`);
-  } catch (error) {
-    console.error(`Failed to settle promises to invalidate auth context cache for tenant ${tenantId}:`, error);
-  }
+// Invalidate the auth context cache for all users in a tenant
+export async function invalidateTenantCache(slug: string) {
+  const tag = `tenant:${slug}`; // TODO: abstract cachet tag
+  await cacheHandler.revalidateTag(tag);
 }
 
 // Public function that transforms cached data back to proper types
-export async function getCachedAuthContextByUserId(userId: string, slug: string) {
-  const cachedResult = await getCachedAuthContextByUserIdInternal(userId, slug);
+export async function getCachedAuthContext(userId: string, slug: string): Promise<any> {
+  const cachedResult = await getSerializedCachedAuthContext(userId, slug);
 
   // Transform the tenant object to ensure Date fields are proper Date objects
-  // This is necessary because unstable_cache serializes to JSON, converting Date objects to strings
   const tenant = {
     ...cachedResult.tenant,
     // Convert date strings back to Date objects
@@ -386,7 +372,7 @@ export async function getCachedAuthContextByUserId(userId: string, slug: string)
     metadata: cachedResult.tenant.metadata
       ? {
           ...cachedResult.tenant.metadata,
-          plans: cachedResult.tenant.metadata.plans?.map((plan) => ({
+          plans: cachedResult.tenant.metadata.plans?.map((plan: any) => ({
             ...plan,
             endedAt: plan.endedAt ? new Date(plan.endedAt) : null,
             startedAt: new Date(plan.startedAt),
@@ -841,10 +827,11 @@ export async function linkUsers(fromUserId: string, toUserId: string) {
 
     if (realUserProfile) {
       await setCurrentProfileId(toUserId, realUserProfile.id);
+      const tenant = await getTenantByTenantId(realUserProfile.tenantId);
+      if (tenant) {
+        await invalidateUserCache(tenant.slug, toUserId);
+      }
     }
-
-    // Invalidate the auth context cache to set new profile
-    await invalidateAuthContextCache(toUserId);
   });
 }
 

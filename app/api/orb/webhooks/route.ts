@@ -8,7 +8,7 @@ import { PLANS, PlanType, SEAT_ADD_ON_NAME } from "@/lib/orb-types";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 import { getRagieClientAndPartition } from "@/lib/server/ragie";
-import { getTenantByTenantId, invalidateAuthContextCacheForTenant } from "@/lib/server/service";
+import { getTenantByTenantId, invalidateTenantCache } from "@/lib/server/service";
 import { ORB_WEBHOOK_SECRET, ORB_API_KEY } from "@/lib/server/settings";
 
 class TenantNotFoundError extends Error {
@@ -168,7 +168,7 @@ async function handleSubscriptionStarted(tenantId: string, payload: OrbWebhookPa
     .where(eq(schema.tenants.id, tenantId));
 
   // Invalidate auth context cache for all users in this tenant
-  await invalidateAuthContextCacheForTenant(tenantId);
+  await invalidateTenantCache(tenant.slug);
 }
 
 async function handlePlanChanged(tenantId: string, payload: OrbWebhookPayload) {
@@ -237,7 +237,7 @@ async function handlePlanChanged(tenantId: string, payload: OrbWebhookPayload) {
   }
 
   // Invalidate auth context cache for all users in this tenant
-  await invalidateAuthContextCacheForTenant(tenantId);
+  await invalidateTenantCache(tenant.slug);
 }
 
 async function handleFixedFeeQuantityUpdated(tenantId: string, payload: OrbWebhookPayload) {
@@ -279,7 +279,7 @@ async function handleFixedFeeQuantityUpdated(tenantId: string, payload: OrbWebho
     .where(eq(schema.tenants.id, tenantId));
 
   // Invalidate auth context cache for all users in this tenant
-  await invalidateAuthContextCacheForTenant(tenantId);
+  await invalidateTenantCache(tenant.slug);
 }
 
 async function handleCustomerCreated(tenantId: string, payload: OrbWebhookPayload) {
@@ -296,7 +296,7 @@ async function handleCustomerCreated(tenantId: string, payload: OrbWebhookPayloa
     .where(eq(schema.tenants.id, tenantId));
 
   // Invalidate auth context cache for all users in this tenant
-  await invalidateAuthContextCacheForTenant(tenantId);
+  await invalidateTenantCache(tenant.slug);
 }
 
 async function handleCustomerEdited(tenantId: string, payload: OrbWebhookPayload) {
@@ -313,5 +313,5 @@ async function handleCustomerEdited(tenantId: string, payload: OrbWebhookPayload
     .where(eq(schema.tenants.id, tenantId));
 
   // Invalidate auth context cache for all users in this tenant
-  await invalidateAuthContextCacheForTenant(tenantId);
+  await invalidateTenantCache(tenant.slug);
 }

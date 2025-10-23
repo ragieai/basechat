@@ -1,205 +1,294 @@
 import { createClient } from "redis";
 
-interface CacheValue {
+interface CacheEntry {
   value: any;
   lastModified: number;
   tags: string[];
-  expiresAt: number;
 }
 
-interface CacheContext {
-  tags: string[];
-  revalidate?: number; // seconds
-}
-
-interface CacheHandlerOptions {
-  [key: string]: any;
-}
-
-class CacheHandler {
-  private redis: any;
-  private options: CacheHandlerOptions;
+export default class CacheHandler {
+  private redisClient: any | null = null;
   private isConnected: boolean = false;
-  private prefix: string = "basechat:";
+  private connectionPromise: Promise<boolean> | null = null;
+  private readonly TTL_SECONDS = 86400; // 24 hours
+  private readonly CACHE_KEY_PREFIX = "basechat:cache:";
+  private readonly TAG_INDEX_PREFIX = "basechat:tags:";
 
-  constructor(options: CacheHandlerOptions) {
-    this.options = options;
-    this.redis = createClient({
-      url: process.env.REDIS_URL || "redis://localhost:6379",
-      socket: {
-        connectTimeout: 5000,
-      },
-    });
+  constructor() {
+    // lazily initialize Redis
+    const redisUrl = process.env.REDIS_URL;
 
-    // Handle Redis connection events
-    this.redis.on("error", (err: any) => {
-      console.error("Redis Client Error:", err);
-    });
+    if (!redisUrl) {
+      console.warn("REDIS_URL environment variable not set. Cache will be disabled.");
+      return;
+    }
 
-    this.redis.on("connect", () => {
-      this.isConnected = true;
-    });
-
-    this.redis.on("disconnect", () => {
-      console.log("Redis Client Disconnected");
-      this.isConnected = false;
-    });
-
-    // Connect to Redis
-    this.connect();
-  }
-
-  private async connect() {
     try {
-      await this.redis.connect();
+      this.redisClient = createClient({
+        url: redisUrl,
+        socket: {
+          reconnectStrategy: (retries) => {
+            // Fail fast - don't retry indefinitely
+            if (retries > 3) {
+              console.warn("Redis reconnection attempts exceeded, disabling cache");
+              return false;
+            }
+            return Math.min(retries * 100, 3000);
+          },
+        },
+      });
+
+      // Set up error handler
+      this.redisClient.on("error", (err: any) => {
+        console.warn("Redis client error:", err);
+        this.isConnected = false;
+      });
+
+      this.redisClient.on("connect", () => {
+        console.log("Redis client connected");
+        this.isConnected = true;
+      });
+
+      this.redisClient.on("disconnect", () => {
+        console.log("Redis client disconnected");
+        this.isConnected = false;
+      });
     } catch (error) {
-      console.error("Failed to connect to Redis:", error);
-      this.isConnected = false;
+      console.warn("Failed to create Redis client:", error);
+      this.redisClient = null;
     }
   }
 
-  private async ensureConnection() {
-    if (!this.isConnected) {
-      await this.connect();
+  private async ensureConnected(): Promise<boolean> {
+    if (!this.redisClient) {
+      return false;
     }
+
+    if (this.isConnected) {
+      return true;
+    }
+
+    // If connection is already in progress, wait for it
+    if (this.connectionPromise) {
+      return this.connectionPromise;
+    }
+
+    // Start new connection attempt
+    this.connectionPromise = (async () => {
+      try {
+        await this.redisClient!.connect();
+        this.isConnected = true;
+        return true;
+      } catch (error) {
+        console.warn("Failed to connect to Redis:", error);
+        this.isConnected = false;
+        return false;
+      } finally {
+        this.connectionPromise = null;
+      }
+    })();
+
+    return this.connectionPromise;
   }
 
-  async get(key: string): Promise<any> {
-    try {
-      await this.ensureConnection();
+  /**
+   * Builds a cache key from tenant and user IDs
+   */
+  // THIS IS USED IN getCachedAuthContext in lib/server/service.tsx
+  private buildCacheKey(slug: string, userId: string): string {
+    return `${this.CACHE_KEY_PREFIX}${slug}:${userId}`;
+  }
 
-      const prefixedKey = `${this.prefix}${key}`;
-      const cached = await this.redis.get(prefixedKey);
-      if (!cached) {
-        return null;
-      }
-
-      const parsed: CacheValue = JSON.parse(cached);
-
-      // Check if cache has expired
-      if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
-        await this.redis.del(prefixedKey);
-        return null;
-      }
-
-      return parsed.value;
-    } catch (error) {
-      console.error("Redis GET error:", error);
+  /**
+   * Parses a cache key to extract tenant and user IDs
+   * Returns null if key format is invalid
+   */
+  private parseCacheKey(key: string): { slug: string; userId: string } | null {
+    if (!key.startsWith(this.CACHE_KEY_PREFIX)) {
       return null;
     }
+
+    const parts = key.slice(this.CACHE_KEY_PREFIX.length).split(":");
+    if (parts.length !== 2) {
+      return null;
+    }
+
+    return {
+      slug: parts[0],
+      userId: parts[1],
+    };
   }
 
-  async set(key: string, data: any, ctx: CacheContext): Promise<void> {
+  /**
+   * Builds tags for a cache entry
+   * Returns both user-specific and tenant-wide tags
+   */
+  private buildTags(slug: string, userId: string): string[] {
+    return [
+      `tenant:${slug}:user:${userId}`, // User-specific
+      `tenant:${slug}`, // Tenant-wide
+    ];
+  }
+
+  /**
+   * Gets the Redis key for a tag index
+   */
+  private getTagIndexKey(tag: string): string {
+    return `${this.TAG_INDEX_PREFIX}${tag}`;
+  }
+
+  /**
+   * Get a value from cache by key
+   */
+  async get(key: string): Promise<CacheEntry | undefined> {
     try {
-      await this.ensureConnection();
-
-      const now = Date.now();
-      const expiresAt = ctx.revalidate ? now + ctx.revalidate * 1000 : null;
-
-      const cacheValue: CacheValue = {
-        value: data,
-        lastModified: now,
-        tags: ctx.tags || [],
-        expiresAt: expiresAt || 0,
-      };
-
-      const prefixedKey = `${this.prefix}${key}`;
-      // Store the cache value
-      await this.redis.set(prefixedKey, JSON.stringify(cacheValue));
-
-      // Store tag-to-key mappings for efficient tag-based invalidation
-      if (ctx.tags && ctx.tags.length > 0) {
-        const pipeline = this.redis.multi();
-
-        for (const tag of ctx.tags) {
-          pipeline.sAdd(`${this.prefix}tag:${tag}`, prefixedKey);
-        }
-
-        await pipeline.exec();
+      const connected = await this.ensureConnected();
+      if (!connected) {
+        console.warn("Redis unavailable in get()");
+        return undefined;
       }
+
+      const data = await this.redisClient!.get(key);
+      if (!data) {
+        return undefined;
+      }
+
+      const parsed: CacheEntry = JSON.parse(data);
+      return parsed;
     } catch (error) {
-      console.error("Redis SET error:", error);
+      console.warn("Error getting cache key:", error);
+      return undefined;
     }
   }
 
+  /**
+   * Set a value in cache with tags
+   *
+   * This method expects the key to already contain tenant and user information.
+   * If you're generating the key elsewhere, ensure it follows the format:
+   * basechat:cache:{slug}:{userId}
+   */
+  async set(key: string, data: any): Promise<void> {
+    try {
+      const connected = await this.ensureConnected();
+      if (!connected) {
+        console.warn("Redis unavailable in set()");
+        return;
+      }
+
+      // Parse the key to extract tenant and user IDs
+      const parsed = this.parseCacheKey(key);
+      if (!parsed) {
+        console.warn(`Invalid cache key format: ${key}`);
+        return;
+      }
+
+      const { slug, userId } = parsed;
+
+      // Build tags for this entry
+      const tags = this.buildTags(slug, userId);
+
+      // Create the cache entry
+      const cacheEntry: CacheEntry = {
+        value: data,
+        lastModified: Date.now(),
+        tags,
+      };
+
+      // Serialize the entry
+      const serialized = JSON.stringify(cacheEntry);
+
+      // Store the cache entry with TTL
+      await this.redisClient!.setEx(key, this.TTL_SECONDS, serialized);
+
+      // Update tag indices - add this cache key to each tag's set
+      // Using a pipeline for efficiency (though not strictly atomic)
+      const multi = this.redisClient!.multi();
+
+      for (const tag of tags) {
+        const tagIndexKey = this.getTagIndexKey(tag);
+        multi.sAdd(tagIndexKey, key);
+        multi.expire(tagIndexKey, this.TTL_SECONDS);
+      }
+
+      await multi.exec();
+    } catch (error) {
+      console.warn("Error setting cache key:", error);
+    }
+  }
+
+  /**
+   * Revalidate (invalidate) cache entries by tag(s)
+   *
+   * This is called by Next.js when you use revalidateTag() in your app,
+   * or you can call it directly through helper functions.
+   */
   async revalidateTag(tags: string | string[]): Promise<void> {
     try {
-      await this.ensureConnection();
+      const connected = await this.ensureConnected();
+      if (!connected) {
+        console.warn("Redis unavailable in revalidateTag()");
+        return;
+      }
 
       const tagArray = Array.isArray(tags) ? tags : [tags];
 
-      const pipeline = this.redis.multi();
-
       for (const tag of tagArray) {
-        const prefixedTag = `${this.prefix}tag:${tag}`;
-        const keys = await this.redis.sMembers(prefixedTag);
+        const tagIndexKey = this.getTagIndexKey(tag);
 
-        if (keys.length > 0) {
-          for (const key of keys) {
-            pipeline.del(key);
-          }
-          pipeline.del(prefixedTag);
+        // Get all cache keys associated with this tag
+        const cacheKeys = await this.redisClient!.sMembers(tagIndexKey);
+
+        if (cacheKeys.length === 0) {
+          continue;
         }
+
+        // Delete all cache entries and the tag index
+        const multi = this.redisClient!.multi();
+
+        for (const cacheKey of cacheKeys) {
+          multi.del(cacheKey);
+
+          // Also remove this cache key from all other tag indices it belongs to
+          const parsedKey = this.parseCacheKey(cacheKey);
+          if (parsedKey) {
+            const allTags = this.buildTags(parsedKey.slug, parsedKey.userId);
+            for (const otherTag of allTags) {
+              if (otherTag !== tag) {
+                multi.sRem(this.getTagIndexKey(otherTag), cacheKey);
+              }
+            }
+          }
+        }
+
+        // Delete the tag index itself
+        multi.del(tagIndexKey);
+
+        await multi.exec();
       }
-
-      await pipeline.exec();
-
-      console.log(`Revalidated tags: ${tagArray.join(", ")}`);
     } catch (error) {
-      console.error("Redis revalidateTag error:", error);
+      console.warn("Error revalidating tags:", error);
     }
   }
 
-  // If you want to have temporary in memory cache for a single request that is reset
-  // before the next request you can leverage this method
+  /**
+   * Reset per-request cache (not needed for Redis-backed cache)
+   */
   resetRequestCache(): void {
-    // This method is called for each request to reset any temporary in-memory cache
-    // Since we're using Redis, we don't need to do anything here
+    // No-op: we don't maintain per-request cache
   }
 
+  /**
+   * Gracefully disconnect from Redis
+   */
   async disconnect(): Promise<void> {
-    try {
-      if (this.isConnected) {
-        await this.redis.disconnect();
+    if (this.redisClient && this.isConnected) {
+      try {
+        await this.redisClient.quit();
+        this.isConnected = false;
+      } catch (error) {
+        console.warn("Error disconnecting from Redis:", error);
       }
-    } catch (error) {
-      console.error("Error disconnecting from Redis:", error);
     }
   }
 }
-
-// Singleton instance for application use
-const redisCache = new CacheHandler({});
-
-// Cache function similar to unstable_cache
-export function redisCacheWrapper<T extends any[], R>(
-  fn: (...args: T) => Promise<R>,
-  keyParts: string[],
-  options: {
-    revalidate?: number;
-    tags?: string[];
-  } = {},
-) {
-  return async (...args: T): Promise<R> => {
-    // Create cache key from function name and arguments
-    const cacheKey = `${keyParts.join("-")}-${JSON.stringify(args)}`;
-
-    // Try to get from cache first
-    const cached = await redisCache.get(cacheKey);
-    if (cached !== null) {
-      return cached;
-    }
-
-    // Execute function and cache result
-    const result = await fn(...args);
-    await redisCache.set(cacheKey, result, {
-      tags: options.tags || [],
-      revalidate: options.revalidate,
-    });
-
-    return result;
-  };
-}
-
-export { redisCache };
-export default CacheHandler;
