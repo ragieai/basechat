@@ -84,7 +84,7 @@ async function handlePartitionLimitEvent(event: WebhookEvent) {
   }
 
   // Invalidate auth context cache for all users in this tenant
-  await invalidateTenantCache(tenantResult[0].slug);
+  invalidateTenantCache(tenantResult[0].slug);
 
   return Response.json({ message: "success" });
 }

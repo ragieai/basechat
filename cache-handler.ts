@@ -6,21 +6,13 @@ interface CacheEntry {
   tags: string[];
 }
 
-const TTL_SECONDS = 86400; // 24 hours
-const CACHE_KEY_PREFIX = "basechat:cache:";
+const CACHE_KEY_PREFIX = "basechat:";
 const TAG_INDEX_PREFIX = "basechat:tags:";
-
-/**
- * Builds a cache key from tenant and user IDs
- */
-export function buildCacheKey(slug: string, userId: string): string {
-  return `${CACHE_KEY_PREFIX}${slug}:${userId}`;
-}
 
 /**
  * Builds a tenant-user tag for cache invalidation purposes
  */
-export function buildTenantUserTag(slug: string, userId: string): string {
+export function buildTenantUserTag(userId: string, slug: string): string {
   return `tenant:${slug}:user:${userId}`;
 }
 
@@ -29,6 +21,16 @@ export function buildTenantUserTag(slug: string, userId: string): string {
  */
 export function buildTenantTag(slug: string): string {
   return `tenant:${slug}`;
+}
+
+/**
+ * Builds tags array with tenant-wide and user-specific tags
+ */
+export function buildTags(userId: string, slug: string): string[] {
+  return [
+    buildTenantUserTag(userId, slug), // User-specific
+    buildTenantTag(slug), // Tenant-wide
+  ];
 }
 
 export default class CacheHandler {
@@ -114,37 +116,6 @@ export default class CacheHandler {
   }
 
   /**
-   * Parses a cache key to extract tenant and user IDs
-   * Returns null if key format is invalid
-   */
-  private parseCacheKey(key: string): { slug: string; userId: string } | null {
-    if (!key.startsWith(CACHE_KEY_PREFIX)) {
-      return null;
-    }
-
-    const parts = key.slice(CACHE_KEY_PREFIX.length).split(":");
-    if (parts.length !== 2) {
-      return null;
-    }
-
-    return {
-      slug: parts[0],
-      userId: parts[1],
-    };
-  }
-
-  /**
-   * Builds tags for a cache entry
-   * Returns both user-specific and tenant-wide tags
-   */
-  private buildTags(slug: string, userId: string): string[] {
-    return [
-      buildTenantUserTag(slug, userId), // User-specific
-      buildTenantTag(slug), // Tenant-wide
-    ];
-  }
-
-  /**
    * Gets the Redis key for a tag index
    */
   private getTagIndexKey(tag: string): string {
@@ -155,6 +126,7 @@ export default class CacheHandler {
    * Get a value from cache by key
    */
   async get(key: string): Promise<CacheEntry | undefined> {
+    const prefixedKey = `${CACHE_KEY_PREFIX}${key}`;
     try {
       const connected = await this.ensureConnected();
       if (!connected) {
@@ -162,7 +134,7 @@ export default class CacheHandler {
         return undefined;
       }
 
-      const data = await this.redisClient.get(key);
+      const data = await this.redisClient.get(prefixedKey);
       if (!data) {
         return undefined;
       }
@@ -178,52 +150,42 @@ export default class CacheHandler {
   /**
    * Set a value in cache with tags
    */
-  async set(key: string, data: any): Promise<void> {
+  async set(key: string, data: any, ctx: any): Promise<void> {
+    const prefixedKey = `${CACHE_KEY_PREFIX}${key}`;
     try {
       const connected = await this.ensureConnected();
       if (!connected) {
         console.warn("Redis unavailable in set()");
-        return;
+        return undefined;
       }
-
-      // Parse the key to extract tenant and user IDs
-      const parsed = this.parseCacheKey(key);
-      if (!parsed) {
-        console.warn(`Invalid cache key format: ${key}`);
-        return;
-      }
-
-      const { slug, userId } = parsed;
-
-      // Build tags for this entry
-      const tags = this.buildTags(slug, userId);
 
       // Create the cache entry
       const cacheEntry: CacheEntry = {
         value: data,
         lastModified: Date.now(),
-        tags,
+        tags: ctx.tags,
       };
 
       // Serialize the entry
       const serialized = JSON.stringify(cacheEntry);
 
-      // Store the cache entry with TTL
-      await this.redisClient.setEx(key, TTL_SECONDS, serialized);
+      // Store the cache entry
+      await this.redisClient.setEx(prefixedKey, data.revalidate, serialized);
 
       // Update tag indices - add this cache key to each tag's set
       // Using a pipeline for efficiency (though not strictly atomic)
       const multi = this.redisClient.multi();
 
-      for (const tag of tags) {
+      for (const tag of ctx.tags) {
         const tagIndexKey = this.getTagIndexKey(tag);
-        multi.sAdd(tagIndexKey, key);
-        multi.expire(tagIndexKey, TTL_SECONDS);
+        multi.sAdd(tagIndexKey, prefixedKey);
+        multi.expire(tagIndexKey, data.revalidate);
       }
 
       await multi.exec();
     } catch (error) {
       console.warn("Error setting cache key:", error);
+      return undefined;
     }
   }
 
@@ -235,7 +197,7 @@ export default class CacheHandler {
       const connected = await this.ensureConnected();
       if (!connected) {
         console.warn("Redis unavailable in revalidateTag()");
-        return;
+        return undefined;
       }
 
       const tagArray = Array.isArray(tags) ? tags : [tags];
@@ -255,17 +217,6 @@ export default class CacheHandler {
 
         for (const cacheKey of cacheKeys) {
           multi.del(cacheKey);
-
-          // Also remove this cache key from all other tag indices it belongs to
-          const parsedKey = this.parseCacheKey(cacheKey);
-          if (parsedKey) {
-            const allTags = this.buildTags(parsedKey.slug, parsedKey.userId);
-            for (const otherTag of allTags) {
-              if (otherTag !== tag) {
-                multi.sRem(this.getTagIndexKey(otherTag), cacheKey);
-              }
-            }
-          }
         }
 
         // Delete the tag index itself
@@ -275,6 +226,7 @@ export default class CacheHandler {
       }
     } catch (error) {
       console.warn("Error revalidating tags:", error);
+      return undefined;
     }
   }
 

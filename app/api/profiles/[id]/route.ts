@@ -23,7 +23,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
 
   try {
     await deleteProfile(profile, tenant.id, id);
-    await invalidateTenantCache(tenant.slug);
+    invalidateTenantCache(tenant.slug);
   } catch (e) {
     return renderError(e);
   }
@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 
   try {
     await changeRole(tenant.id, id, payload.role);
-    await invalidateTenantCache(tenant.slug);
+    invalidateTenantCache(tenant.slug);
   } catch (e) {
     return renderError(e);
   }

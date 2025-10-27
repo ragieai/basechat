@@ -2,7 +2,6 @@ import { eq } from "drizzle-orm";
 import { NextRequest } from "next/server";
 
 import { updateTenantSchema } from "@/lib/api";
-import { modelArraySchema } from "@/lib/llm/types";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
 import { invalidateTenantCache } from "@/lib/server/service";
@@ -22,7 +21,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    await invalidateTenantCache(tenant.slug);
+    invalidateTenantCache(tenant.slug);
   } catch (error) {
     console.error(`Failed to invalidate auth context cache for tenant ${tenant.id}:`, error);
   }

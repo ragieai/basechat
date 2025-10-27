@@ -33,7 +33,7 @@ export async function requireAuthContext(slug: string) {
     tenant.trialExpiresAt < new Date()
   ) {
     await updateTenantPaidStatus(tenant.id, "expired");
-    await invalidateTenantCache(tenant.slug);
+    invalidateTenantCache(tenant.slug);
   }
 
   return { profile, tenant, session };

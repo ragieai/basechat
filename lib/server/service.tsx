@@ -4,6 +4,7 @@ import { render } from "@react-email/components";
 import { User as SlackUser } from "@slack/web-api/dist/types/response/UsersInfoResponse";
 import { asc, and, eq, ne, sql, inArray, like, or } from "drizzle-orm";
 import { union } from "drizzle-orm/pg-core";
+import { unstable_cache, revalidateTag } from "next/cache";
 import nodemailer from "nodemailer";
 import SMTPConnection from "nodemailer/lib/smtp-connection";
 
@@ -11,7 +12,7 @@ import { Member, MemberType } from "@/lib/api";
 import { getDisabledModels } from "@/lib/llm/types";
 import * as settings from "@/lib/server/settings";
 
-import CacheHandler, { buildCacheKey, buildTenantTag, buildTenantUserTag } from "../../cache-handler";
+import { buildTags, buildTenantTag, buildTenantUserTag } from "../../cache-handler";
 import { InviteHtml, PagesLimitReachedHtml, ResetPasswordHtml, VerifyEmailHtml } from "../mail";
 
 import { provisionBillingCustomer } from "./billing";
@@ -20,8 +21,6 @@ import * as schema from "./db/schema";
 import { getRagieClientAndPartition } from "./ragie";
 
 type Role = (typeof schema.rolesEnum.enumValues)[number];
-
-const cacheHandler = new CacheHandler();
 
 async function getUniqueSlug(name: string) {
   // Remove any non-alphanumeric characters except hyphens and spaces
@@ -332,38 +331,38 @@ async function getAuthContextByUserIdInternal(userId: string, slug: string) {
 /**
  * Retrieves serialized authentication context data from cache or database
  */
-export async function getSerializedCachedAuthContext(userId: string, slug: string): Promise<any> {
-  const cacheKey = buildCacheKey(slug, userId);
-
-  const cached = await cacheHandler.get(cacheKey);
-  if (cached) {
-    return cached.value;
-  }
-
-  // Cache miss - fetch from DB
-  const data = await getAuthContextByUserIdInternal(userId, slug);
-
-  await cacheHandler.set(cacheKey, data);
-  return data;
+export function getSerializedCachedAuthContext(userId: string, slug: string) {
+  return unstable_cache(
+    async (userId: string, slug: string) => {
+      return await getAuthContextByUserIdInternal(userId, slug);
+    },
+    ["basechat-auth-context"],
+    {
+      revalidate: 86400, // 24 hours in seconds
+      tags: buildTags(userId, slug),
+    },
+  )(userId, slug);
 }
 
-// Invalidate the auth context cache for a specific user in a tenant
-export async function invalidateUserCache(slug: string, userId: string) {
-  const tag = buildTenantUserTag(slug, userId);
-  await cacheHandler.revalidateTag(tag);
+/**
+ * Invalidate the auth context cache for a specific user in a tenant
+ */
+export function invalidateUserCache(userId: string, slug: string) {
+  const tag = buildTenantUserTag(userId, slug);
+  revalidateTag(tag);
 }
 
-// Invalidate the auth context cache for all users in a tenant
-export async function invalidateTenantCache(slug: string) {
+/**
+ * Invalidate the auth context cache for all users in this tenant
+ */
+export function invalidateTenantCache(slug: string) {
   const tag = buildTenantTag(slug);
-  await cacheHandler.revalidateTag(tag);
+  revalidateTag(tag);
 }
 
 /**
  * Retrieves authentication context data with proper type transformations.
- * Gets cached data and transforms serialized date strings back to Date objects
- * ensuring proper type handling.
- *
+ * Gets cached data and transforms serialized date strings back to Date objects.
  */
 export async function getCachedAuthContext(userId: string, slug: string): Promise<any> {
   const cachedResult = await getSerializedCachedAuthContext(userId, slug);
@@ -839,7 +838,7 @@ export async function linkUsers(fromUserId: string, toUserId: string) {
       await setCurrentProfileId(toUserId, realUserProfile.id);
       const tenant = await getTenantByTenantId(realUserProfile.tenantId);
       if (tenant) {
-        await invalidateUserCache(tenant.slug, toUserId);
+        invalidateUserCache(toUserId, tenant.slug);
       }
     }
   });
