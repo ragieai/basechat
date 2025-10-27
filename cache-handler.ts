@@ -62,7 +62,7 @@ export default class CacheHandler {
 
       // Set up error handler
       this.redisClient.on("error", (err: any) => {
-        console.warn("Redis client error:", err);
+        console.error("Redis client error:", err);
         this.isConnected = false;
       });
 
@@ -76,7 +76,7 @@ export default class CacheHandler {
         this.isConnected = false;
       });
     } catch (error) {
-      console.warn("Failed to create Redis client:", error);
+      console.error("Failed to create Redis client:", error);
       this.redisClient = null;
     }
   }
@@ -102,7 +102,7 @@ export default class CacheHandler {
         this.isConnected = true;
         return true;
       } catch (error) {
-        console.warn("Failed to connect to Redis:", error);
+        console.error("Failed to connect to Redis:", error);
         this.isConnected = false;
         return false;
       } finally {
