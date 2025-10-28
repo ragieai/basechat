@@ -6,11 +6,7 @@ import { NextRequest } from "next/server";
 import { getPricingPlansPath } from "@/lib/paths";
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
-import {
-  saveConnection,
-  sendPageLimitNotificationEmail,
-  invalidateAuthContextCacheForTenant,
-} from "@/lib/server/service";
+import { saveConnection, sendPageLimitNotificationEmail, invalidateTenantCache } from "@/lib/server/service";
 import { DEFAULT_PARTITION_LIMIT, RAGIE_WEBHOOK_SECRET, BASE_URL } from "@/lib/server/settings";
 import { validateSignature } from "@/lib/server/utils";
 
@@ -88,7 +84,7 @@ async function handlePartitionLimitEvent(event: WebhookEvent) {
   }
 
   // Invalidate auth context cache for all users in this tenant
-  await invalidateAuthContextCacheForTenant(event.payload.partition);
+  invalidateTenantCache(tenantResult[0].slug);
 
   return Response.json({ message: "success" });
 }
