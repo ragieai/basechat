@@ -365,6 +365,7 @@ export function invalidateUserCache(userId: string, slug: string) {
  * Invalidate the auth context cache for all users in this tenant
  */
 export function invalidateTenantCache(slug: string) {
+  console.log("Invalidating tenant cache for slug:", slug);
   const tag = buildTenantTag(slug);
   revalidateTag(tag);
 }
@@ -375,6 +376,8 @@ export function invalidateTenantCache(slug: string) {
  */
 export async function getCachedAuthContext(userId: string, slug: string): Promise<any> {
   const cachedResult = await getSerializedCachedAuthContext(userId, slug);
+  console.log("getting cached auth context for userId:", userId, "slug:", slug);
+  console.log("cachedResult:", cachedResult);
 
   // Transform the tenant object to ensure Date fields are proper Date objects
   const tenant = {

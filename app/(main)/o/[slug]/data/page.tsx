@@ -18,6 +18,7 @@ export default async function DataIndexPage({ params, searchParams }: Props) {
   const p = await params;
   const sp = await searchParams;
   const { tenant, session } = await adminOrRedirect(p.slug);
+  console.log("Data Page: tenant:", tenant, "session:", session);
   const connections = await db.select().from(schema.connections).where(eq(schema.connections.tenantId, tenant.id));
 
   // Create a map of source types to connections for quick lookup

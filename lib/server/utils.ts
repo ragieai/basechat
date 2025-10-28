@@ -51,6 +51,7 @@ export async function requireAdminContextFromRequest(request: Request) {
 
 export async function requireAdminContext(slug: string) {
   const context = await requireAuthContext(slug);
+  console.log("Require Admin Context: context:", context);
   if (context.profile.role !== "admin") unauthorized();
   return context;
 }
