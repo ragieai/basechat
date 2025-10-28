@@ -376,8 +376,6 @@ export function invalidateTenantCache(slug: string) {
  */
 export async function getCachedAuthContext(userId: string, slug: string): Promise<any> {
   const cachedResult = await getSerializedCachedAuthContext(userId, slug);
-  console.log("getting cached auth context for userId:", userId, "slug:", slug);
-  console.log("cachedResult:", cachedResult);
 
   // Transform the tenant object to ensure Date fields are proper Date objects
   const tenant = {
