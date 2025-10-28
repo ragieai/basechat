@@ -138,6 +138,7 @@ export default class CacheHandler {
       if (!data) {
         return undefined;
       }
+      console.log("CACHE HIT for key:", prefixedKey);
 
       const parsed: CacheEntry = JSON.parse(data);
       return parsed;
@@ -165,6 +166,7 @@ export default class CacheHandler {
         lastModified: Date.now(),
         tags: ctx.tags,
       };
+      console.log("CACHE SET for key:", prefixedKey);
 
       // Serialize the entry
       const serialized = JSON.stringify(cacheEntry);
