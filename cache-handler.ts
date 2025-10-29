@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+import type { RedisClientType } from "redis";
 
 interface CacheEntry {
   value: any;
@@ -35,7 +36,7 @@ export function buildTags(userId: string, slug: string): string[] {
 }
 
 export default class CacheHandler {
-  private redisClient: any | null = null;
+  private redisClient: RedisClientType | null = null;
   private isConnected: boolean = false;
   private connectionPromise: Promise<boolean> | null = null;
 
@@ -100,7 +101,7 @@ export default class CacheHandler {
     // Start new connection attempt
     this.connectionPromise = (async () => {
       try {
-        await this.redisClient.connect();
+        await this.redisClient!.connect();
         this.isConnected = true;
         return true;
       } catch (error) {
@@ -134,7 +135,7 @@ export default class CacheHandler {
         return undefined;
       }
 
-      const data = await this.redisClient.get(prefixedKey);
+      const data = await this.redisClient!.get(prefixedKey);
       if (!data) {
         return undefined;
       }
@@ -179,10 +180,15 @@ export default class CacheHandler {
       const serialized = JSON.stringify(cacheEntry);
 
       // Store the cache entry
-      await this.redisClient.setEx(prefixedKey, fixedData.revalidate, serialized);
+      await this.redisClient!.set(prefixedKey, serialized, {
+        expiration: {
+          type: "EX",
+          value: fixedData.revalidate,
+        },
+      });
       // Update tag indices - add this cache key to each tag's set
       // Using a pipeline for efficiency (though not strictly atomic)
-      const multi = this.redisClient.multi();
+      const multi = this.redisClient!.multi();
 
       for (const tag of fixedCtx.tags) {
         const tagIndexKey = this.getTagIndexKey(tag);
@@ -214,14 +220,14 @@ export default class CacheHandler {
         const tagIndexKey = this.getTagIndexKey(tag);
 
         // Get all cache keys associated with this tag
-        const cacheKeys = await this.redisClient.sMembers(tagIndexKey);
+        const cacheKeys = await this.redisClient!.sMembers(tagIndexKey);
 
         if (cacheKeys.length === 0) {
           continue;
         }
 
         // Delete all cache entries and the tag index
-        const multi = this.redisClient.multi();
+        const multi = this.redisClient!.multi();
 
         for (const cacheKey of cacheKeys) {
           multi.del(cacheKey);
