@@ -356,10 +356,10 @@ export function getSerializedCachedAuthContext(userId: string, slug: string) {
 /**
  * Invalidate the auth context cache for a specific user in a tenant
  */
-export function invalidateUserCache(userId: string, slug: string) {
-  const tag = buildTenantUserTag(userId, slug);
-  revalidateTag(tag);
-}
+// export function invalidateUserCache(userId: string, slug: string) {
+//   const tag = buildTenantUserTag(userId, slug);
+//   revalidateTag(tag);
+// }
 
 /**
  * Invalidate the auth context cache for all users in this tenant
@@ -848,7 +848,8 @@ export async function linkUsers(fromUserId: string, toUserId: string) {
       await setCurrentProfileId(toUserId, realUserProfile.id);
       const tenant = await getTenantByTenantId(realUserProfile.tenantId);
       if (tenant) {
-        invalidateUserCache(toUserId, tenant.slug);
+        //invalidateUserCache(toUserId, tenant.slug);
+        invalidateTenantCache(tenant.slug);
       }
     }
   });

@@ -28,7 +28,7 @@ export function buildTenantTag(slug: string): string {
  */
 export function buildTags(userId: string, slug: string): string[] {
   return [
-    buildTenantUserTag(userId, slug), // User-specific
+    //buildTenantUserTag(userId, slug), // User-specific
     buildTenantTag(slug), // Tenant-wide
   ];
 }
