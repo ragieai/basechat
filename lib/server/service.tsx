@@ -357,6 +357,7 @@ export function getSerializedCachedAuthContext(userId: string, slug: string) {
  * Invalidate the auth context cache for a specific user in a tenant
  */
 export function invalidateUserCache(userId: string, slug: string) {
+  console.log("Invalidating user cache for userId:", userId, "slug:", slug);
   const tag = buildTenantUserTag(userId, slug);
   revalidateTag(tag);
 }

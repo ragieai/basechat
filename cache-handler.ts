@@ -70,7 +70,6 @@ export default class CacheHandler {
       });
 
       this.redisClient.on("connect", () => {
-        console.log("Redis client connected");
         this.isConnected = true;
       });
 
