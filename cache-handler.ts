@@ -6,6 +6,7 @@ interface CacheEntry {
   tags: string[];
 }
 
+const DEFAULT_TTL = 84600; // 24 hours
 const CACHE_KEY_PREFIX = "basechat:";
 const TAG_INDEX_PREFIX = "basechat:tags:";
 
@@ -28,7 +29,7 @@ export function buildTenantTag(slug: string): string {
  */
 export function buildTags(userId: string, slug: string): string[] {
   return [
-    //buildTenantUserTag(userId, slug), // User-specific
+    buildTenantUserTag(userId, slug), // User-specific
     buildTenantTag(slug), // Tenant-wide
   ];
 }
@@ -138,7 +139,6 @@ export default class CacheHandler {
       if (!data) {
         return undefined;
       }
-      console.log("CACHE HIT for key:", prefixedKey);
 
       const parsed: CacheEntry = JSON.parse(data);
       return parsed;
@@ -153,6 +153,15 @@ export default class CacheHandler {
    */
   async set(key: string, data: any, ctx: any): Promise<void> {
     const prefixedKey = `${CACHE_KEY_PREFIX}${key}`;
+    const fixedCtx = {
+      ...ctx,
+      tags: Array.isArray(ctx.tags) ? ctx.tags : [ctx.tags],
+    };
+    const fixedData = {
+      ...data,
+      revalidate: typeof data.revalidate === "number" ? data.revalidate : DEFAULT_TTL,
+    };
+
     try {
       const connected = await this.ensureConnected();
       if (!connected) {
@@ -162,26 +171,24 @@ export default class CacheHandler {
 
       // Create the cache entry
       const cacheEntry: CacheEntry = {
-        value: data,
+        value: fixedData,
         lastModified: Date.now(),
-        tags: ctx.tags,
+        tags: fixedCtx.tags,
       };
-      console.log("CACHE SET for key:", prefixedKey);
 
       // Serialize the entry
       const serialized = JSON.stringify(cacheEntry);
 
       // Store the cache entry
-      await this.redisClient.setEx(prefixedKey, data.revalidate, serialized);
-
+      await this.redisClient.setEx(prefixedKey, fixedData.revalidate, serialized);
       // Update tag indices - add this cache key to each tag's set
       // Using a pipeline for efficiency (though not strictly atomic)
       const multi = this.redisClient.multi();
 
-      for (const tag of ctx.tags) {
+      for (const tag of fixedCtx.tags) {
         const tagIndexKey = this.getTagIndexKey(tag);
         multi.sAdd(tagIndexKey, prefixedKey);
-        multi.expire(tagIndexKey, data.revalidate);
+        multi.expire(tagIndexKey, fixedData.revalidate);
       }
 
       await multi.exec();

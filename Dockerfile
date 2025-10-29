@@ -1,5 +1,6 @@
 FROM node:22-alpine AS base
-ENV USE_REDIS=true
+ARG USE_REDIS=0
+ENV USE_REDIS=${USE_REDIS}
 
 # Install dependencies only when needed
 FROM base AS deps
