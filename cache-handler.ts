@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+import type { RedisClientType } from "redis";
 
 interface CacheEntry {
   value: any;
@@ -6,6 +7,7 @@ interface CacheEntry {
   tags: string[];
 }
 
+const DEFAULT_TTL = 84600; // 24 hours
 const CACHE_KEY_PREFIX = "basechat:";
 const TAG_INDEX_PREFIX = "basechat:tags:";
 
@@ -34,7 +36,7 @@ export function buildTags(userId: string, slug: string): string[] {
 }
 
 export default class CacheHandler {
-  private redisClient: any | null = null;
+  private redisClient: RedisClientType | null = null;
   private isConnected: boolean = false;
   private connectionPromise: Promise<boolean> | null = null;
 
@@ -69,7 +71,6 @@ export default class CacheHandler {
       });
 
       this.redisClient.on("connect", () => {
-        console.log("Redis client connected");
         this.isConnected = true;
       });
 
@@ -100,7 +101,7 @@ export default class CacheHandler {
     // Start new connection attempt
     this.connectionPromise = (async () => {
       try {
-        await this.redisClient.connect();
+        await this.redisClient!.connect();
         this.isConnected = true;
         return true;
       } catch (error) {
@@ -134,7 +135,7 @@ export default class CacheHandler {
         return undefined;
       }
 
-      const data = await this.redisClient.get(prefixedKey);
+      const data = await this.redisClient!.get(prefixedKey);
       if (!data) {
         return undefined;
       }
@@ -152,6 +153,15 @@ export default class CacheHandler {
    */
   async set(key: string, data: any, ctx: any): Promise<void> {
     const prefixedKey = `${CACHE_KEY_PREFIX}${key}`;
+    const fixedCtx = {
+      ...ctx,
+      tags: Array.isArray(ctx.tags) ? ctx.tags : [ctx.tags],
+    };
+    const fixedData = {
+      ...data,
+      revalidate: typeof data.revalidate === "number" ? data.revalidate : DEFAULT_TTL,
+    };
+
     try {
       const connected = await this.ensureConnected();
       if (!connected) {
@@ -161,25 +171,29 @@ export default class CacheHandler {
 
       // Create the cache entry
       const cacheEntry: CacheEntry = {
-        value: data,
+        value: fixedData,
         lastModified: Date.now(),
-        tags: ctx.tags,
+        tags: fixedCtx.tags,
       };
 
       // Serialize the entry
       const serialized = JSON.stringify(cacheEntry);
 
       // Store the cache entry
-      await this.redisClient.setEx(prefixedKey, data.revalidate, serialized);
-
+      await this.redisClient!.set(prefixedKey, serialized, {
+        expiration: {
+          type: "EX",
+          value: fixedData.revalidate,
+        },
+      });
       // Update tag indices - add this cache key to each tag's set
       // Using a pipeline for efficiency (though not strictly atomic)
-      const multi = this.redisClient.multi();
+      const multi = this.redisClient!.multi();
 
-      for (const tag of ctx.tags) {
+      for (const tag of fixedCtx.tags) {
         const tagIndexKey = this.getTagIndexKey(tag);
         multi.sAdd(tagIndexKey, prefixedKey);
-        multi.expire(tagIndexKey, data.revalidate);
+        multi.expire(tagIndexKey, fixedData.revalidate);
       }
 
       await multi.exec();
@@ -206,14 +220,14 @@ export default class CacheHandler {
         const tagIndexKey = this.getTagIndexKey(tag);
 
         // Get all cache keys associated with this tag
-        const cacheKeys = await this.redisClient.sMembers(tagIndexKey);
+        const cacheKeys = await this.redisClient!.sMembers(tagIndexKey);
 
         if (cacheKeys.length === 0) {
           continue;
         }
 
         // Delete all cache entries and the tag index
-        const multi = this.redisClient.multi();
+        const multi = this.redisClient!.multi();
 
         for (const cacheKey of cacheKeys) {
           multi.del(cacheKey);
