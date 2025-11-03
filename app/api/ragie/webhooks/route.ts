@@ -104,11 +104,7 @@ export async function POST(request: NextRequest) {
 
   const event = JSON.parse(new TextDecoder("utf-8").decode(buffer)) as WebhookEvent;
 
-  if (
-    event.type === "connection_sync_started" ||
-    event.type === "connection_sync_progress" ||
-    event.type === "connection_sync_finished"
-  ) {
+  if (event.type === "connection_sync_started" || event.type === "connection_sync_finished") {
     return await handleConnectionSyncEvent(event);
   } else if (event.type === "partition_limit_exceeded") {
     return await handlePartitionLimitEvent(event);
