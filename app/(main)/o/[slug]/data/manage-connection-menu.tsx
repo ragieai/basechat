@@ -50,7 +50,7 @@ export default function ManageConnectionMenu({ id, tenant, connectionStatus }: P
         if (res.status >= 400 && res.status < 500) {
           try {
             const errorData = await res.json();
-            const errorMessage = errorData.error || "Failed to sync connection";
+            const errorMessage = errorData.detail || "Failed to sync connection";
             toast.error(errorMessage);
           } catch {
             toast.error("Failed to sync connection");
