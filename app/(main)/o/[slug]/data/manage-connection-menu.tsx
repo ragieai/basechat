@@ -45,7 +45,21 @@ export default function ManageConnectionMenu({ id, tenant, connectionStatus }: P
         method: "POST",
       });
 
-      if (!res.ok) throw new Error("sync failed");
+      if (!res.ok) {
+        // For 4XX errors, try to extract the error detail message
+        if (res.status >= 400 && res.status < 500) {
+          try {
+            const errorData = await res.json();
+            const errorMessage = errorData.error || "Failed to sync connection";
+            toast.error(errorMessage);
+          } catch {
+            toast.error("Failed to sync connection");
+          }
+        } else {
+          toast.error("Failed to sync connection");
+        }
+        return;
+      }
 
       toast.success("Connector sync scheduled");
       router.refresh();

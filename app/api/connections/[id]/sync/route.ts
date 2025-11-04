@@ -14,10 +14,37 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await client.connections.sync({
       connectionId: connection.ragieConnectionId,
     });
-  } catch (e: any) {
-    if (e.rawResponse.status !== 404) throw e;
-    console.warn("connection missing in Ragie");
-  }
 
-  return Response.json(200, {});
+    return Response.json({ success: true });
+  } catch (e: any) {
+    // Handle errors from Ragie API
+    if (e?.rawResponse) {
+      const status = e.rawResponse.status;
+      let errorDetail = "Failed to sync connection";
+
+      // Try to extract error detail from response body
+      try {
+        // Clone the response to avoid consuming the original
+        const clonedResponse = e.rawResponse.clone();
+        const errorBody = await clonedResponse.json();
+        errorDetail = errorBody.detail || errorDetail;
+      } catch {
+        // If parsing fails, check if error message contains detail
+        if (e.message) {
+          errorDetail = e.message;
+        }
+      }
+
+      return Response.json({ error: errorDetail }, { status });
+    }
+
+    // For 404, log warning but still return error
+    if (e instanceof Error && e.message?.includes("404")) {
+      console.warn("connection missing in Ragie");
+      return Response.json({ error: "No connection found" }, { status: 404 });
+    }
+
+    // Re-throw unexpected errors
+    throw e;
+  }
 }
