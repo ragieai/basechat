@@ -3,7 +3,7 @@ import { google } from "@ai-sdk/google";
 import { groq } from "@ai-sdk/groq";
 import { openai } from "@ai-sdk/openai";
 import {
-  CoreMessage,
+  ModelMessage,
   DeepPartial,
   generateObject,
   LanguageModel,
@@ -12,7 +12,7 @@ import {
   StreamObjectResult,
 } from "ai";
 import { assertNever } from "assert-never";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { createConversationMessageResponseSchema } from "@/lib/api";
 import { DEFAULT_PROVIDER, getProviderForModel, getModelConfig } from "@/lib/llm/types";
@@ -23,7 +23,7 @@ type GenerateStreamOptions = {
   onFinish: StreamObjectOnFinishCallback<ConversationMessageResponse>;
 };
 
-function filterMessages(messages: CoreMessage[]) {
+function filterMessages(messages: ModelMessage[]) {
   return messages.filter((msg) => {
     if (!msg.content) return false;
     if (typeof msg.content === "string" && msg.content.trim() === "") return false;
@@ -32,7 +32,7 @@ function filterMessages(messages: CoreMessage[]) {
 }
 
 export interface GenerateContext {
-  messages: CoreMessage[];
+  messages: ModelMessage[];
 }
 
 export default interface Generator {

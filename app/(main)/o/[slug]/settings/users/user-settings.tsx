@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { ManageSeatsDialog } from "@/components/billing/manage-seats-dialog";
 import PrimaryButton from "@/components/primary-button";

@@ -277,7 +277,7 @@ export default function GeneralSettings({ tenant, canUploadLogo }: Props) {
   }, [tenant]);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: formSchema.parse(formattedTenant),
   });
 
