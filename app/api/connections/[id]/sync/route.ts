@@ -14,10 +14,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await client.connections.sync({
       connectionId: connection.ragieConnectionId,
     });
-  } catch (e: any) {
-    if (e.rawResponse.status !== 404) throw e;
-    console.warn("connection missing in Ragie");
-  }
 
-  return Response.json(200, {});
+    return Response.json({ success: true });
+  } catch (e: any) {
+    // Handle errors from Ragie API
+    const statusCode = e.statusCode;
+    const bodyJSON = JSON.parse(e.body);
+    const errorDetail = bodyJSON.detail;
+
+    return Response.json({ error: errorDetail }, { status: statusCode });
+  }
 }
