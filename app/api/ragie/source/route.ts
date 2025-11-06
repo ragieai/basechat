@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
-import { getRagieApiKeyAndPartition } from "@/lib/server/ragie";
+import { getRagieClientAndPartition } from "@/lib/server/ragie";
 import { RAGIE_API_BASE_URL } from "@/lib/server/settings";
 import { requireAuthContext } from "@/lib/server/utils";
 
@@ -27,24 +27,28 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { apiKey, partition } = await getRagieApiKeyAndPartition(tenant.id);
+    const { client, partition } = await getRagieClientAndPartition(tenant.id);
+    const url = new URL(params.url);
+    const pathParts = url.pathname.split("/").filter(Boolean); // Remove empty strings
+    // Expected path: ["documents", "{documentId}", "source"]
+    if (pathParts.length !== 3 || pathParts[0] !== "documents" || pathParts[2] !== "source") {
+      return new Response("Invalid URL format", { status: 400 });
+    }
+    const documentId = pathParts[1];
 
-    const upstreamResponse = await fetch(params.url, {
-      headers: {
-        authorization: `Bearer ${apiKey}`,
-        partition: partition,
-      },
-    });
+    const res = await client.documents.getSource({ partition, documentId });
 
     // If there's no body, bail out:
-    if (!upstreamResponse.body) {
+    if (!res) {
       console.error("No body in upstream response");
       return new Response("No body in upstream response", { status: 500 });
     }
 
-    return new Response(upstreamResponse.body, {
-      status: upstreamResponse.status,
-      headers: upstreamResponse.headers,
+    return new Response(res, {
+      status: 200,
+      headers: {
+        "Content-Type": "*/*",
+      },
     });
   } catch (error) {
     console.error("Error in source route:", error);
