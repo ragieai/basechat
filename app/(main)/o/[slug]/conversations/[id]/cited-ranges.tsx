@@ -63,14 +63,7 @@ export default function CitedRanges({ source, slug }: CitedRangesProps) {
             <div className="text-[#7749F8] text-sm">
               {source.mergedRanges.map((range, index) => (
                 <div key={index} className="my-2">
-                  <a
-                    href={
-                      source.ragieSourceUrl
-                        ? getRagieSourcePath(slug, source.ragieSourceUrl, range.startPage)
-                        : undefined
-                    }
-                    target="_blank"
-                  >
+                  <a href={getRagieSourcePath(slug, source.documentId, range.startPage)} target="_blank">
                     {range.startPage && range.endPage
                       ? range.startPage === range.endPage
                         ? `Page ${range.startPage}`
@@ -84,12 +77,7 @@ export default function CitedRanges({ source, slug }: CitedRangesProps) {
             </div>
           ) : (
             <div className="text-[#7749F8] text-sm">
-              <a
-                href={
-                  source.ragieSourceUrl ? getRagieSourcePath(slug, source.ragieSourceUrl, source.startPage) : undefined
-                }
-                target="_blank"
-              >
+              <a href={getRagieSourcePath(slug, source.documentId, source.startPage)} target="_blank">
                 {source.startPage &&
                   source.endPage &&
                   (source.startPage === source.endPage

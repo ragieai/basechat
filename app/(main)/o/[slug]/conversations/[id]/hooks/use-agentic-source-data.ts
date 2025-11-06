@@ -1,5 +1,6 @@
 import { useAgenticRetrieverContext } from "@/components/agentic-retriever/agentic-retriever-context";
 import { getRagieSourcePath } from "@/lib/paths";
+import { SourceMetadata } from "@/lib/types";
 
 import { DocumentDisplayData, MediaDisplayData } from "../shared-types";
 
@@ -7,10 +8,9 @@ interface UseAgenticSourceDataProps {
   runId: string;
   sourceId: string;
   slug: string;
-  apiBaseUrl: string;
 }
 
-export function useAgenticSourceData({ runId, sourceId, slug, apiBaseUrl }: UseAgenticSourceDataProps) {
+export function useAgenticSourceData({ runId, sourceId, slug }: UseAgenticSourceDataProps) {
   const agenticRetrival = useAgenticRetrieverContext();
   const source = agenticRetrival.getEvidence(runId, sourceId);
 
@@ -31,8 +31,7 @@ export function useAgenticSourceData({ runId, sourceId, slug, apiBaseUrl }: UseA
       ? new Date(source.document_metadata.document_uploaded_at * 1000).toISOString()
       : new Date().toISOString(),
     sourceUrl:
-      source.document_metadata.source_url ||
-      getRagieSourcePath(slug, `${apiBaseUrl}/documents/${source.document_id}/source`, source.metadata.start_page),
+      source.document_metadata.source_url || getRagieSourcePath(slug, source.document_id, source.metadata.start_page),
     metadata: {
       source_type: source.document_metadata.source_type || "unknown",
       source_url: source.document_metadata.source_url || "#",
@@ -72,7 +71,7 @@ export function useAgenticSourceData({ runId, sourceId, slug, apiBaseUrl }: UseA
   };
 
   // Create SourceMetadata for CitedRanges component
-  const sourceMetadata = {
+  const sourceMetadata: SourceMetadata = {
     source_type: source.document_metadata.source_type || "unknown",
     file_path: source.document_metadata.file_path || "",
     source_url: source.document_metadata.source_url || "#",
@@ -85,9 +84,6 @@ export function useAgenticSourceData({ runId, sourceId, slug, apiBaseUrl }: UseA
     endTime: source.metadata?.end_time,
     startPage: source.metadata?.start_page,
     endPage: source.metadata?.end_page,
-    ragieSourceUrl: source.document_metadata.source_url
-      ? undefined
-      : `${apiBaseUrl}/documents/${source.document_id}/source`,
     mergedRanges: source.metadata?.merged_ranges,
     mergedTimeRanges: source.metadata?.merged_time_ranges,
   };
