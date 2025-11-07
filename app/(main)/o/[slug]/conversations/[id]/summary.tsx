@@ -42,7 +42,6 @@ export default function Summary({ className, source, slug, onCloseClick = () => 
     documentId: source.documentId,
     slug,
     source: {
-      ragieSourceUrl: source.ragieSourceUrl,
       streamUrl: source.streamUrl,
       downloadUrl: source.downloadUrl,
       imageUrl: source.imageUrl,

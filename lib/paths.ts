@@ -34,10 +34,10 @@ export const getRagieStreamPath = (slug: string, streamUrl: string) => {
   return `/api/ragie/stream?${params.toString()}`;
 };
 
-export const getRagieSourcePath = (slug: string, sourceUrl: string, page?: number) => {
-  const params = new URLSearchParams({ url: sourceUrl, tenant: slug });
+export const getRagieSourcePath = (slug: string, documentId: string, page?: number) => {
+  const params = new URLSearchParams({ tenant: slug });
 
-  const baseUrl = `/api/ragie/source?${params.toString()}`;
+  const baseUrl = `/api/ragie/documents/${documentId}/source?${params.toString()}`;
 
   if (page) {
     return `${baseUrl}#page=${page}`;

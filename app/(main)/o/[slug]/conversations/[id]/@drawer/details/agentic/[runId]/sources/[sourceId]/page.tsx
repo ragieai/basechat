@@ -1,5 +1,3 @@
-import { RAGIE_API_BASE_URL } from "@/lib/server/settings";
-
 import SourceDetails from "./source-details";
 
 interface DetailSourcePageProps {
@@ -9,5 +7,5 @@ interface DetailSourcePageProps {
 export default async function DetailsSourcePage({ params }: DetailSourcePageProps) {
   const { slug, id, runId, sourceId } = await params;
 
-  return <SourceDetails slug={slug} sourceId={sourceId} runId={runId} apiBaseUrl={RAGIE_API_BASE_URL} />;
+  return <SourceDetails slug={slug} sourceId={sourceId} runId={runId} />;
 }

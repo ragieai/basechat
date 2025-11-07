@@ -7,22 +7,11 @@ import MediaDisplay from "@/app/(main)/o/[slug]/conversations/[id]/components/me
 import { useAgenticSourceData } from "@/app/(main)/o/[slug]/conversations/[id]/hooks/use-agentic-source-data";
 import { useMediaPlayer } from "@/app/(main)/o/[slug]/conversations/[id]/hooks/use-media-player";
 
-export default function SourceDetails({
-  slug,
-  sourceId,
-  runId,
-  apiBaseUrl,
-}: {
-  slug: string;
-  sourceId: string;
-  runId: string;
-  apiBaseUrl: string;
-}) {
+export default function SourceDetails({ slug, sourceId, runId }: { slug: string; sourceId: string; runId: string }) {
   const { documentData, mediaData, isLoading, error, sourceMetadata } = useAgenticSourceData({
     runId,
     sourceId,
     slug,
-    apiBaseUrl,
   });
 
   // Use media player hook for proper state management
