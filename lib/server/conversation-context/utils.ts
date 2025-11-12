@@ -5,8 +5,6 @@ import * as schema from "@/lib/server/db/schema";
 import { getRagieClientAndPartition } from "@/lib/server/ragie";
 import { SourceMetadata } from "@/lib/types";
 
-import { RAGIE_API_BASE_URL } from "../settings";
-
 export const FAILED_MESSAGE_CONTENT = `Failed to generate message from the model, please try again.`;
 
 export async function getRetrievalSystemPrompt(
