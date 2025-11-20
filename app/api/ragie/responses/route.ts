@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { getRagieApiKeyAndPartition } from "@/lib/server/ragie";
 import { RAGIE_API_BASE_URL } from "@/lib/server/settings";
@@ -7,7 +7,7 @@ import { requireAuthContext } from "@/lib/server/utils";
 
 const reqBodySchema = z.object({
   input: z.string(),
-  reasoning: z.object({
+  reasoningText: z.object({
     effort: z.enum(["low", "medium", "high"]),
   }),
   tenantSlug: z.string(),
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
             partitions: [partition],
           },
         ],
-        reasoning: params.reasoning,
+        reasoningText: params.reasoningText,
         stream: true,
       }),
     });

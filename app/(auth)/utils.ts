@@ -1,4 +1,4 @@
-import { z, ZodRawShape } from "zod";
+import { z, ZodRawShape } from "zod/v3";
 
 const passwordSchema = z.object({
   password: z.string().min(6, { message: "Password is required and must be at least 6 characters" }),

@@ -1,7 +1,7 @@
 import { EventSourceMessage, fetchEventSource } from "@microsoft/fetch-event-source";
 import { parse, OBJ, ARR, STR } from "partial-json";
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 import { getRagieAgentsSearchPath } from "@/lib/paths";
 
@@ -443,7 +443,7 @@ export default function useAgenticRetriever({
       method: "POST",
       body: JSON.stringify({
         input: state.query,
-        reasoning: {
+        reasoningText: {
           effort: state.effort,
         },
         tenantSlug,

@@ -1,5 +1,5 @@
 import Orb from "orb-billing";
-import { z } from "zod";
+import { z } from "zod/v3";
 
 // used on the pricing page for in-app upgrades
 export const tierSchema = z.union([

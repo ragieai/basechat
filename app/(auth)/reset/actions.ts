@@ -1,6 +1,6 @@
 "use server";
 
-import { z, ZodError } from "zod";
+import { z, ZodError } from "zod/v3";
 
 import auth from "@/auth";
 import { getChangePasswordPath } from "@/lib/paths";
