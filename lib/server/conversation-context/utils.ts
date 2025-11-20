@@ -5,8 +5,6 @@ import * as schema from "@/lib/server/db/schema";
 import { getRagieClientAndPartition } from "@/lib/server/ragie";
 import { SourceMetadata } from "@/lib/types";
 
-import { RAGIE_API_BASE_URL } from "../settings";
-
 export const FAILED_MESSAGE_CONTENT = `Failed to generate message from the model, please try again.`;
 
 export async function getRetrievalSystemPrompt(
@@ -75,11 +73,6 @@ export async function getRetrievalSystemPrompt(
 
     const imageUrl = chunk.links.self_image?.href ?? undefined;
 
-    let ragieSourceUrl = undefined;
-    if (!chunk.documentMetadata.source_url) {
-      ragieSourceUrl = `${RAGIE_API_BASE_URL}/documents/${chunk.documentId}/source`;
-    }
-
     return {
       ...chunk.documentMetadata,
       source_type: chunk.documentMetadata.source_type,
@@ -95,7 +88,6 @@ export async function getRetrievalSystemPrompt(
       imageUrl,
       startPage: chunk.metadata?.start_page,
       endPage: chunk.metadata?.end_page,
-      ragieSourceUrl,
     };
   });
 

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WarningMessage from "@/components/warning-message";
 import { getPricingPlansPath } from "@/lib/paths";
+import * as schema from "@/lib/server/db/schema";
 import ManageDataPreviewIcons from "@/public/manage-data-preview-icons.svg";
 
 import AddConnectionMenu from "./add-connection-menu";
@@ -30,7 +31,7 @@ interface Props {
   initialFiles: any[];
   nextCursor: string | null;
   totalDocuments: number;
-  connections: any[];
+  connections: (typeof schema.connections.$inferSelect)[];
   connectionMap: Record<
     string,
     {

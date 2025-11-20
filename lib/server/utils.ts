@@ -9,12 +9,7 @@ import auth from "@/auth";
 
 import { getCheckPath, getSignInPath, getTenantPath } from "../paths";
 
-import {
-  findTenantBySlug,
-  getCachedAuthContextByUserId,
-  invalidateAuthContextCacheForTenant,
-  updateTenantPaidStatus,
-} from "./service";
+import { findTenantBySlug, getCachedAuthContext, invalidateTenantCache, updateTenantPaidStatus } from "./service";
 import { BILLING_ENABLED } from "./settings";
 
 const tenantSchema = z.string();
@@ -30,7 +25,7 @@ export async function requireSession() {
 
 export async function requireAuthContext(slug: string) {
   const session = await requireSession();
-  const { profile, tenant } = await getCachedAuthContextByUserId(session.user.id, slug);
+  const { profile, tenant } = await getCachedAuthContext(session.user.id, slug);
 
   if (
     BILLING_ENABLED &&
@@ -38,7 +33,7 @@ export async function requireAuthContext(slug: string) {
     tenant.trialExpiresAt < new Date()
   ) {
     await updateTenantPaidStatus(tenant.id, "expired");
-    await invalidateAuthContextCacheForTenant(tenant.id);
+    invalidateTenantCache(tenant.slug);
   }
 
   return { profile, tenant, session };

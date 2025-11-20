@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import CONNECTOR_MAP from "@/lib/connector-map";
+import * as schema from "@/lib/server/db/schema";
 import { getStatusDisplayName } from "@/lib/utils";
 
 import ManageConnectionMenu from "./manage-connection-menu";
@@ -17,7 +18,7 @@ interface Props {
     slug: string;
     paidStatus: string;
   };
-  connections: any[];
+  connections: (typeof schema.connections.$inferSelect)[];
 }
 
 export default function ConnectionsTable({ tenant, connections }: Props) {
@@ -96,7 +97,7 @@ export default function ConnectionsTable({ tenant, connections }: Props) {
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <ManageConnectionMenu id={connection.id} tenant={tenant} />
+                  <ManageConnectionMenu id={connection.id} tenant={tenant} connectionStatus={connection.status} />
                 </TableCell>
               </TableRow>
             ))}

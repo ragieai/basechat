@@ -29,25 +29,28 @@ Do not include any other fields or text outside the JSON object.`;
 // Single source of truth for providers and their models
 export const PROVIDER_CONFIG = {
   openai: {
-    models: ["gpt-4o", "gpt-4.1-2025-04-14", "o3-2025-04-16", "gpt-5"] as const,
+    models: ["gpt-4o", "gpt-4.1-2025-04-14", "o3-2025-04-16", "gpt-5", "gpt-5.1"] as const,
     logo: "/openai.svg",
     modelLogos: {
       "gpt-4o": "/openai.svg",
       "gpt-4.1-2025-04-14": "/openai.svg",
       "o3-2025-04-16": "/openai.svg",
       "gpt-5": "/openai.svg",
+      "gpt-5.1": "/openai.svg",
     } as const,
     displayNames: {
       "gpt-4o": "GPT-4o",
       "gpt-4.1-2025-04-14": "GPT-4.1",
       "o3-2025-04-16": "o3",
       "gpt-5": "GPT-5",
+      "gpt-5.1": "GPT-5.1",
     } as const,
     modelConfigs: {
       "gpt-4o": { temperature: DEFAULT_TEMPERATURE },
       "gpt-4.1-2025-04-14": { temperature: DEFAULT_TEMPERATURE },
       "o3-2025-04-16": { temperature: DEFAULT_TEMPERATURE },
       "gpt-5": { temperature: 1, systemPrompt: GPT_5_PROMPT },
+      "gpt-5.1": { temperature: DEFAULT_TEMPERATURE, systemPrompt: GPT_5_PROMPT },
     } as const,
   },
   google: {

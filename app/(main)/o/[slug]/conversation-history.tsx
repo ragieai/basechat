@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod/v3";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { conversationListResponseSchema, conversationSchema } from "@/lib/api";
+import { conversationSchema } from "@/lib/api";
 import { getConversationPath, getTenantPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
 import EllipsesIcon from "@/public/icons/ellipses.svg";

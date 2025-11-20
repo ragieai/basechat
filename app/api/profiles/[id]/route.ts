@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod/v3";
 
-import { changeRole, deleteProfile, ServiceError } from "@/lib/server/service";
+import { changeRole, deleteProfile, invalidateTenantCache, ServiceError } from "@/lib/server/service";
 import { requireAdminContextFromRequest, requireAuthContextFromRequest } from "@/lib/server/utils";
 
 type Params = Promise<{ id: string }>;
@@ -23,6 +23,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
 
   try {
     await deleteProfile(profile, tenant.id, id);
+    invalidateTenantCache(tenant.slug);
   } catch (e) {
     return renderError(e);
   }
@@ -44,6 +45,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 
   try {
     await changeRole(tenant.id, id, payload.role);
+    invalidateTenantCache(tenant.slug);
   } catch (e) {
     return renderError(e);
   }

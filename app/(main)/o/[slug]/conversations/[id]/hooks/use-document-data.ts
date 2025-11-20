@@ -20,7 +20,6 @@ interface UseDocumentDataProps {
   documentId: string;
   slug: string;
   source: {
-    ragieSourceUrl?: string;
     streamUrl?: string;
     downloadUrl?: string;
     imageUrl?: string;
@@ -49,7 +48,7 @@ export function useDocumentData({ documentId, slug, source }: UseDocumentDataPro
             name: "Document",
             summary: "Document summary not available",
             updatedAt: new Date().toISOString(),
-            sourceUrl: source.ragieSourceUrl,
+            sourceUrl: getRagieSourcePath(slug, documentId),
             downloadUrl: source.downloadUrl,
             metadata: {
               source_type: "unknown",
@@ -78,7 +77,7 @@ export function useDocumentData({ documentId, slug, source }: UseDocumentDataPro
           updatedAt: json.metadata._source_updated_at
             ? new Date(json.metadata._source_updated_at * 1000).toISOString()
             : json.updatedAt,
-          sourceUrl: json.metadata.source_url || getRagieSourcePath(slug, source.ragieSourceUrl || ""),
+          sourceUrl: json.metadata.source_url || getRagieSourcePath(slug, documentId),
           downloadUrl: source.downloadUrl,
           metadata: json.metadata,
         };
@@ -90,7 +89,7 @@ export function useDocumentData({ documentId, slug, source }: UseDocumentDataPro
         setIsLoading(false);
       }
     })();
-  }, [documentId, slug, source.ragieSourceUrl, source.downloadUrl]);
+  }, [documentId, slug, source.downloadUrl]);
 
   return { documentData, isLoading };
 }
