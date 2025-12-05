@@ -60,6 +60,7 @@ export async function authOrRedirect(slug: string) {
     return await requireAuthContext(slug);
   } catch (e) {
     const tenant = await findTenantBySlug(slug);
+    console.error("authOrRedirect error", e);
     if (tenant?.isPublic) {
       return redirect(getCheckPath(slug));
     } else {
