@@ -3,6 +3,7 @@ import assert from "assert";
 import argon2 from "argon2";
 import { headers } from "next/headers";
 import { redirect, unauthorized } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 
 import auth from "@/auth";
@@ -32,8 +33,12 @@ export async function requireAuthContext(slug: string) {
     (tenant.paidStatus === "trial" || tenant.paidStatus === "legacy") &&
     tenant.trialExpiresAt < new Date()
   ) {
-    await updateTenantPaidStatus(tenant.id, "expired");
-    invalidateTenantCache(tenant.slug);
+    // Use after() to run side effects after the response is sent
+    // This avoids calling revalidateTag during render, which is not allowed
+    after(async () => {
+      await updateTenantPaidStatus(tenant.id, "expired");
+      invalidateTenantCache(tenant.slug);
+    });
   }
 
   return { profile, tenant, session };
