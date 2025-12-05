@@ -10,6 +10,8 @@ import { authOrRedirect } from "@/lib/server/utils";
 import Footer from "./footer";
 import Header from "./header";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ slug: string }>;
   children?: ReactNode;
