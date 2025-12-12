@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { anonymous } from "better-auth/plugins";
+import { jwt } from "better-auth/plugins/jwt";
 
 import db from "@/lib/server/db";
 import * as schema from "@/lib/server/db/schema";
@@ -25,7 +26,7 @@ export const auth = betterAuth({
     schema,
     usePlural: true,
   }),
-  advanced: { generateId: false },
+  advanced: { database: { generateId: false } },
   socialProviders,
   emailVerification: {
     sendVerificationEmail: async ({ user, url, token }, request) => {
@@ -52,6 +53,12 @@ export const auth = betterAuth({
       emailDomainName: "example.com",
       onLinkAccount: async ({ anonymousUser, newUser }) => {
         await linkUsers(anonymousUser.user.id, newUser.user.id);
+      },
+    }),
+    jwt({
+      jwt: {
+        issuer: settings.BASE_URL,
+        expirationTime: "30 days",
       },
     }),
     nextCookies(), // This must be the last plugin

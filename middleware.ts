@@ -3,11 +3,41 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { BASE_URL } from "./lib/server/settings";
 
+/**
+ * Check if the path is an embed route (e.g., /o/[slug]/embed)
+ */
+function isEmbedRoute(pathname: string): boolean {
+  const embedPattern = /^\/o\/[^/]+\/embed(\/|$)/;
+  return embedPattern.test(pathname);
+}
+
 export async function middleware(request: NextRequest) {
+  console.log("===>>middleware", request.nextUrl.pathname);
   const sessionCookie = getSessionCookie(request);
+  const pathname = request.nextUrl.pathname;
+
+  // Allow embed routes without authentication - they handle auth via JWT
+  if (isEmbedRoute(pathname)) {
+    console.log("===>>isEmbedRoute", pathname);
+    const requestHeaders = new Headers(request.headers);
+    // requestHeaders.set("x-pathname", pathname);
+
+    const response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
+    // Allow embedding in iframes from any origin for embed routes
+    // Security is handled via JWT token validation
+    response.headers.set("X-Frame-Options", "ALLOWALL");
+    // TODO: Double check that we want to completely remove the Content-Security-Policy header
+    response.headers.delete("Content-Security-Policy");
+
+    return response;
+  }
 
   if (!sessionCookie) {
-    const pathname = request.nextUrl.pathname;
     if (
       pathname !== "/sign-in" &&
       pathname !== "/sign-up" &&
@@ -25,6 +55,7 @@ export async function middleware(request: NextRequest) {
         redirectTo.search = request.nextUrl.search;
         newUrl.searchParams.set("redirectTo", redirectTo.toString());
       }
+      console.log("===>>redirecting to", pathname, "->", newUrl);
       return Response.redirect(newUrl);
     }
   }

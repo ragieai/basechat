@@ -49,9 +49,21 @@ interface Props {
   initMessage?: string;
   onSelectedSource: (source: SourceMetadata) => void;
   onMessageConsumed?: () => void;
+  /**
+   * When true, disables all advanced settings UI.
+   * Used for embedded chat experiences.
+   */
+  simplified?: boolean;
 }
 
-export default function Chatbot({ tenant, conversationId, initMessage, onSelectedSource, onMessageConsumed }: Props) {
+export default function Chatbot({
+  tenant,
+  conversationId,
+  initMessage,
+  onSelectedSource,
+  onMessageConsumed,
+  simplified = false,
+}: Props) {
   const [localInitMessage, setLocalInitMessage] = useState(initMessage);
   const [messages, setMessages] = useState<Message[]>([]);
   const [agenticRunId, setAgenticRunId] = useState<string | null>(null);
@@ -79,6 +91,7 @@ export default function Chatbot({ tenant, conversationId, initMessage, onSelecte
     canUseAgentic,
   } = useSearchSettings({
     tenant,
+    simplified,
   });
 
   const {

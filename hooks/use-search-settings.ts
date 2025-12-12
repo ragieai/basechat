@@ -26,6 +26,11 @@ interface SearchSettingsActions {
 
 interface UseSearchSettingsOptions {
   tenant: typeof schema.tenants.$inferSelect;
+  /**
+   * When true, disables all user-facing settings controls.
+   * Used for embedded/simplified chat experiences.
+   */
+  simplified?: boolean;
 }
 
 interface UseSearchSettingsReturn extends SearchSettings, SearchSettingsActions {
@@ -38,7 +43,7 @@ interface UseSearchSettingsReturn extends SearchSettings, SearchSettingsActions 
   canUseAgentic: boolean;
 }
 
-export function useSearchSettings({ tenant }: UseSearchSettingsOptions): UseSearchSettingsReturn {
+export function useSearchSettings({ tenant, simplified = false }: UseSearchSettingsOptions): UseSearchSettingsReturn {
   const enabledModels = useMemo(() => getEnabledModelsFromDisabled(tenant.disabledModels), [tenant.disabledModels]);
 
   // State variables
@@ -116,11 +121,12 @@ export function useSearchSettings({ tenant }: UseSearchSettingsOptions): UseSear
   const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
 
   // Computed values for override permissions
-  const canSetIsBreadth = tenant.overrideBreadth ?? true;
-  const canSetRerankEnabled = tenant.overrideRerank ?? true;
-  const canSetPrioritizeRecent = tenant.overridePrioritizeRecent ?? true;
-  const canSetAgenticLevel = tenant.overrideAgenticLevel ?? true;
-  const canUseAgentic = tenant.agenticLevel !== "disabled";
+  // When simplified mode is enabled, all user-facing controls are disabled
+  const canSetIsBreadth = simplified ? false : (tenant.overrideBreadth ?? true);
+  const canSetRerankEnabled = simplified ? false : (tenant.overrideRerank ?? true);
+  const canSetPrioritizeRecent = simplified ? false : (tenant.overridePrioritizeRecent ?? true);
+  const canSetAgenticLevel = simplified ? false : (tenant.overrideAgenticLevel ?? true);
+  const canUseAgentic = simplified ? false : tenant.agenticLevel !== "disabled";
 
   // Load settings from localStorage after initial render
   useEffect(() => {

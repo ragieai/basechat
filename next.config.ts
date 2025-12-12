@@ -12,6 +12,38 @@ const nextConfig: NextConfig = {
   experimental: {
     authInterrupts: true,
   },
+  async headers() {
+    return [
+      {
+        // Allow embed routes to be loaded in iframes
+        source: "/o/:slug/embed/:path*",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "ALLOWALL",
+          },
+        ],
+      },
+      {
+        // Allow embed API routes to be called from iframes (CORS)
+        source: "/api/embed/:path*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -252,6 +252,13 @@ export const verifications = pgTable("verifications", {
   expiresAt: timestamp("expires_at").notNull(),
 });
 
+/** JWT plugin table for storing JSON Web Keys */
+export const jwkss = pgTable("jwkss", {
+  ...baseFields,
+  publicKey: text("public_key").notNull(),
+  privateKey: text("private_key").notNull(),
+});
+
 export const authenticators = pgTable(
   "authenticators",
   {

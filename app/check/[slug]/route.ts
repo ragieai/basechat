@@ -17,6 +17,8 @@ export async function GET(request: Request, { params }: Params) {
 
   const session = await getSession();
 
+  console.log("===>>session", session);
+
   if (session) {
     const profile = await findProfileByTenantIdAndUserId(tenant.id, session.user.id);
     if (!profile) {
