@@ -24,6 +24,7 @@ import PlusIcon from "@/public/icons/plus.svg";
 
 import { Banner, BannerLink } from "./banner";
 import ConversationHistory from "./conversation-history";
+import { LegalAnalysisToggle } from "@/components/legal-analysis/legal-analysis-toggle";
 
 const errorSchema = z.object({
   error: z.string(),
@@ -121,7 +122,7 @@ export default function Header({
 
   return (
     <header className="w-full shrink-0 flex justify-between p-4 items-center">
-      <div className="flex">
+      <div className="flex items-center gap-2">
         <Popover>
           <PopoverTrigger asChild>
             <Image src={HamburgerIcon} alt="Expand chats" className="mr-2.5 cursor-pointer" onClick={onNavClick} />
@@ -133,6 +134,7 @@ export default function Header({
         <Link href={getTenantPath(tenant.slug)}>
           <Image src={NewChatIcon} alt="New chat" />
         </Link>
+        <LegalAnalysisToggle />
       </div>
       {billingEnabled && (
         <>
