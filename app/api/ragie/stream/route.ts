@@ -20,7 +20,10 @@ export async function GET(request: NextRequest) {
     url: request.nextUrl.searchParams.get("url"),
   });
 
-  if (!params.url.startsWith(RAGIE_API_BASE_URL)) {
+  const parsed = new URL(params.url);
+  const expected = new URL(RAGIE_API_BASE_URL);
+
+  if (parsed.protocol !== "https:" || parsed.hostname !== expected.hostname) {
     return new Response("Invalid URL", { status: 400 });
   }
 
